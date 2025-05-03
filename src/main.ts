@@ -358,25 +358,77 @@ function renderGameCanvas(gameState: any) {
   if (!bufferCtx) return;
   bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
 
-  // Draw grid on buffer
-  for (let y = 0; y < gridSizeY; y++) {
-    for (let x = 0; x < gridSizeX; x++) {
-      bufferCtx.strokeStyle = '#444';
-      bufferCtx.lineWidth = 1;
-      bufferCtx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
-      if (gameState.currentDiceRoll && gameState.validMoves) {
-        const isValid = gameState.validMoves.some((m: any) => m.x === x && m.y === y);
-        if (isValid) {
-          bufferCtx.fillStyle = 'rgba(0,255,0,0.2)';
+  // --- Biome textures ---
+  const biomeTextures: Record<string, HTMLImageElement> = {};
+  const biomeFiles: Record<string, string> = {
+    plains: 'plains.png',
+    forest: 'forest.png',
+    desert: 'desert.png',
+    volcano: 'volcano.png',
+    town: 'town.png',
+    castle: 'castle.png',
+  };
+  const biomeColors: Record<string, string> = {
+    plains: '#e0e6b8',
+    forest: '#4e8c4a',
+    desert: '#e2c97b',
+    volcano: '#a13c2f',
+    town: '#6ec1e4',
+    castle: '#bdbdbd',
+  };
+  let texturesLoaded = 0;
+  let texturesToLoad = Object.keys(biomeFiles).length;
+  let texturesReady = false;
+
+  // Preload textures
+  Object.entries(biomeFiles).forEach(([biome, file]) => {
+    const img = new window.Image();
+    img.src = `/biomes/${file}`;
+    img.onload = () => {
+      biomeTextures[biome] = img;
+      texturesLoaded++;
+      if (texturesLoaded === texturesToLoad) {
+        texturesReady = true;
+        drawGrid();
+      }
+    };
+    img.onerror = () => {
+      texturesLoaded++;
+      if (texturesLoaded === texturesToLoad) {
+        texturesReady = true;
+        drawGrid();
+      }
+    };
+  });
+
+  function drawGrid() {
+    for (let y = 0; y < gridSizeY; y++) {
+      for (let x = 0; x < gridSizeX; x++) {
+        const biome = gameState.biomeGrid?.[y]?.[x] || 'plains';
+        if (biomeTextures[biome]) {
+          bufferCtx.drawImage(biomeTextures[biome], x * cellSize, y * cellSize, cellSize, cellSize);
+        } else {
+          bufferCtx.fillStyle = biomeColors[biome] || '#e0e6b8';
           bufferCtx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-          if (gameState.players[gameState.currentTurn].id === playerId) {
-            bufferCtx.strokeStyle = 'green';
-            bufferCtx.lineWidth = 3;
-            bufferCtx.strokeRect(x * cellSize + 2, y * cellSize + 2, cellSize - 4, cellSize - 4);
+        }
+        bufferCtx.strokeStyle = '#444';
+        bufferCtx.lineWidth = 1;
+        bufferCtx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+        if (gameState.currentDiceRoll && gameState.validMoves) {
+          const isValid = gameState.validMoves.some((m: any) => m.x === x && m.y === y);
+          if (isValid) {
+            bufferCtx.fillStyle = 'rgba(0,255,0,0.2)';
+            bufferCtx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            if (gameState.players[gameState.currentTurn].id === playerId) {
+              bufferCtx.strokeStyle = 'green';
+              bufferCtx.lineWidth = 3;
+              bufferCtx.strokeRect(x * cellSize + 2, y * cellSize + 2, cellSize - 4, cellSize - 4);
+            }
           }
         }
       }
     }
+    drawPlayersAndFinish();
   }
 
   // Preload all player images, then draw them synchronously on buffer
@@ -384,7 +436,8 @@ function renderGameCanvas(gameState: any) {
   let loaded = 0;
   const total = gameState.players.length;
   if (total === 0) {
-    finishBuffer();
+    window._gameBufferCanvas = bufferCanvas;
+    drawToMainCanvasBufferOnly();
     return;
   }
   for (const player of gameState.players) {
@@ -392,11 +445,11 @@ function renderGameCanvas(gameState: any) {
     img.src = `/profile-pictures/${player.profilePic || 'default.png'}`;
     img.onload = () => {
       loaded++;
-      if (loaded === total) drawPlayersAndFinish();
+      if (loaded === total && texturesReady) drawGrid();
     };
     img.onerror = () => {
       loaded++;
-      if (loaded === total) drawPlayersAndFinish();
+      if (loaded === total && texturesReady) drawGrid();
     };
     playerImages.push({ player, img });
   }
@@ -422,9 +475,6 @@ function renderGameCanvas(gameState: any) {
       );
       bufferCtx.restore();
     }
-    finishBuffer();
-  }
-  function finishBuffer() {
     window._gameBufferCanvas = bufferCanvas;
     drawToMainCanvasBufferOnly();
   }

@@ -61,13 +61,84 @@ function serializeGame(gameRow, playerRows, validMoveRows) {
   };
 }
 
+// --- Biome grid generation ---
+function generateBiomeGrid(width, height) {
+  // Start with all plains
+  const grid = Array.from({ length: height }, () => Array.from({ length: width }, () => 'plains'));
+
+  // Helper to place a patch of a biome
+  function placePatch(biome, count, patchSize) {
+    for (let i = 0; i < count; i++) {
+      const cx = Math.floor(Math.random() * width);
+      const cy = Math.floor(Math.random() * height);
+      for (let dx = -patchSize; dx <= patchSize; dx++) {
+        for (let dy = -patchSize; dy <= patchSize; dy++) {
+          const x = cx + dx;
+          const y = cy + dy;
+          if (x >= 0 && x < width && y >= 0 && y < height && Math.random() < 0.7) {
+            grid[y][x] = biome;
+          }
+        }
+      }
+    }
+  }
+
+  // Place forest and desert patches
+  placePatch('forest', Math.floor(width * height / 30), 2);
+  placePatch('desert', Math.floor(width * height / 30), 2);
+
+  // Place volcanoes (single cells)
+  for (let i = 0; i < Math.max(1, Math.floor(width * height / 100)); i++) {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * width);
+      y = Math.floor(Math.random() * height);
+    } while (grid[y][x] !== 'plains');
+    grid[y][x] = 'volcano';
+  }
+
+  // Place towns (single cells)
+  for (let i = 0; i < Math.max(2, Math.floor(width * height / 80)); i++) {
+    let x, y;
+    do {
+      x = Math.floor(Math.random() * width);
+      y = Math.floor(Math.random() * height);
+    } while (grid[y][x] !== 'plains');
+    grid[y][x] = 'town';
+  }
+
+  // Place castle in a random corner and surround with volcanoes
+  const corners = [
+    [0, 0],
+    [0, height - 1],
+    [width - 1, 0],
+    [width - 1, height - 1]
+  ];
+  const [castleX, castleY] = corners[Math.floor(Math.random() * corners.length)];
+  grid[castleY][castleX] = 'castle';
+  // Surround castle with volcanoes
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      if (dx === 0 && dy === 0) continue;
+      const x = castleX + dx;
+      const y = castleY + dy;
+      if (x >= 0 && x < width && y >= 0 && y < height) {
+        grid[y][x] = 'volcano';
+      }
+    }
+  }
+
+  return grid;
+}
+
 // Create a new game
 app.post('/api/games', (req, res) => {
   const { gridSizeX, gridSizeY } = req.body;
   const safeX = Math.max(10, Math.min(100, parseInt(gridSizeX) || 10));
   const safeY = Math.max(10, Math.min(100, parseInt(gridSizeY) || 10));
   const gameId = Math.random().toString(36).substr(2, 9);
-  db.run('INSERT INTO games (id, gameStateJson) VALUES (?, ?)', [gameId, JSON.stringify({ currentTurn: 0, currentDiceRoll: null, gridSizeX: safeX, gridSizeY: safeY })], err => {
+  const biomeGrid = generateBiomeGrid(safeX, safeY);
+  db.run('INSERT INTO games (id, gameStateJson) VALUES (?, ?)', [gameId, JSON.stringify({ currentTurn: 0, currentDiceRoll: null, gridSizeX: safeX, gridSizeY: safeY, biomeGrid })], err => {
     if (err) return res.status(500).json({ error: 'DB error' });
     res.status(201).json({ gameId });
   });

@@ -1,0 +1,52 @@
+ok we are about to get into some real gameplay now.
+
+Up to now we were just setting up and testing, this is where it will get difficult. and may take multiple steps and refactors.
+
+PLEASE KEEP IN MIND - all game logic and state MUST REMAIN ON THE SERVER. the clients will only ever be dumb, rendering and providing the interface for interaction. at any point the client can disconnect and reconnect and pick up exactly where they left off.
+
+My premise for the game is as follows:
+
+Players are placed on the grid, and are attempting to save the baby dragon from the evil princess.
+
+The evil princess will be in a castle placed at one of the corners of the grid.
+
+Players will traverse the game board, and will encounter monsters which they will have to defeat by rolling dice.
+
+The grid that we have been setting up will need to have some random generation (perlin noise perhaps) which will create some distinct areas:
+
+- Towns (save zones, used to refill health)
+- Plains (contains lower level monsters) - low spawn rate of nearby biome types
+- Forest (contains lower level monsters) - medium spawn rate
+- Desert (contains medium level monsters - medium spawn rate
+- Volcano (contains hard level monsters) - high spawn rate
+
+There will only be a few volcano areas and a few towns, but the rest of the map can be evenly distributed between plains forests and desert, ideally all terrain will start as a plains biome and will get patches of forest desert, and then sprinkled with towns and volcanos.
+
+I will provide a folder containing the PNGs for the textures to apply to these areas.
+
+I have already amassed a collection of monster names and pictures for the forest, desert, and volcano biomes.
+
+I have also a collection of weapons and armor names and pictures, with distinct weapons and armor found in the 3 respective biomes.
+
+Each weapon will have an attack value, and a %chance to hit.
+Each armor will have a defense value and a %chance to block.
+
+When a player lands on a grid tile, they will roll a dice, to determine if they encounter a monster - based on the biome spawn rate:
+low - roll a 1, 2, or 3
+medium - roll a 1, 2, 3, or 4 
+high - roll a 1, 2, 3, 4, or 5
+
+all players will start out with the FIST weapon which has 1 attack, and a 50% chance to hit.
+
+when a player encounters a monster, they take turns rolling dice, if the dice matches the "hit chance" of their current weapon, the hit lands.
+e.g. player rolls a 1, 2, or 3, and the fist hits the monster. player rolls a 4, 5, or 6 and the attack misses.
+
+Then the monster attacks, they too have a % to hit, based on their own meta data.
+should they roll and succeed they will attack the player.
+
+however If they player has some armor, they can roll the dice and should the dice be within the chance to block rate of the armor, the attack is reduced in damage by the defence value of the armor.
+
+Simarly to the attack, players will always have the ability to run, with a 50% chaance of escape.
+
+
+There is more to it, however for now i think this gives you enough context
