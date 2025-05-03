@@ -26,7 +26,6 @@ public/
 server/
   index.js                 # Express server and API endpoints
 src/
-  counter.ts               # (Sample/unused) TypeScript file
   main.ts                  # Main client-side game logic
   style.css                # Game and UI styles
   typescript.svg           # TypeScript logo
