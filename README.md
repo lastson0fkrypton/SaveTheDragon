@@ -12,7 +12,6 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 ## Project Structure
 
 ```
-BackupSource.zip           # Backup of the source code
 index.html                 # Main HTML file
 package.json               # Project dependencies and scripts
 tsconfig.json              # TypeScript configuration
