@@ -425,6 +425,10 @@ function renderGameCanvas(gameState: any) {
               bufferCtx.strokeRect(x * cellSize + 2, y * cellSize + 2, cellSize - 4, cellSize - 4);
             }
           }
+          else {
+            bufferCtx.fillStyle = 'rgba(0,0,0,0.5)';
+            bufferCtx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+          }
         }
       }
     }
@@ -489,13 +493,20 @@ function setupCanvasPanZoom() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  canvas.onmousedown = (e) => {
+  // Remove previous listeners to avoid duplicates
+  canvas.removeEventListener('mousedown', (window as any)._panZoomMouseDown);
+  window.removeEventListener('mouseup', (window as any)._panZoomMouseUp);
+  window.removeEventListener('mousemove', (window as any)._panZoomMouseMove);
+  canvas.removeEventListener('wheel', (window as any)._panZoomWheel);
+
+  // Define handlers
+  const onMouseDown = (e: MouseEvent) => {
     dragging = true;
     lastX = e.clientX;
     lastY = e.clientY;
   };
-  window.onmouseup = () => { dragging = false; };
-  window.onmousemove = (e) => {
+  const onMouseUp = () => { dragging = false; };
+  const onMouseMove = (e: MouseEvent) => {
     if (dragging) {
       panX += e.clientX - lastX;
       panY += e.clientY - lastY;
@@ -505,12 +516,11 @@ function setupCanvasPanZoom() {
       drawToMainCanvasBufferOnly();
     }
   };
-  canvas.onwheel = (e) => {
+  const onWheel = (e: WheelEvent) => {
     e.preventDefault();
     const oldZoom = zoom;
     zoom *= e.deltaY < 0 ? 1.1 : 0.9;
     zoom = Math.max(0.3, Math.min(zoom, 3));
-    // Zoom to mouse position
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
@@ -519,28 +529,58 @@ function setupCanvasPanZoom() {
     saveGridTransform();
     drawToMainCanvasBufferOnly();
   };
-}
+  // Store handlers for removal
+  (window as any)._panZoomMouseDown = onMouseDown;
+  (window as any)._panZoomMouseUp = onMouseUp;
+  (window as any)._panZoomMouseMove = onMouseMove;
+  (window as any)._panZoomWheel = onWheel;
 
-// --- Listen for window resize to resize canvas ---
-window.addEventListener('resize', resizeGameCanvas);
+  canvas.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mouseup', onMouseUp);
+  window.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('wheel', onWheel, { passive: false });
+}
 
 function setupCanvasClick(gameState: any) {
   const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
   if (!canvas) return;
-  canvas.onclick = (e) => {
+  // Remove previous listeners to avoid duplicates
+  canvas.removeEventListener('mousedown', (window as any)._clickMouseDown);
+  canvas.removeEventListener('mouseup', (window as any)._clickMouseUp);
+  let downX = 0, downY = 0;
+  let isDown = false;
+  const onMouseDown = (e: MouseEvent) => {
+    isDown = true;
+    downX = e.clientX;
+    downY = e.clientY;
+  };
+  const onMouseUp = (e: MouseEvent) => {
+    if (!isDown) return;
+    isDown = false;
+    const upX = e.clientX;
+    const upY = e.clientY;
+    const dist = Math.sqrt((upX - downX) ** 2 + (upY - downY) ** 2);
+    if (dist > 10) return; // Ignore if mouse moved more than 10px
     if (!gameState.currentDiceRoll || !gameState.validMoves) return;
     if (gameState.players[gameState.currentTurn].id !== playerId) return;
     const rect = canvas.getBoundingClientRect();
     // Inverse transform
-    const sx = (e.clientX - rect.left - panX) / zoom;
-    const sy = (e.clientY - rect.top - panY) / zoom;
+    const sx = (upX - rect.left - panX) / zoom;
+    const sy = (upY - rect.top - panY) / zoom;
     const x = Math.floor(sx / cellSize);
     const y = Math.floor(sy / cellSize);
     if (gameState.validMoves.some((m: any) => m.x === x && m.y === y)) {
       movePlayer(x, y);
     }
   };
+  (window as any)._clickMouseDown = onMouseDown;
+  (window as any)._clickMouseUp = onMouseUp;
+  canvas.addEventListener('mousedown', onMouseDown);
+  canvas.addEventListener('mouseup', onMouseUp);
 }
+
+// --- Listen for window resize to resize canvas ---
+window.addEventListener('resize', resizeGameCanvas);
 
 function renderStatusBar(gameState: any) {
   let bar = document.getElementById('status-bar');
