@@ -1,4 +1,5 @@
 # Save the Dragon!
+![{17194FAC-7974-4BCE-A696-9B26B3A3D83C}](https://github.com/user-attachments/assets/cc456995-6eb1-4f98-bbd8-6de25fc125e5)
 
 Save the Dragon! is a turn-based, grid-based multiplayer board game implemented as a web app. Players join a game, roll dice to move their characters, and compete or cooperate to save the dragon. Each player is represented by a unique profile picture and can move around the board based on dice rolls. The game state is managed on a Node.js/Express server with SQLite for persistence.
 
