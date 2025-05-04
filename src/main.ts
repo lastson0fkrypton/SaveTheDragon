@@ -281,7 +281,7 @@ async function movePlayer(targetX: number, targetY: number) {
 let panX = 0;
 let panY = 0;
 let zoom = 1;
-const cellSize = 60; // px per cell
+const cellSize = 128; // px per cell
 
 // Persist pan/zoom in localStorage
 function saveGridTransform() {
@@ -364,6 +364,7 @@ function renderGameCanvas(gameState: any) {
     plains: 'plains.png',
     forest: 'forest.png',
     desert: 'desert.png',
+    cave: 'cave.png',
     volcano: 'volcano.png',
     town: 'town.png',
     castle: 'castle.png',
@@ -372,6 +373,7 @@ function renderGameCanvas(gameState: any) {
     plains: '#e0e6b8',
     forest: '#4e8c4a',
     desert: '#e2c97b',
+    cave: '#222222',
     volcano: '#a13c2f',
     town: '#6ec1e4',
     castle: '#bdbdbd',

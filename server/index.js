@@ -87,24 +87,14 @@ function generateBiomeGrid(width, height) {
   placePatch('forest', Math.floor(width * height / 30), 2);
   placePatch('desert', Math.floor(width * height / 30), 2);
 
-  // Place volcanoes (single cells)
+  // Place caves (single cells)
   for (let i = 0; i < Math.max(1, Math.floor(width * height / 100)); i++) {
     let x, y;
     do {
       x = Math.floor(Math.random() * width);
       y = Math.floor(Math.random() * height);
     } while (grid[y][x] !== 'plains');
-    grid[y][x] = 'volcano';
-  }
-
-  // Place towns (single cells)
-  for (let i = 0; i < Math.max(2, Math.floor(width * height / 80)); i++) {
-    let x, y;
-    do {
-      x = Math.floor(Math.random() * width);
-      y = Math.floor(Math.random() * height);
-    } while (grid[y][x] !== 'plains');
-    grid[y][x] = 'town';
+    grid[y][x] = 'cave';
   }
 
   // Place castle in a random corner and surround with volcanoes
@@ -127,6 +117,39 @@ function generateBiomeGrid(width, height) {
       }
     }
   }
+
+  // Place towns (single cells) at least 6 spaces from the castle
+  let townsToPlace = Math.max(2, Math.floor(width * height / 80));
+  let attempts = 0;
+  const townCenters = [];
+  while (townsToPlace > 0 && attempts < 1000) {
+    let x = Math.floor(Math.random() * width);
+    let y = Math.floor(Math.random() * height);
+    // Manhattan distance from castle
+    const dist = Math.abs(x - castleX) + Math.abs(y - castleY);
+    if (
+      grid[y][x] === 'plains' &&
+      dist >= 6
+    ) {
+      grid[y][x] = 'town';
+      townCenters.push({x, y});
+      // Surround town with plains (unless castle or volcano)
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            grid[ny][nx] = 'plains';
+          }
+        }
+      }
+      townsToPlace--;
+    }
+    attempts++;
+  }
+  // Attach townCenters to grid for player spawn logic
+  grid._townCenters = townCenters;
 
   return grid;
 }
@@ -184,13 +207,47 @@ app.post('/api/games/:gameId/join', (req, res) => {
             return res.status(200).json({ playerId: playerRow.id });
           }
           const playerId = Math.random().toString(36).substr(2, 9);
-          // --- Assign random position not occupied by other players ---
-          const gridSizeX = gameRow.gameStateJson ? (JSON.parse(gameRow.gameStateJson).gridSizeX || 10) : 10;
-          const gridSizeY = gameRow.gameStateJson ? (JSON.parse(gameRow.gameStateJson).gridSizeY || 10) : 10;
+          // --- Assign random position around a town not occupied by other players ---
+          const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+          const gridSizeX = gameState.gridSizeX || 10;
+          const gridSizeY = gameState.gridSizeY || 10;
+          const biomeGrid = gameState.biomeGrid;
           let possiblePositions = [];
-          for (let x = 0; x < gridSizeX; x++) {
+          let townCenters = biomeGrid && biomeGrid._townCenters ? biomeGrid._townCenters : null;
+          if (!townCenters) {
+            // fallback: find all towns
+            townCenters = [];
             for (let y = 0; y < gridSizeY; y++) {
-              if (!usedPositions.includes(`${x},${y}`)) possiblePositions.push({x, y});
+              for (let x = 0; x < gridSizeX; x++) {
+                if (biomeGrid[y][x] === 'town') townCenters.push({x, y});
+              }
+            }
+          }
+          // Find all plains cells adjacent to a town
+          for (const {x, y} of townCenters) {
+            for (let dx = -1; dx <= 1; dx++) {
+              for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = x + dx;
+                const ny = y + dy;
+                if (
+                  nx >= 0 && nx < gridSizeX && ny >= 0 && ny < gridSizeY &&
+                  biomeGrid[ny][nx] === 'plains' &&
+                  !usedPositions.includes(`${nx},${ny}`)
+                ) {
+                  possiblePositions.push({x: nx, y: ny});
+                }
+              }
+            }
+          }
+          // fallback: any plains
+          if (possiblePositions.length === 0) {
+            for (let x = 0; x < gridSizeX; x++) {
+              for (let y = 0; y < gridSizeY; y++) {
+                if (biomeGrid[y][x] === 'plains' && !usedPositions.includes(`${x},${y}`)) {
+                  possiblePositions.push({x, y});
+                }
+              }
             }
           }
           let positionX = 0, positionY = 0;
