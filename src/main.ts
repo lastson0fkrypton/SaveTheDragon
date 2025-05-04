@@ -95,99 +95,71 @@ function getJoinIconSVG() {
 }
 
 function showHomeScreen() {
-  // Hide all game-related UI elements
-  const elementsToHide = [
-    'game-ui',
-    'game-canvas',
-    'status-bar',
-    'player-panel',
-    'roll-btn',
-    'floating-bar',
-    'hearts-bar',
-    'dice-roll-display',
-    'dice-panel',
-    'quit-btn',
-    'profile-modal-bg',
-    'profile-modal',
-    'weapon-slot',
-    'armor-slot',
-    'player-panel-center',
-  ];
-  elementsToHide.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  // Optionally remove modals and overlays
-  const removable = ['profile-modal-bg', 'profile-modal'];
-  removable.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-  });
-  const app = document.getElementById('app');
-  if (app) {
-    app.innerHTML = `
-      <div class="menu-title" style="font-size:2.5em;margin-bottom:40px;">Save the Dragon!</div>
-      <div id="main-menu-container">
-        <div class="menu-col">
-          <div class="menu-icon">${getHostIconSVG()}</div>
-          <form id="new-game-form">
-            <input class="menu-input" type="text" id="player-name-new" placeholder="Enter your name" required /><br />
-            <div style="margin:10px 0 0 0;">
-              <label style="font-size:1em;">Size X:</label>
-              <input class="menu-input" type="number" id="grid-size-x" min="10" max="100" value="10" style="width:80px;display:inline-block;margin-left:8px;" required />
-              <label style="font-size:1em;margin-left:16px;">Y:</label>
-              <input class="menu-input" type="number" id="grid-size-y" min="10" max="100" value="10" style="width:80px;display:inline-block;margin-left:8px;" required />
-            </div>
-            <button class="menu-btn" type="submit" style="margin-top:12px;">Start a new game</button>
-          </form>
-        </div>
-        <div class="menu-divider"></div>
-        <div class="menu-col">
-          <div class="menu-icon">${getJoinIconSVG()}</div>
-          <form id="join-game-form">
-            <input class="menu-input" type="text" id="game-id" placeholder="Game ID" required />
-            <input class="menu-input" type="text" id="player-name-join" placeholder="Enter your name" required /><br />
-            <button class="menu-btn" type="submit">Join a game</button>
-          </form>
-        </div>
+  showHomeUI();
+  const homeDiv = document.getElementById('home-ui');
+  if (!homeDiv) return;
+  homeDiv.innerHTML = `
+    <div class="menu-title" style="font-size:2.5em;margin-bottom:40px;">Save the Dragon!</div>
+    <div id="main-menu-container">
+      <div class="menu-col">
+        <div class="menu-icon">${getHostIconSVG()}</div>
+        <form id="new-game-form">
+          <input class="menu-input" type="text" id="player-name-new" placeholder="Enter your name" required /><br />
+          <div style="margin:10px 0 0 0;">
+            <label style="font-size:1em;">Size X:</label>
+            <input class="menu-input" type="number" id="grid-size-x" min="10" max="100" value="10" style="width:80px;display:inline-block;margin-left:8px;" required />
+            <label style="font-size:1em;margin-left:16px;">Y:</label>
+            <input class="menu-input" type="number" id="grid-size-y" min="10" max="100" value="10" style="width:80px;display:inline-block;margin-left:8px;" required />
+          </div>
+          <button class="menu-btn" type="submit" style="margin-top:12px;">Start a new game</button>
+        </form>
       </div>
-      <a id="admin-link">Admin</a>
-    `;
-    document.getElementById('admin-link')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      showAdminPage();
-    });
-    const newGameForm = document.getElementById('new-game-form');
-    newGameForm?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const playerNameInput = document.getElementById('player-name-new') as HTMLInputElement;
-      const gridSizeXInput = document.getElementById('grid-size-x') as HTMLInputElement;
-      const gridSizeYInput = document.getElementById('grid-size-y') as HTMLInputElement;
-      if (playerNameInput && gridSizeXInput && gridSizeYInput) {
-        // Clear grid transform so it will be centered
-        localStorage.removeItem('gridPanX');
-        localStorage.removeItem('gridPanY');
-        localStorage.removeItem('gridZoom');
-        createGameWithName(playerNameInput.value, parseInt(gridSizeXInput.value), parseInt(gridSizeYInput.value));
-        setTimeout(pollGameState, 500); // Start polling after joining
-      }
-    });
+      <div class="menu-divider"></div>
+      <div class="menu-col">
+        <div class="menu-icon">${getJoinIconSVG()}</div>
+        <form id="join-game-form">
+          <input class="menu-input" type="text" id="game-id" placeholder="Game ID" required />
+          <input class="menu-input" type="text" id="player-name-join" placeholder="Enter your name" required /><br />
+          <button class="menu-btn" type="submit">Join a game</button>
+        </form>
+      </div>
+    </div>
+    <a id="admin-link">Admin</a>
+  `;
+  document.getElementById('admin-link')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    showAdminPage();
+  });
+  const newGameForm = document.getElementById('new-game-form');
+  newGameForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const playerNameInput = document.getElementById('player-name-new') as HTMLInputElement;
+    const gridSizeXInput = document.getElementById('grid-size-x') as HTMLInputElement;
+    const gridSizeYInput = document.getElementById('grid-size-y') as HTMLInputElement;
+    if (playerNameInput && gridSizeXInput && gridSizeYInput) {
+      // Clear grid transform so it will be centered
+      localStorage.removeItem('gridPanX');
+      localStorage.removeItem('gridPanY');
+      localStorage.removeItem('gridZoom');
+      createGameWithName(playerNameInput.value, parseInt(gridSizeXInput.value), parseInt(gridSizeYInput.value));
+      setTimeout(pollGameState, 500); // Start polling after joining
+    }
+  });
 
-    const joinGameForm = document.getElementById('join-game-form');
-    joinGameForm?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const gameIdInput = document.getElementById('game-id') as HTMLInputElement;
-      const playerNameInput = document.getElementById('player-name-join') as HTMLInputElement;
-      if (gameIdInput && playerNameInput) {
-        // Clear grid transform so it will be centered
-        localStorage.removeItem('gridPanX');
-        localStorage.removeItem('gridPanY');
-        localStorage.removeItem('gridZoom');
-        joinGame(gameIdInput.value, playerNameInput.value, true);
-        setTimeout(pollGameState, 500); // Start polling after joining
-      }
-    });
-  }
+  const joinGameForm = document.getElementById('join-game-form');
+  joinGameForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const gameIdInput = document.getElementById('game-id') as HTMLInputElement;
+    const playerNameInput = document.getElementById('player-name-join') as HTMLInputElement;
+    if (gameIdInput && playerNameInput) {
+      // Clear grid transform so it will be centered
+      localStorage.removeItem('gridPanX');
+      localStorage.removeItem('gridPanY');
+      localStorage.removeItem('gridZoom');
+      joinGame(gameIdInput.value, playerNameInput.value, true);
+      setTimeout(pollGameState, 500); // Start polling after joining
+    }
+  });
 }
 
 async function fetchGameState() {
@@ -633,13 +605,15 @@ function renderPlayerPanel(gameState: any) {
   panel.innerHTML = `
     <span class="game-id">Game ID: ${gameId}</span>
     <ul class="player-list">
-      ${gameState.players.map((p: any, idx: number) => `
+      ${gameState.players.map((p: any, idx: number) => {
+        const hearts = Math.max(1, (p.maxHearts || 5) - (p.damage || 0));
+        return `
         <li class="player-list-item${idx === gameState.currentTurn ? ' current-turn' : ''}">
           <img class="player-profile-pic" src="/profile-pictures/${p.profilePic || 'default.png'}" alt="profile" />
           <span class="player-name">${p.name}</span>
-          <span class="player-hearts">${Array.from({length: Math.max(1, p.hearts || 5)}, (_, i) => `<img src='/heart.svg' style='width:16px;height:16px;vertical-align:middle;opacity:${i < (p.hearts || 5) ? 1 : 0.2};margin-left:2px;' alt='♥' />`).join('')}</span>
+          <span class="player-hearts">${Array.from({length: p.maxHearts || 5}, (_, i) => `<img src='/heart.svg' style='width:16px;height:16px;vertical-align:middle;opacity:${i < hearts ? 1 : 0.2};margin-left:2px;' alt='♥' />`).join('')}</span>
         </li>
-      `).join('')}
+      `;}).join('')}
     </ul>
   `;
 }
@@ -661,9 +635,10 @@ function renderFloatingBar(gameState: any) {
     document.body.appendChild(heartsBar);
   }
   if (me) {
-    const maxHearts = Math.max(5, Math.min(20, me.hearts || 5));
+    const maxHearts = Math.max(5, Math.min(20, me.maxHearts || 5));
+    const hearts = Math.max(1, (me.maxHearts || 5) - (me.damage || 0));
     heartsBar.innerHTML = Array.from({length: maxHearts}, (_, i) =>
-      `<span class="heart">${i < me.hearts ? '<img src="/heart.svg" alt="♥" />' : '<img src="/heart.svg" style="opacity:0.2;" alt="♡" />'}</span>`
+      `<span class="heart">${i < hearts ? '<img src="/heart.svg" alt="♥" />' : '<img src="/heart.svg" style="opacity:0.2;" alt="♡" />'}</span>`
     ).join('');
   }
   // Floating bar panels
@@ -717,7 +692,7 @@ async function showProfilePicModal() {
   modal.querySelectorAll('.profile-pic-option').forEach(el => {
     el.addEventListener('click', async (e) => {
       const pic = (e.target as HTMLImageElement).getAttribute('data-pic');
-      if (pic && me && (!usedPics.includes(pic) || me.profilePic === pic)) {
+      if (pic && me && (!usedPics.includes(pic) || me?.profilePic === pic)) {
         await fetch(`/api/games/${gameId}/player/${playerId}/profile-pic`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -739,7 +714,10 @@ function renderRollButton(gameState: any) {
   if (!dicePanel) {
     dicePanel = document.createElement('div');
     dicePanel.id = 'dice-panel';
-    document.body.appendChild(dicePanel);
+    // Append to game-ui, not body
+    const gameDiv = document.getElementById('game-ui');
+    if (gameDiv) gameDiv.appendChild(dicePanel);
+    else document.body.appendChild(dicePanel);
   }
   // Clear previous content
   dicePanel.innerHTML = '';
@@ -770,34 +748,8 @@ function renderRollButton(gameState: any) {
 }
 
 // --- Item/inventory UI helpers ---
-const ITEM_DEFS = [
-  // Weapons (example, expand as needed)
-  // Fist is NOT included in random item pool
-  { id: 'fist', name: 'Fist', type: 'weapon', biome: 'any', attack: 1, hit: 3, img: 'fist.png', noRandom: true },
-  { id: 'forest_sword', name: 'Forest Sword', type: 'weapon', biome: 'forest', attack: 2, hit: 4, img: 'forest_sword.png' },
-  { id: 'desert_spear', name: 'Desert Spear', type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: 'desert_spear.png' },
-  { id: 'volcano_axe', name: 'Volcano Axe', type: 'weapon', biome: 'volcano', attack: 4, hit: 5, img: 'volcano_axe.png' },
-  { id: 'cave_hammer', name: 'Cave Hammer', type: 'weapon', biome: 'cave', attack: 4, hit: 5, img: 'cave_hammer.png' },
-  // ...existing code...
-  { id: 'forest_shield', name: 'Forest Shield', type: 'armor', biome: 'forest', defense: 1, block: 3, img: 'forest_shield.png' },
-  { id: 'desert_armor', name: 'Desert Armor', type: 'armor', biome: 'desert', defense: 2, block: 4, img: 'desert_armor.png' },
-  { id: 'volcano_plate', name: 'Volcano Plate', type: 'armor', biome: 'volcano', defense: 3, block: 5, img: 'volcano_plate.png' },
-  { id: 'cave_cloak', name: 'Cave Cloak', type: 'armor', biome: 'cave', defense: 3, block: 5, img: 'cave_cloak.png' },
-  { id: 'teleport', name: 'Teleport', type: 'item', biome: 'any', effect: 'teleport', img: 'teleport.png' },
-  { id: 'small_potion', name: 'Small Health Potion', type: 'item', biome: 'any', heal: 3, img: 'small_potion.png' },
-  { id: 'medium_potion', name: 'Medium Health Potion', type: 'item', biome: 'any', heal: 5, img: 'medium_potion.png' },
-  { id: 'large_potion', name: 'Large Health Potion', type: 'item', biome: 'any', heal: 7, img: 'large_potion.png' },
-  { id: 'full_potion', name: 'Full Health Potion', type: 'item', biome: 'any', heal: 999, img: 'full_potion.png' },
-  { id: 'extra_heart', name: 'Additional Heart', type: 'item', biome: 'any', effect: 'extra_heart', img: 'extra_heart.png' },
-];
-function getItemDef(id) {
-  return ITEM_DEFS.find(i => i.id === id);
-}
-
-function getRandomItemForBiome(biome) {
-  // Only give biome-appropriate items (or biome:any), and not 'fist'
-  const pool = ITEM_DEFS.filter(i => (i.biome === biome || i.biome === 'any') && !i.noRandom);
-  return pool[Math.floor(Math.random() * pool.length)];
+function getItemMeta(gameState, id) {
+  return gameState.itemMeta && gameState.itemMeta[id] ? gameState.itemMeta[id] : null;
 }
 
 let lastFoundItemKey = '';
@@ -813,7 +765,7 @@ function showItemModal(gameState) {
   const me = gameState.players.find((p: any) => p.id === playerId);
   const isMe = found.playerId === playerId;
   const player = gameState.players.find((p: any) => p.id === found.playerId);
-  const item = found.item;
+  const item = gameState.itemMeta && found.item?.id ? gameState.itemMeta[found.item.id] : found.item;
   // Modal background
   const bg = document.createElement('div');
   bg.id = 'item-modal-bg';
@@ -890,16 +842,16 @@ function renderInventoryUI(gameState) {
   // Weapon slot
   const weaponSlot = document.getElementById('weapon-slot');
   if (weaponSlot) {
-    const eqWeapon = getItemDef(me.inventory.equippedWeaponId);
-    weaponSlot.innerHTML = `<div style="font-size:0.9em;">Weapon</div><img src="/biomes/${eqWeapon?.img || 'fist.png'}" alt="weapon" style="width:48px;height:48px;cursor:pointer;" id="weapon-equip-btn" /><div style="font-size:0.8em;">${eqWeapon?.name || 'Fist'}</div>`;
-    weaponSlot.onclick = () => showEquipModal('weapon', me);
+    const eqWeapon = getItemMeta(gameState, me.inventory.equippedWeaponId);
+    weaponSlot.innerHTML = `<div style="font-size:0.9em;">Weapon</div><img src="/items/${eqWeapon?.img || 'fist.png'}" alt="weapon" style="width:48px;height:48px;cursor:pointer;" id="weapon-equip-btn" /><div style="font-size:0.8em;">${eqWeapon?.name || 'Fist'}</div>`;
+    weaponSlot.onclick = () => showEquipModal('weapon', me, gameState);
   }
   // Armor slot
   const armorSlot = document.getElementById('armor-slot');
   if (armorSlot) {
-    const eqArmor = getItemDef(me.inventory.equippedArmorId);
-    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/biomes/${eqArmor?.img || ''}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div>`;
-    armorSlot.onclick = () => showEquipModal('armor', me);
+    const eqArmor = getItemMeta(gameState, me.inventory.equippedArmorId);
+    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/items/${eqArmor?.img || ''}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div>`;
+    armorSlot.onclick = () => showEquipModal('armor', me, gameState);
   }
   // Item slot (bottom left)
   let itemSlot = document.getElementById('item-slot');
@@ -913,10 +865,10 @@ function renderInventoryUI(gameState) {
     document.body.appendChild(itemSlot);
   }
   itemSlot.innerHTML = `<button id="use-item-btn">Use Item</button>`;
-  document.getElementById('use-item-btn')?.addEventListener('click', () => showUseItemModal(me));
+  document.getElementById('use-item-btn')?.addEventListener('click', () => showUseItemModal(me, gameState));
 }
 
-function showEquipModal(type, me) {
+function showEquipModal(type, me, gameState) {
   document.getElementById('equip-modal-bg')?.remove();
   const bg = document.createElement('div');
   bg.id = 'equip-modal-bg';
@@ -942,8 +894,8 @@ function showEquipModal(type, me) {
   modal.style.flexDirection = 'column';
   modal.style.alignItems = 'center';
   modal.innerHTML = `<h2>Choose ${type === 'weapon' ? 'Weapon' : 'Armor'}</h2>`;
-  const items = (type === 'weapon' ? me.inventory.weapons : me.inventory.armor).map(getItemDef).filter(Boolean);
-  modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/biomes/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
+  const items = (type === 'weapon' ? me.inventory.weapons : me.inventory.armor).map(id => getItemMeta(gameState, id)).filter(Boolean);
+  modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/items/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
   modal.innerHTML += `<button id="close-equip-modal">Close</button>`;
   bg.appendChild(modal);
   document.body.appendChild(bg);
@@ -961,7 +913,7 @@ function showEquipModal(type, me) {
   document.getElementById('close-equip-modal')?.addEventListener('click', () => bg.remove());
 }
 
-function showUseItemModal(me) {
+function showUseItemModal(me, gameState) {
   document.getElementById('use-item-modal-bg')?.remove();
   const bg = document.createElement('div');
   bg.id = 'use-item-modal-bg';
@@ -987,11 +939,11 @@ function showUseItemModal(me) {
   modal.style.flexDirection = 'column';
   modal.style.alignItems = 'center';
   modal.innerHTML = `<h2>Use Item</h2>`;
-  const items = me.inventory.items.map(getItemDef).filter(Boolean);
+  const items = me.inventory.items.map(id => getItemMeta(gameState, id)).filter(Boolean);
   if (items.length === 0) {
     modal.innerHTML += `<div style='margin:16px 0;'>No items available</div>`;
   } else {
-    modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/biomes/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
+    modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/items/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
   }
   modal.innerHTML += `<button id="close-use-item-modal">Close</button>`;
   bg.appendChild(modal);
@@ -1010,32 +962,90 @@ function showUseItemModal(me) {
   document.getElementById('close-use-item-modal')?.addEventListener('click', () => bg.remove());
 }
 
-async function renderGameUI(gameState: any, centerOnPlayer = false) {
-   // show all game-related UI elements with correct display styles
-  const displayMap: { [id: string]: string } = {
-    'game-ui': 'block',
-    'game-canvas': 'block',
-    'status-bar': 'flex',
-    'player-panel': 'block',
-    'roll-btn': 'block',
-    'floating-bar': 'flex', // ensure flex for floating bar
-    'hearts-bar': 'block',
-    'dice-roll-display': 'block',
-    'dice-panel': 'block',
-    'quit-btn': 'block',
-    'profile-modal-bg': 'block',
-    'profile-modal': 'block',
-    'weapon-slot': 'block',
-    'armor-slot': 'block',
-    'player-panel-center': 'block',
-  };
-  Object.entries(displayMap).forEach(([id, display]) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = display;
-  });
+// Toast notification system
+const seenActionIds = new Set();
+function showToastNotification(action) {
+  if (seenActionIds.has(action.id)) return;
+  seenActionIds.add(action.id);
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.position = 'fixed';
+    container.style.top = '32px';
+    container.style.right = '32px';
+    container.style.zIndex = '3000';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '12px';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.background = '#222';
+  toast.style.color = '#fff';
+  toast.style.padding = '16px 28px 16px 18px';
+  toast.style.borderRadius = '10px';
+  toast.style.boxShadow = '0 2px 12px #000a';
+  toast.style.fontSize = '1.1em';
+  toast.style.position = 'relative';
+  toast.style.minWidth = '220px';
+  toast.style.maxWidth = '340px';
+  toast.style.display = 'flex';
+  toast.style.alignItems = 'center';
+  toast.style.justifyContent = 'space-between';
+  let msg = '';
+  if (action.type === 'use-item') {
+    msg = `${action.playerName} used ${action.itemName}`;
+  } else if (action.type === 'equip') {
+    msg = `${action.playerName} equipped ${action.itemName}`;
+  } else {
+    msg = `${action.playerName} did something`;
+  }
+  toast.innerHTML = `<span>${msg}</span><button style='background:none;border:none;color:#fff;font-size:1.2em;cursor:pointer;margin-left:18px;'>&times;</button>`;
+  const closeBtn = toast.querySelector('button');
+  closeBtn?.addEventListener('click', () => toast.remove());
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
 
+function processGameNotifications(gameState) {
+  if (!gameState.recentActions) return;
+  for (const action of gameState.recentActions) {
+    showToastNotification(action);
+  }
+}
+
+// Remove dynamic canvas creation from renderGameUI
+async function renderGameUI(gameState: any, centerOnPlayer = false) {
+  showGameUI();
+  const gameDiv = document.getElementById('game-ui');
+  if (!gameDiv) return;
+  // Instead of replacing all innerHTML, only update or create the dynamic UI elements
+  function ensure(id: string) {
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = id;
+      gameDiv.appendChild(el);
+    }
+    return el;
+  }
+  ensure('status-bar');
+  ensure('player-panel');
+  ensure('floating-bar');
+  ensure('hearts-bar');
+  ensure('dice-panel');
+  ensure('item-slot');
+  let quitBtn = document.getElementById('quit-btn') as HTMLButtonElement | null;
+  if (!quitBtn) {
+    quitBtn = document.createElement('button');
+    quitBtn.id = 'quit-btn';
+    quitBtn.textContent = 'Quit Game';
+    gameDiv.appendChild(quitBtn);
+  }
+  // Canvas is now static in index.html, do not recreate or remove it here
   lastGameState = gameState; // Set before centering so grid size is available
-  showGameUI(true);
   // Center on current player's coordinate if available
   if (centerOnPlayer) {
     let myPlayer = gameState.players.find((p: any) => p.id === playerId);
@@ -1050,48 +1060,49 @@ async function renderGameUI(gameState: any, centerOnPlayer = false) {
   renderInventoryUI(gameState);
   showItemModal(gameState);
   setupCanvasClick(gameState);
-  
   setupCanvasPanZoom();
-  // Hide old grid and app content if present
-  const grid = document.getElementById('grid');
-  if (grid) grid.style.display = 'none';
-  const app = document.getElementById('app');
-  if (app) app.innerHTML = '';
-  // Quit button
-  const quitBtn = document.getElementById('quit-btn');
+  processGameNotifications(gameState);
   if (quitBtn) {
     quitBtn.onclick = () => {
       gameId = null;
       playerId = null;
       window.history.replaceState({}, '', window.location.pathname);
-      showGameUI(false);
       showHomeScreen();
     };
   }
   lastGameState = gameState;
 }
 
-function showGameUI(show: boolean) {
-  const gameUI = document.getElementById('game-ui');
-  const canvas = document.getElementById('game-canvas');
-  const dicePanel = document.getElementById('dice-panel');
-  if (gameUI) {
-    gameUI.style.display = show ? 'block' : 'none';
-    gameUI.style.pointerEvents = show ? 'auto' : 'none';
-  }
-  if (canvas) canvas.style.display = show ? 'block' : 'none';
-  if (dicePanel) dicePanel.style.display = show ? 'block' : 'none';
-  // Also ensure player-panel and quit-btn are visible when game is shown
-  const playerPanel = document.getElementById('player-panel');
-  if (playerPanel) playerPanel.style.display = show ? 'block' : 'none';
-  const quitBtn = document.getElementById('quit-btn');
-  if (quitBtn) quitBtn.style.display = show ? 'block' : 'none';
+function showHomeUI() {
+  const homeEl = document.getElementById('home-ui');
+  if (homeEl) homeEl.style.display = 'block';
+  const gameEl = document.getElementById('game-ui');
+  if (gameEl) gameEl.style.display = 'none';
+  const adminEl = document.getElementById('admin-ui');
+  if (adminEl) adminEl.style.display = 'none';
+}
+function showGameUI() {
+  const homeEl = document.getElementById('home-ui');
+  if (homeEl) homeEl.style.display = 'none';
+  const gameEl = document.getElementById('game-ui');
+  if (gameEl) gameEl.style.display = 'block';
+  const adminEl = document.getElementById('admin-ui');
+  if (adminEl) adminEl.style.display = 'none';
+}
+function showAdminUI() {
+  const homeEl = document.getElementById('home-ui');
+  if (homeEl) homeEl.style.display = 'none';
+  const gameEl = document.getElementById('game-ui');
+  if (gameEl) gameEl.style.display = 'none';
+  const adminEl = document.getElementById('admin-ui');
+  if (adminEl) adminEl.style.display = 'block';
 }
 
 function showAdminPage() {
-  const app = document.getElementById('app');
-  if (!app) return;
-  app.innerHTML = `
+  showAdminUI();
+  const adminDiv = document.getElementById('admin-ui');
+  if (!adminDiv) return;
+  adminDiv.innerHTML = `
     <div id="admin-panel" style="max-width:420px;margin:60px auto 0 auto;padding:36px 32px 32px 32px;background:rgba(30,30,30,0.97);border-radius:18px;box-shadow:0 4px 32px #000a;">
       <div class="menu-title" style="font-size:2em;margin-bottom:32px;text-align:center;">Admin Panel</div>
       <label for="admin-password" class="menu-label" style="margin-bottom:4px;display:block;">Password</label>
@@ -1186,6 +1197,11 @@ function showAdminPage() {
 pollGameState();
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Remove the default Vite page rendering and the #app div
+  document.getElementById('app')?.remove();
+  // Remove the default Vite page rendering and the #app div
+  const defaultApp = document.getElementById('app');
+  if (defaultApp) defaultApp.remove();
   const url = new URL(window.location.href);
   const urlGameId = url.searchParams.get('game');
   const urlPlayerName = url.searchParams.get('name');
@@ -1193,12 +1209,13 @@ window.addEventListener('DOMContentLoaded', () => {
   if (urlGameId && urlPlayerName) {
     gameId = urlGameId;
     if (app) app.innerHTML = '<h2>Reconnecting to game...</h2>';
-    showGameUI(true);
+    showGameUI();
     reconnectGame(urlGameId, urlPlayerName).then(() => {
       pollGameState();
     });
     return;
   }
+  showHomeUI();
   showHomeScreen();
 });
 

@@ -2,10 +2,27 @@ just an FYI, I have introduced the concept of a cave, it will funtion like a vol
 
 Perhaps we should get started on the Item management. 
 
-Weapons and Armor are required for the monster encounters and battles.
+Please remember that all state should remain on the server, and be sent to the clients for viewing - no actions taken on the client should affect game state without validation server side.
 
-When a player starts, they start with a "Fist" weapon, and no armor.
+Weapons and Armor are required for the monster encounters and battles. Items are available to the user during their turn.
+
+When a player starts, they start with a "Fist" weapon,  no armor and no items.
 
 *for now - to test, I would like to gift each player a random item from the biome set when they land on it.
 
+When a user is gifted a new item, they are shown a popup with the title "You found a ___" item details and a modal asking them to "equip" or "stash" if it is armor or weapon, and stash if it is an item.
+
+other players joined the game on their screens also see the modal, however they do not have any buttons and it will say "Player X found a ____" with a 5 second timeout and a button to dismiss.
+
 each player will have a collection of weapons and armor which (similar to changing profile, they can change out by clicking the weapon slot, or armor slot)
+they will also need an Item slot which can exist bottom left of the screen under a button called "Use Item"
+
+Each item will have a item id (which can be used to render the item picture on the clients), and item type "weapon", "armor", "item", a spawn biome, an attack value, and a percentage to hit as a number between 1 to 6, where 1 means it only hits if the user rolls a 1, and 6 means it hits if the user rolls a 1, 2, 3, 4, 5 or 6
+
+Items that can exist are:
+Teleport - teleports the user to the nearest town.
+Small Health Potion - heals for 3 hearts
+Medium Health Potion - heals for 5 hearts
+Large Health Potion - heals for 7 Hearts
+Full Health Potion - heals all hearts
+Additional Heart - gives the user another heart.

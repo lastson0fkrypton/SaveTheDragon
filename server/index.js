@@ -51,14 +51,46 @@ function serializeGame(gameRow, playerRows, validMoveRows) {
       ...playerState
     };
   });
+  // Attach item metadata for all items in play
+  const allItemIds = new Set();
+  players.forEach(p => {
+    if (p.inventory) {
+      (p.inventory.weapons || []).forEach(id => allItemIds.add(id));
+      (p.inventory.armor || []).forEach(id => allItemIds.add(id));
+      (p.inventory.items || []).forEach(id => allItemIds.add(id));
+      if (p.inventory.equippedWeaponId) allItemIds.add(p.inventory.equippedWeaponId);
+      if (p.inventory.equippedArmorId) allItemIds.add(p.inventory.equippedArmorId);
+    }
+  });
+  if (gameState.recentlyFoundItem && gameState.recentlyFoundItem.item?.id) {
+    allItemIds.add(gameState.recentlyFoundItem.item.id);
+  }
+  const itemMeta = {};
+  ITEM_DEFS.forEach(def => { if (allItemIds.has(def.id)) itemMeta[def.id] = def; });
   return {
     id: gameRow.id,
     ...gameState,
     players,
     validMoves: validMoveRows.map(m => ({ x: m.x, y: m.y })),
     gridSizeX: gameState.gridSizeX || 10,
-    gridSizeY: gameState.gridSizeY || 10
+    gridSizeY: gameState.gridSizeY || 10,
+    itemMeta
   };
+}
+
+// Helper to add a recent action to the game state
+function addRecentAction(gameState, type, playerName, itemName) {
+  if (!gameState.recentActions) gameState.recentActions = [];
+  const action = {
+    id: `${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    type, // 'use-item' or 'equip'
+    playerName,
+    itemName,
+    ts: Date.now()
+  };
+  gameState.recentActions.push(action);
+  // Keep only the latest 10 actions
+  if (gameState.recentActions.length > 10) gameState.recentActions = gameState.recentActions.slice(-10);
 }
 
 // --- Item definitions ---
@@ -285,7 +317,10 @@ app.post('/api/games/:gameId/join', (req, res) => {
             positionY = pos.y;
           }
           const playerState = {
-            positionX, positionY, hearts: 5, profilePic: randomPic,
+            positionX, positionY,
+            maxHearts: 5,
+            damage: 0,
+            profilePic: randomPic,
             inventory: {
               weapons: ['fist'],
               armor: [],
@@ -398,7 +433,7 @@ app.post('/api/games/:gameId/move', (req, res) => {
         // --- Reduce health by 1 if moving onto cave biome ---
         const biome = gameState.biomeGrid?.[targetY]?.[targetX] || 'plains';
         if (biome === 'cave') {
-          playerState.hearts = Math.max(1, (playerState.hearts || 5) - 1);
+          playerState.damage = Math.min((playerState.damage || 0) + 1, (playerState.maxHearts || 5) - 1);
         }
         // --- Gift a random item from the biome set ---
         let foundItem = null;
@@ -543,15 +578,39 @@ app.post('/api/games/:gameId/player/:playerId/equip', (req, res) => {
     if (!item) return res.status(400).json({ error: 'Invalid item' });
     if (item.type === 'weapon' && playerState.inventory.weapons.includes(itemId)) {
       playerState.inventory.equippedWeaponId = itemId;
+      // Add notification
+      db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+        if (gameRow) {
+          const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+          addRecentAction(gameState, 'equip', playerRow.name, item.name);
+          db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+            db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
+              if (err2) return res.status(500).json({ error: 'Failed to equip item' });
+              res.json({ success: true });
+            });
+          });
+        }
+      });
+      return;
     } else if (item.type === 'armor' && playerState.inventory.armor.includes(itemId)) {
       playerState.inventory.equippedArmorId = itemId;
+      // Add notification
+      db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+        if (gameRow) {
+          const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+          addRecentAction(gameState, 'equip', playerRow.name, item.name);
+          db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+            db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
+              if (err2) return res.status(500).json({ error: 'Failed to equip item' });
+              res.json({ success: true });
+            });
+          });
+        }
+      });
+      return;
     } else {
       return res.status(400).json({ error: 'Item not in inventory' });
     }
-    db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
-      if (err2) return res.status(500).json({ error: 'Failed to equip item' });
-      res.json({ success: true });
-    });
   });
 });
 
@@ -568,13 +627,13 @@ app.post('/api/games/:gameId/player/:playerId/use-item', (req, res) => {
     // Apply item effect
     let used = false;
     if (item.heal) {
-      playerState.hearts = Math.min((playerState.hearts || 5) + item.heal, 20);
+      playerState.damage = Math.max(0, (playerState.damage || 0) - item.heal);
       used = true;
     } else if (item.effect === 'full_heal') {
-      playerState.hearts = 20;
+      playerState.damage = 0;
       used = true;
     } else if (item.effect === 'extra_heart') {
-      playerState.hearts = Math.min((playerState.hearts || 5) + 1, 20);
+      playerState.maxHearts = Math.min((playerState.maxHearts || 5) + 1, 20);
       used = true;
     } else if (item.effect === 'teleport') {
       // Teleport to nearest town
@@ -598,10 +657,19 @@ app.post('/api/games/:gameId/player/:playerId/use-item', (req, res) => {
     if (used) {
       // Remove item from inventory
       playerState.inventory.items = playerState.inventory.items.filter(i => i !== itemId);
-      db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
-        if (err2) return res.status(500).json({ error: 'Failed to use item' });
-        res.json({ success: true });
+      db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+        if (gameRow) {
+          const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+          addRecentAction(gameState, 'use-item', playerRow.name, item.name);
+          db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+            db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
+              if (err2) return res.status(500).json({ error: 'Failed to use item' });
+              res.json({ success: true });
+            });
+          });
+        }
       });
+      return;
     } else {
       res.status(400).json({ error: 'Item cannot be used' });
     }
