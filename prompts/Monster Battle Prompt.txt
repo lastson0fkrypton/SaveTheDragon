@@ -1,0 +1,12 @@
+Monster Battle Prompt
+
+
+I would like to get started on the monster encounters.
+
+As mentioned before all logic must remain server side, and be included in the game state. 
+
+When a player moves into a space, we will need to test the spawn rate of the biome type, and then conditionally enter a battle mode.
+
+in battle mode, the player who is battling will need to be added to the game state, and one of the random enemies (for that biome) added as the enemy.
+
+a UI will need to be created for the clients to show the battle (modal popup would be good) showing the battling players profile picture on the left, and enemy profile on the right. - below the player character will be the weapon 

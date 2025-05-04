@@ -61,6 +61,34 @@ function serializeGame(gameRow, playerRows, validMoveRows) {
   };
 }
 
+// --- Item definitions ---
+const ITEM_DEFS = [
+  // Weapons (example, expand as needed)
+  { id: 'fist', name: 'Fist', type: 'weapon', biome: 'any', attack: 1, hit: 3, img: 'fist.png', noRandom: true },
+  { id: 'forest_sword', name: 'Forest Sword', type: 'weapon', biome: 'forest', attack: 2, hit: 4, img: 'forest_sword.png' },
+  { id: 'desert_spear', name: 'Desert Spear', type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: 'desert_spear.png' },
+  { id: 'volcano_axe', name: 'Volcano Axe', type: 'weapon', biome: 'volcano', attack: 4, hit: 5, img: 'volcano_axe.png' },
+  { id: 'cave_hammer', name: 'Cave Hammer', type: 'weapon', biome: 'cave', attack: 4, hit: 5, img: 'cave_hammer.png' },
+  // Armor (example)
+  { id: 'forest_shield', name: 'Forest Shield', type: 'armor', biome: 'forest', defense: 1, block: 3, img: 'forest_shield.png' },
+  { id: 'desert_armor', name: 'Desert Armor', type: 'armor', biome: 'desert', defense: 2, block: 4, img: 'desert_armor.png' },
+  { id: 'volcano_plate', name: 'Volcano Plate', type: 'armor', biome: 'volcano', defense: 3, block: 5, img: 'volcano_plate.png' },
+  { id: 'cave_cloak', name: 'Cave Cloak', type: 'armor', biome: 'cave', defense: 3, block: 5, img: 'cave_cloak.png' },
+  // Items
+  { id: 'teleport', name: 'Teleport', type: 'item', biome: 'any', effect: 'teleport', img: 'teleport.png' },
+  { id: 'small_potion', name: 'Small Health Potion', type: 'item', biome: 'any', heal: 3, img: 'small_potion.png' },
+  { id: 'medium_potion', name: 'Medium Health Potion', type: 'item', biome: 'any', heal: 5, img: 'medium_potion.png' },
+  { id: 'large_potion', name: 'Large Health Potion', type: 'item', biome: 'any', heal: 7, img: 'large_potion.png' },
+  { id: 'full_potion', name: 'Full Health Potion', type: 'item', biome: 'any', heal: 999, img: 'full_potion.png' },
+  { id: 'extra_heart', name: 'Additional Heart', type: 'item', biome: 'any', effect: 'extra_heart', img: 'extra_heart.png' },
+];
+
+function getRandomItemForBiome(biome) {
+  // Only give biome-appropriate items (or biome:any), and not 'fist'
+  const pool = ITEM_DEFS.filter(i => (i.biome === biome || i.biome === 'any') && !i.noRandom);
+  return pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
+
 // --- Biome grid generation ---
 function generateBiomeGrid(width, height) {
   // Start with all plains
@@ -256,7 +284,16 @@ app.post('/api/games/:gameId/join', (req, res) => {
             positionX = pos.x;
             positionY = pos.y;
           }
-          const playerState = { positionX, positionY, hearts: 5, profilePic: randomPic };
+          const playerState = {
+            positionX, positionY, hearts: 5, profilePic: randomPic,
+            inventory: {
+              weapons: ['fist'],
+              armor: [],
+              items: [],
+              equippedWeaponId: 'fist',
+              equippedArmorId: null
+            }
+          };
           db.run('INSERT INTO players (id, gameId, name, playerStateJson) VALUES (?, ?, ?, ?)', [playerId, gameId, playerName, JSON.stringify(playerState)], err2 => {
             if (err2) {
               console.error('DB error (insert player):', err2);
@@ -358,6 +395,34 @@ app.post('/api/games/:gameId/move', (req, res) => {
         const playerState = player.playerStateJson ? JSON.parse(player.playerStateJson) : {};
         playerState.positionX = targetX;
         playerState.positionY = targetY;
+        // --- Reduce health by 1 if moving onto cave biome ---
+        const biome = gameState.biomeGrid?.[targetY]?.[targetX] || 'plains';
+        if (biome === 'cave') {
+          playerState.hearts = Math.max(1, (playerState.hearts || 5) - 1);
+        }
+        // --- Gift a random item from the biome set ---
+        let foundItem = null;
+        if (biome !== 'town' && biome !== 'castle') { // Don't gift in towns/castle
+          foundItem = getRandomItemForBiome(biome);
+          if (foundItem) {
+            // Add to inventory (by type)
+            if (foundItem.type === 'weapon') {
+              if (!playerState.inventory.weapons.includes(foundItem.id)) playerState.inventory.weapons.push(foundItem.id);
+            } else if (foundItem.type === 'armor') {
+              if (!playerState.inventory.armor.includes(foundItem.id)) playerState.inventory.armor.push(foundItem.id);
+            } else if (foundItem.type === 'item') {
+              playerState.inventory.items.push(foundItem.id);
+            }
+            // Add to game state for modal
+            gameState.recentlyFoundItem = {
+              playerId,
+              item: foundItem,
+              ts: Date.now()
+            };
+          }
+        } else {
+          gameState.recentlyFoundItem = null;
+        }
         // Update game state
         gameState.currentTurn = nextTurn;
         gameState.currentDiceRoll = null;
@@ -464,6 +529,82 @@ app.post('/api/games/:gameId/player/:playerId/profile-pic', (req, res) => {
       if (err2) return res.status(500).json({ error: 'Failed to update profile picture' });
       res.json({ success: true });
     });
+  });
+});
+
+// Equip weapon or armor
+app.post('/api/games/:gameId/player/:playerId/equip', (req, res) => {
+  const { gameId, playerId } = req.params;
+  const { itemId } = req.body;
+  db.get('SELECT * FROM players WHERE id = ? AND gameId = ?', [playerId, gameId], (err, playerRow) => {
+    if (!playerRow) return res.status(404).json({ error: 'Player not found' });
+    const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
+    const item = ITEM_DEFS.find(i => i.id === itemId);
+    if (!item) return res.status(400).json({ error: 'Invalid item' });
+    if (item.type === 'weapon' && playerState.inventory.weapons.includes(itemId)) {
+      playerState.inventory.equippedWeaponId = itemId;
+    } else if (item.type === 'armor' && playerState.inventory.armor.includes(itemId)) {
+      playerState.inventory.equippedArmorId = itemId;
+    } else {
+      return res.status(400).json({ error: 'Item not in inventory' });
+    }
+    db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
+      if (err2) return res.status(500).json({ error: 'Failed to equip item' });
+      res.json({ success: true });
+    });
+  });
+});
+
+// Use item (e.g., potion, teleport, extra heart)
+app.post('/api/games/:gameId/player/:playerId/use-item', (req, res) => {
+  const { gameId, playerId } = req.params;
+  const { itemId } = req.body;
+  db.get('SELECT * FROM players WHERE id = ? AND gameId = ?', [playerId, gameId], (err, playerRow) => {
+    if (!playerRow) return res.status(404).json({ error: 'Player not found' });
+    const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
+    if (!playerState.inventory.items.includes(itemId)) return res.status(400).json({ error: 'Item not in inventory' });
+    const item = ITEM_DEFS.find(i => i.id === itemId);
+    if (!item || item.type !== 'item') return res.status(400).json({ error: 'Invalid item' });
+    // Apply item effect
+    let used = false;
+    if (item.heal) {
+      playerState.hearts = Math.min((playerState.hearts || 5) + item.heal, 20);
+      used = true;
+    } else if (item.effect === 'full_heal') {
+      playerState.hearts = 20;
+      used = true;
+    } else if (item.effect === 'extra_heart') {
+      playerState.hearts = Math.min((playerState.hearts || 5) + 1, 20);
+      used = true;
+    } else if (item.effect === 'teleport') {
+      // Teleport to nearest town
+      const gameState = playerRow.gameStateJson ? JSON.parse(playerRow.gameStateJson) : {};
+      const biomeGrid = gameState.biomeGrid;
+      if (biomeGrid) {
+        let minDist = Infinity, tx = 0, ty = 0;
+        for (let y = 0; y < biomeGrid.length; y++) {
+          for (let x = 0; x < biomeGrid[0].length; x++) {
+            if (biomeGrid[y][x] === 'town') {
+              const dist = Math.abs(playerState.positionX - x) + Math.abs(playerState.positionY - y);
+              if (dist < minDist) { minDist = dist; tx = x; ty = y; }
+            }
+          }
+        }
+        playerState.positionX = tx;
+        playerState.positionY = ty;
+        used = true;
+      }
+    }
+    if (used) {
+      // Remove item from inventory
+      playerState.inventory.items = playerState.inventory.items.filter(i => i !== itemId);
+      db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], err2 => {
+        if (err2) return res.status(500).json({ error: 'Failed to use item' });
+        res.json({ success: true });
+      });
+    } else {
+      res.status(400).json({ error: 'Item cannot be used' });
+    }
   });
 });
 

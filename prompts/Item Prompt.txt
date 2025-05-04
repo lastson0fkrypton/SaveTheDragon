@@ -1,0 +1,11 @@
+just an FYI, I have introduced the concept of a cave, it will funtion like a volcano area, Hard level monsters high spawn rate.
+
+Perhaps we should get started on the Item management. 
+
+Weapons and Armor are required for the monster encounters and battles.
+
+When a player starts, they start with a "Fist" weapon, and no armor.
+
+*for now - to test, I would like to gift each player a random item from the biome set when they land on it.
+
+each player will have a collection of weapons and armor which (similar to changing profile, they can change out by clicking the weapon slot, or armor slot)

@@ -637,6 +637,7 @@ function renderPlayerPanel(gameState: any) {
         <li class="player-list-item${idx === gameState.currentTurn ? ' current-turn' : ''}">
           <img class="player-profile-pic" src="/profile-pictures/${p.profilePic || 'default.png'}" alt="profile" />
           <span class="player-name">${p.name}</span>
+          <span class="player-hearts">${Array.from({length: Math.max(1, p.hearts || 5)}, (_, i) => `<img src='/heart.svg' style='width:16px;height:16px;vertical-align:middle;opacity:${i < (p.hearts || 5) ? 1 : 0.2};margin-left:2px;' alt='♥' />`).join('')}</span>
         </li>
       `).join('')}
     </ul>
@@ -768,6 +769,247 @@ function renderRollButton(gameState: any) {
   }
 }
 
+// --- Item/inventory UI helpers ---
+const ITEM_DEFS = [
+  // Weapons (example, expand as needed)
+  // Fist is NOT included in random item pool
+  { id: 'fist', name: 'Fist', type: 'weapon', biome: 'any', attack: 1, hit: 3, img: 'fist.png', noRandom: true },
+  { id: 'forest_sword', name: 'Forest Sword', type: 'weapon', biome: 'forest', attack: 2, hit: 4, img: 'forest_sword.png' },
+  { id: 'desert_spear', name: 'Desert Spear', type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: 'desert_spear.png' },
+  { id: 'volcano_axe', name: 'Volcano Axe', type: 'weapon', biome: 'volcano', attack: 4, hit: 5, img: 'volcano_axe.png' },
+  { id: 'cave_hammer', name: 'Cave Hammer', type: 'weapon', biome: 'cave', attack: 4, hit: 5, img: 'cave_hammer.png' },
+  // ...existing code...
+  { id: 'forest_shield', name: 'Forest Shield', type: 'armor', biome: 'forest', defense: 1, block: 3, img: 'forest_shield.png' },
+  { id: 'desert_armor', name: 'Desert Armor', type: 'armor', biome: 'desert', defense: 2, block: 4, img: 'desert_armor.png' },
+  { id: 'volcano_plate', name: 'Volcano Plate', type: 'armor', biome: 'volcano', defense: 3, block: 5, img: 'volcano_plate.png' },
+  { id: 'cave_cloak', name: 'Cave Cloak', type: 'armor', biome: 'cave', defense: 3, block: 5, img: 'cave_cloak.png' },
+  { id: 'teleport', name: 'Teleport', type: 'item', biome: 'any', effect: 'teleport', img: 'teleport.png' },
+  { id: 'small_potion', name: 'Small Health Potion', type: 'item', biome: 'any', heal: 3, img: 'small_potion.png' },
+  { id: 'medium_potion', name: 'Medium Health Potion', type: 'item', biome: 'any', heal: 5, img: 'medium_potion.png' },
+  { id: 'large_potion', name: 'Large Health Potion', type: 'item', biome: 'any', heal: 7, img: 'large_potion.png' },
+  { id: 'full_potion', name: 'Full Health Potion', type: 'item', biome: 'any', heal: 999, img: 'full_potion.png' },
+  { id: 'extra_heart', name: 'Additional Heart', type: 'item', biome: 'any', effect: 'extra_heart', img: 'extra_heart.png' },
+];
+function getItemDef(id) {
+  return ITEM_DEFS.find(i => i.id === id);
+}
+
+function getRandomItemForBiome(biome) {
+  // Only give biome-appropriate items (or biome:any), and not 'fist'
+  const pool = ITEM_DEFS.filter(i => (i.biome === biome || i.biome === 'any') && !i.noRandom);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+let lastFoundItemKey = '';
+function showItemModal(gameState) {
+  // Remove any existing modal
+  document.getElementById('item-modal-bg')?.remove();
+  const found = gameState.recentlyFoundItem;
+  if (!found) return;
+  // Only show if this is a new found item event
+  const foundKey = `${found.playerId}_${found.item?.id}_${found.ts}`;
+  if (lastFoundItemKey === foundKey) return;
+  lastFoundItemKey = foundKey;
+  const me = gameState.players.find((p: any) => p.id === playerId);
+  const isMe = found.playerId === playerId;
+  const player = gameState.players.find((p: any) => p.id === found.playerId);
+  const item = found.item;
+  // Modal background
+  const bg = document.createElement('div');
+  bg.id = 'item-modal-bg';
+  bg.style.position = 'fixed';
+  bg.style.left = '0';
+  bg.style.top = '0';
+  bg.style.right = '0';
+  bg.style.bottom = '0';
+  bg.style.background = 'rgba(0,0,0,0.7)';
+  bg.style.zIndex = '2000';
+  bg.style.display = 'flex';
+  bg.style.alignItems = 'center';
+  bg.style.justifyContent = 'center';
+  // Modal content
+  const modal = document.createElement('div');
+  modal.id = 'item-modal';
+  modal.style.background = '#222';
+  modal.style.borderRadius = '16px';
+  modal.style.padding = '32px 24px 24px 24px';
+  modal.style.minWidth = '320px';
+  modal.style.minHeight = '220px';
+  modal.style.boxShadow = '0 4px 32px #000a';
+  modal.style.color = '#fff';
+  modal.style.display = 'flex';
+  modal.style.flexDirection = 'column';
+  modal.style.alignItems = 'center';
+  // Title
+  modal.innerHTML = `<h2>${isMe ? 'You found a' : player.name + ' found a'} ${item.name}!</h2>`;
+  // Item image and details
+  modal.innerHTML += `<img src="/biomes/${item.img}" alt="${item.name}" style="width:80px;height:80px;margin:12px 0;" />`;
+  modal.innerHTML += `<div style="margin-bottom:12px;">${item.type === 'weapon' ? `Attack: ${item.attack}, Hit: 1-${item.hit}` : item.type === 'armor' ? `Defense: ${item.defense}, Block: 1-${item.block}` : item.heal ? `Heals: ${item.heal} hearts` : item.effect === 'teleport' ? 'Teleports to nearest town' : item.effect === 'extra_heart' ? 'Gives an extra heart' : ''}</div>`;
+  // Buttons
+  if (isMe) {
+    if (item.type === 'weapon' || item.type === 'armor') {
+      modal.innerHTML += `<button id="equip-btn">Equip</button> <button id="stash-btn">Stash</button>`;
+    } else {
+      modal.innerHTML += `<button id="stash-btn">Stash</button>`;
+    }
+  } else {
+    modal.innerHTML += `<button id="dismiss-btn">Dismiss</button>`;
+  }
+  bg.appendChild(modal);
+  document.body.appendChild(bg);
+  // Button handlers
+  if (isMe) {
+    if (item.type === 'weapon' || item.type === 'armor') {
+      document.getElementById('equip-btn')?.addEventListener('click', async () => {
+        await fetch(`/api/games/${gameId}/player/${playerId}/equip`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ itemId: item.id })
+        });
+        bg.remove();
+        pollGameState();
+      });
+    }
+    document.getElementById('stash-btn')?.addEventListener('click', () => {
+      bg.remove();
+      pollGameState();
+    });
+  } else {
+    const dismiss = document.getElementById('dismiss-btn');
+    let timeout = setTimeout(() => bg.remove(), 5000);
+    dismiss?.addEventListener('click', () => {
+      clearTimeout(timeout);
+      bg.remove();
+    });
+  }
+}
+
+function renderInventoryUI(gameState) {
+  // Find self
+  const me = gameState.players.find((p) => p.id === playerId);
+  if (!me) return;
+  // Weapon slot
+  const weaponSlot = document.getElementById('weapon-slot');
+  if (weaponSlot) {
+    const eqWeapon = getItemDef(me.inventory.equippedWeaponId);
+    weaponSlot.innerHTML = `<div style="font-size:0.9em;">Weapon</div><img src="/biomes/${eqWeapon?.img || 'fist.png'}" alt="weapon" style="width:48px;height:48px;cursor:pointer;" id="weapon-equip-btn" /><div style="font-size:0.8em;">${eqWeapon?.name || 'Fist'}</div>`;
+    weaponSlot.onclick = () => showEquipModal('weapon', me);
+  }
+  // Armor slot
+  const armorSlot = document.getElementById('armor-slot');
+  if (armorSlot) {
+    const eqArmor = getItemDef(me.inventory.equippedArmorId);
+    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/biomes/${eqArmor?.img || ''}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div>`;
+    armorSlot.onclick = () => showEquipModal('armor', me);
+  }
+  // Item slot (bottom left)
+  let itemSlot = document.getElementById('item-slot');
+  if (!itemSlot) {
+    itemSlot = document.createElement('div');
+    itemSlot.id = 'item-slot';
+    itemSlot.style.position = 'absolute';
+    itemSlot.style.left = '30px';
+    itemSlot.style.bottom = '30px';
+    itemSlot.style.zIndex = '30';
+    document.body.appendChild(itemSlot);
+  }
+  itemSlot.innerHTML = `<button id="use-item-btn">Use Item</button>`;
+  document.getElementById('use-item-btn')?.addEventListener('click', () => showUseItemModal(me));
+}
+
+function showEquipModal(type, me) {
+  document.getElementById('equip-modal-bg')?.remove();
+  const bg = document.createElement('div');
+  bg.id = 'equip-modal-bg';
+  bg.style.position = 'fixed';
+  bg.style.left = '0';
+  bg.style.top = '0';
+  bg.style.right = '0';
+  bg.style.bottom = '0';
+  bg.style.background = 'rgba(0,0,0,0.7)';
+  bg.style.zIndex = '2000';
+  bg.style.display = 'flex';
+  bg.style.alignItems = 'center';
+  bg.style.justifyContent = 'center';
+  const modal = document.createElement('div');
+  modal.style.background = '#222';
+  modal.style.borderRadius = '16px';
+  modal.style.padding = '32px 24px 24px 24px';
+  modal.style.minWidth = '320px';
+  modal.style.minHeight = '220px';
+  modal.style.boxShadow = '0 4px 32px #000a';
+  modal.style.color = '#fff';
+  modal.style.display = 'flex';
+  modal.style.flexDirection = 'column';
+  modal.style.alignItems = 'center';
+  modal.innerHTML = `<h2>Choose ${type === 'weapon' ? 'Weapon' : 'Armor'}</h2>`;
+  const items = (type === 'weapon' ? me.inventory.weapons : me.inventory.armor).map(getItemDef).filter(Boolean);
+  modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/biomes/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
+  modal.innerHTML += `<button id="close-equip-modal">Close</button>`;
+  bg.appendChild(modal);
+  document.body.appendChild(bg);
+  modal.querySelectorAll('img[data-id]').forEach(img => {
+    img.addEventListener('click', async (e) => {
+      const id = (e.target as HTMLImageElement).getAttribute('data-id');
+      await fetch(`/api/games/${gameId}/player/${playerId}/equip`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId: id })
+      });
+      bg.remove();
+      pollGameState();
+    });
+  });
+  document.getElementById('close-equip-modal')?.addEventListener('click', () => bg.remove());
+}
+
+function showUseItemModal(me) {
+  document.getElementById('use-item-modal-bg')?.remove();
+  const bg = document.createElement('div');
+  bg.id = 'use-item-modal-bg';
+  bg.style.position = 'fixed';
+  bg.style.left = '0';
+  bg.style.top = '0';
+  bg.style.right = '0';
+  bg.style.bottom = '0';
+  bg.style.background = 'rgba(0,0,0,0.7)';
+  bg.style.zIndex = '2000';
+  bg.style.display = 'flex';
+  bg.style.alignItems = 'center';
+  bg.style.justifyContent = 'center';
+  const modal = document.createElement('div');
+  modal.style.background = '#222';
+  modal.style.borderRadius = '16px';
+  modal.style.padding = '32px 24px 24px 24px';
+  modal.style.minWidth = '320px';
+  modal.style.minHeight = '220px';
+  modal.style.boxShadow = '0 4px 32px #000a';
+  modal.style.color = '#fff';
+  modal.style.display = 'flex';
+  modal.style.flexDirection = 'column';
+  modal.style.alignItems = 'center';
+  modal.innerHTML = `<h2>Use Item</h2>`;
+  const items = me.inventory.items.map(getItemDef).filter(Boolean);
+  if (items.length === 0) {
+    modal.innerHTML += `<div style='margin:16px 0;'>No items available</div>`;
+  } else {
+    modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/biomes/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
+  }
+  modal.innerHTML += `<button id="close-use-item-modal">Close</button>`;
+  bg.appendChild(modal);
+  document.body.appendChild(bg);
+  modal.querySelectorAll('img[data-id]').forEach(img => {
+    img.addEventListener('click', async (e) => {
+      const id = (e.target as HTMLImageElement).getAttribute('data-id');
+      await fetch(`/api/games/${gameId}/player/${playerId}/use-item`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId: id })
+      });
+      bg.remove();
+      pollGameState();
+    });
+  });
+  document.getElementById('close-use-item-modal')?.addEventListener('click', () => bg.remove());
+}
+
 async function renderGameUI(gameState: any, centerOnPlayer = false) {
    // show all game-related UI elements with correct display styles
   const displayMap: { [id: string]: string } = {
@@ -805,6 +1047,8 @@ async function renderGameUI(gameState: any, centerOnPlayer = false) {
   renderPlayerPanel(gameState);
   renderFloatingBar(gameState);
   renderRollButton(gameState);
+  renderInventoryUI(gameState);
+  showItemModal(gameState);
   setupCanvasClick(gameState);
   
   setupCanvasPanZoom();
