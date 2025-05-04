@@ -795,7 +795,7 @@ function showItemModal(gameState) {
   // Title
   modal.innerHTML = `<h2>${isMe ? 'You found a' : player.name + ' found a'} ${item.name}!</h2>`;
   // Item image and details
-  modal.innerHTML += `<img src="/biomes/${item.img}" alt="${item.name}" style="width:80px;height:80px;margin:12px 0;" />`;
+  modal.innerHTML += `<img src="/items/${item.img}" alt="${item.name}" style="width:80px;height:80px;margin:12px 0;" />`;
   modal.innerHTML += `<div style="margin-bottom:12px;">${item.type === 'weapon' ? `Attack: ${item.attack}, Hit: 1-${item.hit}` : item.type === 'armor' ? `Defense: ${item.defense}, Block: 1-${item.block}` : item.heal ? `Heals: ${item.heal} hearts` : item.effect === 'teleport' ? 'Teleports to nearest town' : item.effect === 'extra_heart' ? 'Gives an extra heart' : ''}</div>`;
   // Buttons
   if (isMe) {
@@ -850,22 +850,15 @@ function renderInventoryUI(gameState) {
   const armorSlot = document.getElementById('armor-slot');
   if (armorSlot) {
     const eqArmor = getItemMeta(gameState, me.inventory.equippedArmorId);
-    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/items/${eqArmor?.img || ''}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div>`;
+    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/items/${eqArmor?.img || 'nothing.png'}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div>`;
     armorSlot.onclick = () => showEquipModal('armor', me, gameState);
   }
   // Item slot (bottom left)
   let itemSlot = document.getElementById('item-slot');
-  if (!itemSlot) {
-    itemSlot = document.createElement('div');
-    itemSlot.id = 'item-slot';
-    itemSlot.style.position = 'absolute';
-    itemSlot.style.left = '30px';
-    itemSlot.style.bottom = '30px';
-    itemSlot.style.zIndex = '30';
-    document.body.appendChild(itemSlot);
+  if (itemSlot) {
+    itemSlot.innerHTML = `<button id="use-item-btn">Use Item</button>`;
+    document.getElementById('use-item-btn')?.addEventListener('click', () => showUseItemModal(me, gameState));
   }
-  itemSlot.innerHTML = `<button id="use-item-btn">Use Item</button>`;
-  document.getElementById('use-item-btn')?.addEventListener('click', () => showUseItemModal(me, gameState));
 }
 
 function showEquipModal(type, me, gameState) {
