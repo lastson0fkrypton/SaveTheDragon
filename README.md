@@ -9,8 +9,6 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 - Dice rolling and valid move highlighting.
 - Profile picture selection.
 - Admin panel for managing games.
-- **Item management:** Weapons and armor are distributed by biome and have unique stats. Players can collect, equip, and use items found in different areas.
-- **Item usage:** Equip weapons and armor to boost attack or defense, or use consumable items (like potions or teleport scrolls) for special effects. The server tracks inventory, equipped items, and applies item effects automatically.
 
 ## Project Structure
 

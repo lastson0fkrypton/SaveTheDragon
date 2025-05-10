@@ -3,6 +3,54 @@ let gameId: string | null = null;
 let playerId: string | null = null;
 let lastGameState: any = null;
 
+// --- TypeScript interfaces for type safety ---
+interface ItemMeta {
+  id: string;
+  name: string;
+  img: string;
+  type: 'weapon' | 'armor' | 'item';
+  attack?: number;
+  attackChance?: number;
+  defense?: number;
+  defenseChance?: number;
+  heal?: number;
+  effect?: string;
+}
+
+interface Inventory {
+  weapons: string[];
+  armor: string[];
+  items: string[];
+  equippedWeaponId?: string;
+  equippedArmorId?: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  profilePic?: string;
+  maxHearts?: number;
+  damage?: number;
+  positionX: number;
+  positionY: number;
+  inventory: Inventory;
+}
+
+interface GameState {
+  gameId: string;
+  gridSizeX: number;
+  gridSizeY: number;
+  players: Player[];
+  currentTurn: number;
+  currentDiceRoll?: number;
+  validMoves?: { x: number; y: number }[];
+  biomeGrid?: string[][];
+  itemMeta?: Record<string, ItemMeta>;
+  recentlyFoundItem?: any;
+  currentBattle?: any;
+  recentActions?: any[];
+}
+
 function deepEqual(a: any, b: any): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -688,6 +736,7 @@ async function showProfilePicModal() {
     <button class="close-btn">Close</button>
   `;
   bg.appendChild(modal);
+  document.body.appendChild(bg);
   // Click to select
   modal.querySelectorAll('.profile-pic-option').forEach(el => {
     el.addEventListener('click', async (e) => {
@@ -748,12 +797,12 @@ function renderRollButton(gameState: any) {
 }
 
 // --- Item/inventory UI helpers ---
-function getItemMeta(gameState, id) {
+function getItemMeta(gameState: GameState, id: string): ItemMeta | null {
   return gameState.itemMeta && gameState.itemMeta[id] ? gameState.itemMeta[id] : null;
 }
 
 let lastFoundItemKey = '';
-function showItemModal(gameState) {
+function showItemModal(gameState: GameState) {
   // Remove any existing modal
   document.getElementById('item-modal-bg')?.remove();
   const found = gameState.recentlyFoundItem;
@@ -796,7 +845,7 @@ function showItemModal(gameState) {
   modal.innerHTML = `<h2>${isMe ? 'You found a' : player.name + ' found a'} ${item.name}!</h2>`;
   // Item image and details
   modal.innerHTML += `<img src="/items/${item.img}" alt="${item.name}" style="width:80px;height:80px;margin:12px 0;" />`;
-  modal.innerHTML += `<div style="margin-bottom:12px;">${item.type === 'weapon' ? `Attack: ${item.attack}, Hit: 1-${item.hit}` : item.type === 'armor' ? `Defense: ${item.defense}, Block: 1-${item.block}` : item.heal ? `Heals: ${item.heal} hearts` : item.effect === 'teleport' ? 'Teleports to nearest town' : item.effect === 'extra_heart' ? 'Gives an extra heart' : ''}</div>`;
+  modal.innerHTML += `<div style="margin-bottom:12px;">${item.type === 'weapon' ? `Attack: ${item.attack}, Chance: ${typeof item.attackChance === 'number' ? percent(item.attackChance, 1) : '0%'}` : item.type === 'armor' ? `Defense: ${item.defense}, Chance: ${typeof item.defenseChance === 'number' ? percent(item.defenseChance, 1) : '0%'}` : item.heal ? `Heals: ${item.heal} hearts` : item.effect === 'teleport' ? 'Teleports to nearest town' : item.effect === 'extra_heart' ? 'Gives an extra heart' : ''}</div>`;
   // Buttons
   if (isMe) {
     if (item.type === 'weapon' || item.type === 'armor') {
@@ -835,22 +884,22 @@ function showItemModal(gameState) {
   }
 }
 
-function renderInventoryUI(gameState) {
+function renderInventoryUI(gameState: GameState): void {
   // Find self
-  const me = gameState.players.find((p) => p.id === playerId);
+  const me = gameState.players.find((p: Player) => p.id === playerId);
   if (!me) return;
   // Weapon slot
   const weaponSlot = document.getElementById('weapon-slot');
-  if (weaponSlot) {
+  if (weaponSlot && me.inventory.equippedWeaponId) {
     const eqWeapon = getItemMeta(gameState, me.inventory.equippedWeaponId);
-    weaponSlot.innerHTML = `<div style="font-size:0.9em;">Weapon</div><img src="/items/${eqWeapon?.img || 'fist.png'}" alt="weapon" style="width:48px;height:48px;cursor:pointer;" id="weapon-equip-btn" /><div style="font-size:0.8em;">${eqWeapon?.name || 'Fist'}</div>`;
+    weaponSlot.innerHTML = `<div style="font-size:0.9em;">Weapon</div><img src="/items/${eqWeapon?.img || 'fist.png'}" alt="weapon" style="width:48px;height:48px;cursor:pointer;" id="weapon-equip-btn" /><div style="font-size:0.8em;">${eqWeapon?.name || 'Fist'}</div><div style='font-size:0.75em;margin-top:2px;'>Atk: ${eqWeapon?.attack ?? 0}<br>Chance: ${typeof eqWeapon?.attackChance === 'number' ? percent(eqWeapon.attackChance, 1) : '0%'}</div>`;
     weaponSlot.onclick = () => showEquipModal('weapon', me, gameState);
   }
   // Armor slot
   const armorSlot = document.getElementById('armor-slot');
-  if (armorSlot) {
+  if (armorSlot && me.inventory.equippedArmorId) {
     const eqArmor = getItemMeta(gameState, me.inventory.equippedArmorId);
-    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/items/${eqArmor?.img || 'nothing.png'}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div>`;
+    armorSlot.innerHTML = `<div style="font-size:0.9em;">Armor</div><img src="/items/${eqArmor?.img || 'nothing.png'}" alt="armor" style="width:48px;height:48px;cursor:pointer;" id="armor-equip-btn" /><div style="font-size:0.8em;">${eqArmor?.name || 'None'}</div><div style='font-size:0.75em;margin-top:2px;'>Def: ${eqArmor?.defense ?? 0}<br>Chance: ${typeof eqArmor?.defenseChance === 'number' ? percent(eqArmor.defenseChance, 1) : '0%'}</div>`;
     armorSlot.onclick = () => showEquipModal('armor', me, gameState);
   }
   // Item slot (bottom left)
@@ -861,7 +910,7 @@ function renderInventoryUI(gameState) {
   }
 }
 
-function showEquipModal(type, me, gameState) {
+function showEquipModal(type: 'weapon' | 'armor', me: Player, gameState: GameState) {
   document.getElementById('equip-modal-bg')?.remove();
   const bg = document.createElement('div');
   bg.id = 'equip-modal-bg';
@@ -888,7 +937,7 @@ function showEquipModal(type, me, gameState) {
   modal.style.alignItems = 'center';
   modal.innerHTML = `<h2>Choose ${type === 'weapon' ? 'Weapon' : 'Armor'}</h2>`;
   const items = (type === 'weapon' ? me.inventory.weapons : me.inventory.armor).map(id => getItemMeta(gameState, id)).filter(Boolean);
-  modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/items/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div></div>`).join('')}</div>`;
+  modal.innerHTML += `<div style="display:flex;gap:16px;">${items.map(i => `<div style='text-align:center;'><img src="/items/${i.img}" alt="${i.name}" style="width:48px;height:48px;cursor:pointer;" data-id="${i.id}" /><div style='font-size:0.8em;'>${i.name}</div><div style='font-size:0.75em;margin-top:2px;'>${i.type === 'weapon' ? `Atk: ${i.attack ?? 0}<br>Chance: ${typeof i.attackChance === 'number' ? percent(i.attackChance, 1) : '0%'}` : `Def: ${i.defense ?? 0}<br>Chance: ${typeof i.defenseChance === 'number' ? percent(i.defenseChance, 1) : '0%'}`}</div></div>`).join('')}</div>`;
   modal.innerHTML += `<button id="close-equip-modal">Close</button>`;
   bg.appendChild(modal);
   document.body.appendChild(bg);
@@ -906,7 +955,7 @@ function showEquipModal(type, me, gameState) {
   document.getElementById('close-equip-modal')?.addEventListener('click', () => bg.remove());
 }
 
-function showUseItemModal(me, gameState) {
+function showUseItemModal(me: Player, gameState: GameState) {
   document.getElementById('use-item-modal-bg')?.remove();
   const bg = document.createElement('div');
   bg.id = 'use-item-modal-bg';
@@ -955,9 +1004,182 @@ function showUseItemModal(me, gameState) {
   document.getElementById('close-use-item-modal')?.addEventListener('click', () => bg.remove());
 }
 
+let lastBattleKey = '';
+function showBattleModal(gameState: GameState) {
+  document.getElementById('battle-modal-bg')?.remove();
+  const battle = gameState.currentBattle;
+  if (!battle) return;
+  // Only show if this is a new battle event or if the modal is not present
+  const battleKey = `${battle.playerId}_${battle.monster?.id}_${battle.ts}`;
+  if (lastBattleKey === battleKey && document.getElementById('battle-modal-bg')) return;
+  lastBattleKey = battleKey;
+  const me = gameState.players.find((p) => p.id === playerId);
+  const isMe = battle.playerId === playerId;
+  const player = gameState.players.find((p) => p.id === battle.playerId);
+  const weapon = gameState.itemMeta && player?.inventory?.equippedWeaponId ? gameState.itemMeta[player.inventory.equippedWeaponId] : { name: 'Fist', img: 'fist.png', attack: 1, attackChance: 1 };
+  const armor = gameState.itemMeta && player?.inventory?.equippedArmorId ? gameState.itemMeta[player.inventory.equippedArmorId] : { name: 'None', img: 'nothing.png', defense: 0, defenseChance: 1 };
+  // Modal background
+  const bg = document.createElement('div');
+  bg.id = 'battle-modal-bg';
+  bg.style.position = 'fixed';
+  bg.style.left = '0';
+  bg.style.top = '0';
+  bg.style.right = '0';
+  bg.style.bottom = '0';
+  bg.style.background = 'rgba(0,0,0,0.8)';
+  bg.style.zIndex = '3000';
+  bg.style.display = 'flex';
+  bg.style.alignItems = 'center';
+  bg.style.justifyContent = 'center';
+  // Modal content
+  const modal = document.createElement('div');
+  modal.id = 'battle-modal';
+  modal.style.background = '#222';
+  modal.style.borderRadius = '16px';
+  modal.style.padding = '32px 24px 24px 24px';
+  modal.style.minWidth = '700px';
+  modal.style.minHeight = '340px';
+  modal.style.boxShadow = '0 4px 32px #000a';
+  modal.style.color = '#fff';
+  modal.style.display = 'flex';
+  modal.style.flexDirection = 'row';
+  modal.style.alignItems = 'flex-start';
+  // Player/Monster columns and log
+  modal.innerHTML = `
+    <div style='flex:1;display:flex;flex-direction:column;align-items:center;min-width:200px;'>
+      <img src="/profile-pictures/${player.profilePic || 'default.png'}" alt="profile" style="width:90px;height:90px;border-radius:50%;border:3px solid #fff;" />
+      <div style="margin:8px 0 0 0;font-size:1.1em;">${player.name}</div>
+      <div style="margin:10px 0 0 0;display:flex;gap:18px;">
+        <div style='text-align:center;'>
+          <img src="/items/${weapon.img}" alt="weapon" style="width:48px;height:48px;" />
+          <div style="font-size:0.9em;">${weapon.name}</div>
+          <div style="font-size:0.85em;margin-top:4px;">
+            <span>Atk: ${weapon.attack ?? 0}</span><br/>
+            <span>Chance: ${typeof weapon.attackChance === 'number' ? percent(weapon.attackChance, 1) : '0%'} </span>
+          </div>
+        </div>
+        <div style='text-align:center;'>
+          <img src="/items/${armor.img}" alt="armor" style="width:48px;height:48px;" />
+          <div style="font-size:0.9em;">${armor.name}</div>
+          <div style="font-size:0.85em;margin-top:4px;">
+            <span>Def: ${armor.defense ?? 0}</span><br/>
+            <span>Chance: ${typeof armor.defenseChance === 'number' ? percent(armor.defenseChance, 1) : '0%'} </span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <span style="font-size:1.1em;">❤️</span> <span style="font-size:1.1em;">${Math.max(0, battle.playerHealth)}</span>
+      </div>
+    </div>
+    <div style='flex:0 0 60px;text-align:center;font-size:2.5em;align-self:center;'>VS</div>
+    <div style='flex:1;display:flex;flex-direction:column;align-items:center;min-width:200px;'>
+      <img src="/ai-pictures/${battle.monster.img}" alt="monster" style="width:90px;height:90px;border-radius:16px;border:3px solid #fff;" />
+      <div style="margin:8px 0 0 0;font-size:1.1em;">${battle.monster.name}</div>
+      <div style="margin:10px 0 0 0;display:flex;gap:18px;">
+        <div style='text-align:center;'>
+          <img src="/items/generic_sword.png" alt="monster-weapon" style="width:48px;height:48px;filter:grayscale(0.7);" />
+          <div style="font-size:0.9em;">Attack</div>
+          <div style="font-size:0.85em;margin-top:4px;">
+            <span>Atk: ${battle.monster.attack ?? 0}</span><br/>
+            <span>Chance: ${typeof battle.monster.attackChance === 'number' ? percent(battle.monster.attackChance, 1) : '0%'} </span>
+          </div>
+        </div>
+        <div style='text-align:center;'>
+          <img src="/items/generic_shield.png" alt="monster-armor" style="width:48px;height:48px;filter:grayscale(0.7);" />
+          <div style="font-size:0.9em;">Defense</div>
+          <div style="font-size:0.85em;margin-top:4px;">
+            <span>Def: ${battle.monster.defense ?? 0}</span><br/>
+            <span>Chance: ${typeof battle.monster.defenseChance === 'number' ? percent(battle.monster.defenseChance, 1) : '0%'} </span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <span style="font-size:1.1em;">❤️</span> <span style="font-size:1.1em;">${Math.max(0, battle.monsterHealth)}</span>
+      </div>
+    </div>
+    <div style='flex:0 0 220px;display:flex;flex-direction:column;align-items:flex-start;max-height:320px;overflow-y:auto;margin-left:24px;'>
+      <div style='font-size:1.1em;font-weight:bold;margin-bottom:8px;'>Battle Log</div>
+      <div id='battle-log' style='font-size:0.98em;line-height:1.5em;white-space:pre-line;'>
+        ${(battle.battleLog || []).map((line: string) => `<div>${line}</div>`).join('')}
+      </div>
+    </div>
+  `;
+  // Action buttons (bottom row)
+  const btnRow = document.createElement('div');
+  btnRow.style.display = 'flex';
+  btnRow.style.justifyContent = 'space-between';
+  btnRow.style.alignItems = 'center';
+  btnRow.style.width = '100%';
+  btnRow.style.marginTop = '32px';
+  if (isMe) {
+    if (battle.playerHealth <= 0) {
+      btnRow.innerHTML = `
+        <div style='flex:1;text-align:left;'></div>
+        <div style='flex:1;text-align:center;'><button id="return-town-btn" style="padding:10px 28px;font-size:1.1em;">Return to Town</button></div>
+        <div style='flex:1;text-align:right;'></div>
+      `;
+    } else if (battle.monsterHealth <= 0) {
+      btnRow.innerHTML = `
+        <div style='flex:1;text-align:left;'></div>
+        <div style='flex:1;text-align:center;'><button id="collect-treasure-btn" style="padding:10px 28px;font-size:1.1em;">Collect Treasure</button></div>
+        <div style='flex:1;text-align:right;'></div>
+      `;
+    } else {
+      btnRow.innerHTML = `
+        <div style='flex:1;text-align:left;'><button id="attack-btn" style="padding:10px 28px;font-size:1.1em;">${battle.battleLog && battle.battleLog.length > 2 ? 'Keep Battling' : 'Battle'}</button></div>
+        <div style='flex:1;text-align:center;'></div>
+        <div style='flex:1;text-align:right;'><button id="run-btn" style="padding:10px 28px;font-size:1.1em;">Run Away</button></div>
+      `;
+    }
+    modal.appendChild(btnRow);
+    // Button handlers
+    btnRow.querySelector('#attack-btn')?.addEventListener('click', async () => {
+      await fetch(`/api/games/${gameId}/battle/attack`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId })
+      });
+      // Do not close modal, just poll for new state
+      pollGameState();
+    });
+    btnRow.querySelector('#run-btn')?.addEventListener('click', async () => {
+      await fetch(`/api/games/${gameId}/battle/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId })
+      });
+      pollGameState();
+    });
+    btnRow.querySelector('#return-town-btn')?.addEventListener('click', async () => {
+      await fetch(`/api/games/${gameId}/battle/return-to-town`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId })
+      });
+      document.getElementById('battle-modal-bg')?.remove();
+      pollGameState();
+    });
+    btnRow.querySelector('#collect-treasure-btn')?.addEventListener('click', async () => {
+      await fetch(`/api/games/${gameId}/battle/collect-loot`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId })
+      });
+      document.getElementById('battle-modal-bg')?.remove();
+      pollGameState();
+    });
+  } else {
+    const waitMsg = document.createElement('div');
+    waitMsg.style.marginTop = '32px';
+    waitMsg.style.width = '100%';
+    waitMsg.style.textAlign = 'center';
+    waitMsg.innerHTML = `<span style='font-size:1.1em;'>Waiting for ${player.name} to battle...</span>`;
+    modal.appendChild(waitMsg);
+  }
+  bg.appendChild(modal);
+  document.body.appendChild(bg);
+}
+
 // Toast notification system
 const seenActionIds = new Set();
-function showToastNotification(action) {
+function showToastNotification(action: { id: string; type: string; playerName?: string; itemName?: string }): void {
   if (seenActionIds.has(action.id)) return;
   seenActionIds.add(action.id);
   let container = document.getElementById('toast-container');
@@ -992,6 +1214,8 @@ function showToastNotification(action) {
     msg = `${action.playerName} used ${action.itemName}`;
   } else if (action.type === 'equip') {
     msg = `${action.playerName} equipped ${action.itemName}`;
+  } else if (action.type === 'battle-end') {
+    msg = `${action.playerName} ${action.itemName}`;
   } else {
     msg = `${action.playerName} did something`;
   }
@@ -1002,7 +1226,7 @@ function showToastNotification(action) {
   setTimeout(() => toast.remove(), 5000);
 }
 
-function processGameNotifications(gameState) {
+function processGameNotifications(gameState: GameState): void {
   if (!gameState.recentActions) return;
   for (const action of gameState.recentActions) {
     showToastNotification(action);
@@ -1052,6 +1276,7 @@ async function renderGameUI(gameState: any, centerOnPlayer = false) {
   renderRollButton(gameState);
   renderInventoryUI(gameState);
   showItemModal(gameState);
+  showBattleModal(gameState);
   setupCanvasClick(gameState);
   setupCanvasPanZoom();
   processGameNotifications(gameState);
@@ -1216,4 +1441,8 @@ window.addEventListener('DOMContentLoaded', () => {
 const defaultApp = document.querySelector<HTMLDivElement>('#app');
 if (defaultApp) {
   defaultApp.innerHTML = '';
+}
+
+function percent(val: number, max: number): string {
+  return Math.round((val / max) * 100) + '%';
 }

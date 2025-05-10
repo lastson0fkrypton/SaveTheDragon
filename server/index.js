@@ -96,121 +96,121 @@ function addRecentAction(gameState, type, playerName, itemName) {
 // --- Item definitions ---
 const ITEM_DEFS = [
   // Fist (starter, not random)
-  { id: 'fist', name: 'Fist', type: 'weapon', biome: 'any', attack: 1, hit: 3, img: 'fist.png', noRandom: true },
+  { id: 'fist', name: 'Fist', type: 'weapon', biome: 'any', attack: 1, attackChance: 0.5, img: 'fist.png', noRandom: true },
   // Easy Weapons (plains, forest)
-  { id: 'rusty_spoon', name: 'Rusty Spoon', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 3, img: 'rusty_spoon.png' },
-  { id: 'foam_noodle', name: 'Foam Noodle', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 4, img: 'foam_noodle.png' },
-  { id: 'rubber_chicken', name: 'Rubber Chicken', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 5, img: 'rubber_chicken.png' },
-  { id: 'feather_duster', name: 'Feather Duster', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 4, img: 'feather_duster.png' },
-  { id: 'banana_boomerang', name: 'Banana Boomerang', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 3, img: 'banana_boomerang.png' },
-  { id: 'bubble_wrap_sword', name: 'Bubble Wrap Sword', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 5, img: 'bubble_wrap_sword.png' },
-  { id: 'bubble_wand', name: 'Bubble Wand', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 3, img: 'bubble_wand.png' },
-  { id: 'squirt_gun_blaster', name: 'Squirt Gun Blaster', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 4, img: 'squirt_gun_blaster.png' },
-  { id: 'balloon_sword', name: 'Balloon Sword', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 5, img: 'balloon_sword.png' },
-  { id: 'spaghetti_whip', name: 'Spaghetti Whip', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 3, img: 'spaghetti_whip.png' },
-  { id: 'silly_string_shooter', name: 'Silly String Shooter', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 4, img: 'silly_string_shooter.png' },
-  { id: 'cucumber_sword', name: 'Cucumber Sword', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 5, img: 'cucumber_sword.png' },
-  { id: 'clown_nose_launcher', name: 'Clown Nose Launcher', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 3, img: 'clown_nose_launcher.png' },
-  { id: 'balloon_launcher', name: 'Balloon Launcher', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 4, img: 'balloon_launcher.png' },
-  { id: 'sausage_nunchucks', name: 'Sausage Nunchucks', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 5, img: 'sausage_nunchucks.png' },
-  { id: 'bouncy_ball_blaster', name: 'Bouncy Ball Blaster', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 3, img: 'bouncy_ball_blaster.png' },
-  { id: 'sock_with_a_rock', name: 'Sock with a Rock', type: 'weapon', biome: 'plains,forest', attack: 2, hit: 4, img: 'sock_with_a_rock.png' },
-  { id: 'pooper_scooper', name: 'Pooper Scooper', type: 'weapon', biome: 'plains,forest', attack: 1, hit: 5, img: 'pooper_scooper.png' },
+  { id: 'rusty_spoon', name: 'Rusty Spoon', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.5, img: 'rusty_spoon.png' },
+  { id: 'foam_noodle', name: 'Foam Noodle', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.7, img: 'foam_noodle.png' },
+  { id: 'rubber_chicken', name: 'Rubber Chicken', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.9, img: 'rubber_chicken.png' },
+  { id: 'feather_duster', name: 'Feather Duster', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.7, img: 'feather_duster.png' },
+  { id: 'banana_boomerang', name: 'Banana Boomerang', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.5, img: 'banana_boomerang.png' },
+  { id: 'bubble_wrap_sword', name: 'Bubble Wrap Sword', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.9, img: 'bubble_wrap_sword.png' },
+  { id: 'bubble_wand', name: 'Bubble Wand', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.5, img: 'bubble_wand.png' },
+  { id: 'squirt_gun_blaster', name: 'Squirt Gun Blaster', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.7, img: 'squirt_gun_blaster.png' },
+  { id: 'balloon_sword', name: 'Balloon Sword', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.9, img: 'balloon_sword.png' },
+  { id: 'spaghetti_whip', name: 'Spaghetti Whip', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.5, img: 'spaghetti_whip.png' },
+  { id: 'silly_string_shooter', name: 'Silly String Shooter', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.7, img: 'silly_string_shooter.png' },
+  { id: 'cucumber_sword', name: 'Cucumber Sword', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.9, img: 'cucumber_sword.png' },
+  { id: 'clown_nose_launcher', name: 'Clown Nose Launcher', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.5, img: 'clown_nose_launcher.png' },
+  { id: 'balloon_launcher', name: 'Balloon Launcher', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.7, img: 'balloon_launcher.png' },
+  { id: 'sausage_nunchucks', name: 'Sausage Nunchucks', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.9, img: 'sausage_nunchucks.png' },
+  { id: 'bouncy_ball_blaster', name: 'Bouncy Ball Blaster', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.5, img: 'bouncy_ball_blaster.png' },
+  { id: 'sock_with_a_rock', name: 'Sock with a Rock', type: 'weapon', biome: 'plains,forest', attack: 2, attackChance: 0.7, img: 'sock_with_a_rock.png' },
+  { id: 'pooper_scooper', name: 'Pooper Scooper', type: 'weapon', biome: 'plains,forest', attack: 1, attackChance: 0.9, img: 'pooper_scooper.png' },
   // Easy Armor (plains, forest)
-  { id: 'rubber_bracelet', name: 'Rubber Bracelet', type: 'armor', biome: 'plains,forest', defense: 1, block: 3, img: 'rubber_bracelet.png' },
-  { id: 'popstick_shield', name: 'Popstick Shield', type: 'armor', biome: 'plains,forest', defense: 2, block: 4, img: 'popstick_shield.png' },
-  { id: 'straw_hat', name: 'Straw Hat', type: 'armor', biome: 'plains,forest', defense: 1, block: 5, img: 'straw_hat.png' },
-  { id: 'dog_collar_armbands', name: 'Dog Collar Armbands', type: 'armor', biome: 'plains,forest', defense: 2, block: 3, img: 'dog_collar_armbands.png' },
-  { id: 'cardboard_gloves', name: 'Cardboard Gloves', type: 'armor', biome: 'plains,forest', defense: 1, block: 4, img: 'cardboard_gloves.png' },
-  { id: 'steel_toeless_boots', name: 'Steel Toeless Boots', type: 'armor', biome: 'plains,forest', defense: 2, block: 5, img: 'steel_toeless_boots.png' },
-  { id: 'tin_foil_shield', name: 'Tin Foil Shield', type: 'armor', biome: 'plains,forest', defense: 1, block: 3, img: 'tin_foil_shield.png' },
-  { id: 'fuzzy_slippers', name: 'Fuzzy Slippers', type: 'armor', biome: 'plains,forest', defense: 2, block: 4, img: 'fuzzy_slippers.png' },
-  { id: 'leather_undies', name: 'Leather Undies', type: 'armor', biome: 'plains,forest', defense: 1, block: 5, img: 'leather_undies.png' },
-  { id: 'pizza_boots', name: 'Pizza Boots', type: 'armor', biome: 'plains,forest', defense: 2, block: 3, img: 'pizza_boots.png' },
-  { id: 'jello_helmet', name: 'Jello Helmet', type: 'armor', biome: 'plains,forest', defense: 1, block: 4, img: 'jello_helmet.png' },
-  { id: 'cardboard_chestplate', name: 'Cardboard Chestplate', type: 'armor', biome: 'plains,forest', defense: 2, block: 5, img: 'cardboard_chestplate.png' },
-  { id: 'bubble_wrap_armor', name: 'Bubble Wrap Armor', type: 'armor', biome: 'plains,forest', defense: 1, block: 3, img: 'bubble_wrap_armor.png' },
-  { id: 'booger_crown', name: 'Booger Crown', type: 'armor', biome: 'plains,forest', defense: 2, block: 4, img: 'booger_crown.png' },
-  { id: 'cloud_gloves', name: 'Cloud Gloves', type: 'armor', biome: 'plains,forest', defense: 1, block: 5, img: 'cloud_gloves.png' },
-  { id: 'toilet_seat_shield', name: 'Toilet Seat Shield', type: 'armor', biome: 'plains,forest', defense: 2, block: 3, img: 'toilet_seat_shield.png' },
-  { id: 'patchwork_poncho', name: 'Patchwork Poncho', type: 'armor', biome: 'plains,forest', defense: 1, block: 4, img: 'patchwork_poncho.png' },
-  { id: 'caterpillar_helmet', name: 'Caterpillar Helmet', type: 'armor', biome: 'plains,forest', defense: 2, block: 5, img: 'caterpillar_helmet.png' },
+  { id: 'rubber_bracelet', name: 'Rubber Bracelet', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.5, img: 'rubber_bracelet.png' },
+  { id: 'popstick_shield', name: 'Popstick Shield', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.7, img: 'popstick_shield.png' },
+  { id: 'straw_hat', name: 'Straw Hat', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.9, img: 'straw_hat.png' },
+  { id: 'dog_collar_armbands', name: 'Dog Collar Armbands', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.5, img: 'dog_collar_armbands.png' },
+  { id: 'cardboard_gloves', name: 'Cardboard Gloves', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.7, img: 'cardboard_gloves.png' },
+  { id: 'steel_toeless_boots', name: 'Steel Toeless Boots', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.9, img: 'steel_toeless_boots.png' },
+  { id: 'tin_foil_shield', name: 'Tin Foil Shield', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.5, img: 'tin_foil_shield.png' },
+  { id: 'fuzzy_slippers', name: 'Fuzzy Slippers', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.7, img: 'fuzzy_slippers.png' },
+  { id: 'leather_undies', name: 'Leather Undies', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.9, img: 'leather_undies.png' },
+  { id: 'pizza_boots', name: 'Pizza Boots', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.5, img: 'pizza_boots.png' },
+  { id: 'jello_helmet', name: 'Jello Helmet', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.7, img: 'jello_helmet.png' },
+  { id: 'cardboard_chestplate', name: 'Cardboard Chestplate', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.9, img: 'cardboard_chestplate.png' },
+  { id: 'bubble_wrap_armor', name: 'Bubble Wrap Armor', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.5, img: 'bubble_wrap_armor.png' },
+  { id: 'booger_crown', name: 'Booger Crown', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.7, img: 'booger_crown.png' },
+  { id: 'cloud_gloves', name: 'Cloud Gloves', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.9, img: 'cloud_gloves.png' },
+  { id: 'toilet_seat_shield', name: 'Toilet Seat Shield', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.5, img: 'toilet_seat_shield.png' },
+  { id: 'patchwork_poncho', name: 'Patchwork Poncho', type: 'armor', biome: 'plains,forest', defense: 1, defenseChance: 0.7, img: 'patchwork_poncho.png' },
+  { id: 'caterpillar_helmet', name: 'Caterpillar Helmet', type: 'armor', biome: 'plains,forest', defense: 2, defenseChance: 0.9, img: 'caterpillar_helmet.png' },
   // Medium Weapons (desert)
-  { id: 'cola_bomb', name: 'Cola Bomb', type: 'weapon', biome: 'desert', attack: 3, hit: 3, img: 'cola_bomb.png' },
-  { id: 'feather_boomerang', name: 'Feather Boomerang', type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: 'feather_boomerang.png' },
-  { id: 'confetti_cannon', name: 'Confetti Cannon', type: 'weapon', biome: 'desert', attack: 4, hit: 5, img: 'confetti_cannon.png' },
-  { id: 'spitwad_blowpipe', name: 'Spitwad Blowpipe', type: 'weapon', biome: 'desert', attack: 3, hit: 5, img: 'spitwad_blowpipe.png' },
-  { id: 'paper_fan', name: 'Paper Fan', type: 'weapon', biome: 'desert', attack: 3, hit: 3, img: 'paper_fan.png' },
-  { id: 'banana_slingshot', name: 'Banana Slingshot', type: 'weapon', biome: 'desert', attack: 4, hit: 4, img: 'banana_slingshot.png' },
-  { id: 'red_licorice_whip', name: 'Red Licorice Whip', type: 'weapon', biome: 'desert', attack: 3, hit: 5, img: 'red_licorice_whip.png' },
-  { id: 'mallow_catapult', name: 'Mallow Catapult', type: 'weapon', biome: 'desert', attack: 4, hit: 3, img: 'mallow_catapult.png' },
-  { id: 'fart_bomb', name: 'Fart Bomb', type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: 'fart_bomb.png' },
-  { id: 'pogo_stick_lance', name: 'Pogo Stick Lance', type: 'weapon', biome: 'desert', attack: 4, hit: 5, img: 'pogo_stick_lance.png' },
-  { id: 'jesters_scepter', name: "Jester's Scepter", type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: "jesters_scepter.png" },
-  { id: 'jelly_bean_gun', name: 'Jelly Bean Gun', type: 'weapon', biome: 'desert', attack: 4, hit: 3, img: 'jelly_bean_gun.png' },
-  { id: 'plunger_bow', name: 'Plunger Bow', type: 'weapon', biome: 'desert', attack: 3, hit: 5, img: 'plunger_bow.png' },
-  { id: 'sharp_candy_cane', name: 'Sharp Candy Cane', type: 'weapon', biome: 'desert', attack: 4, hit: 4, img: 'sharp_candy_cane.png' },
-  { id: 'glue_shooter', name: 'Glue Shooter', type: 'weapon', biome: 'desert', attack: 3, hit: 3, img: 'glue_shooter.png' },
-  { id: 'baguette_sword', name: 'Baguette Sword', type: 'weapon', biome: 'desert', attack: 4, hit: 5, img: 'baguette_sword.png' },
-  { id: 'rolling_pin_hammer', name: 'Rolling Pin Hammer', type: 'weapon', biome: 'desert', attack: 3, hit: 4, img: 'rolling_pin_hammer.png' },
-  { id: 'exploding_ice_cream', name: 'Exploding Ice Cream', type: 'weapon', biome: 'desert', attack: 4, hit: 3, img: 'exploding_ice_cream.png' },
+  { id: 'cola_bomb', name: 'Cola Bomb', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.5, img: 'cola_bomb.png' },
+  { id: 'feather_boomerang', name: 'Feather Boomerang', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.7, img: 'feather_boomerang.png' },
+  { id: 'confetti_cannon', name: 'Confetti Cannon', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.9, img: 'confetti_cannon.png' },
+  { id: 'spitwad_blowpipe', name: 'Spitwad Blowpipe', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.9, img: 'spitwad_blowpipe.png' },
+  { id: 'paper_fan', name: 'Paper Fan', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.5, img: 'paper_fan.png' },
+  { id: 'banana_slingshot', name: 'Banana Slingshot', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.7, img: 'banana_slingshot.png' },
+  { id: 'red_licorice_whip', name: 'Red Licorice Whip', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.9, img: 'red_licorice_whip.png' },
+  { id: 'mallow_catapult', name: 'Mallow Catapult', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.5, img: 'mallow_catapult.png' },
+  { id: 'fart_bomb', name: 'Fart Bomb', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.7, img: 'fart_bomb.png' },
+  { id: 'pogo_stick_lance', name: 'Pogo Stick Lance', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.9, img: 'pogo_stick_lance.png' },
+  { id: 'jesters_scepter', name: "Jester's Scepter", type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.7, img: "jesters_scepter.png" },
+  { id: 'jelly_bean_gun', name: 'Jelly Bean Gun', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.5, img: 'jelly_bean_gun.png' },
+  { id: 'plunger_bow', name: 'Plunger Bow', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.9, img: 'plunger_bow.png' },
+  { id: 'sharp_candy_cane', name: 'Sharp Candy Cane', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.7, img: 'sharp_candy_cane.png' },
+  { id: 'glue_shooter', name: 'Glue Shooter', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.5, img: 'glue_shooter.png' },
+  { id: 'baguette_sword', name: 'Baguette Sword', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.9, img: 'baguette_sword.png' },
+  { id: 'rolling_pin_hammer', name: 'Rolling Pin Hammer', type: 'weapon', biome: 'desert', attack: 3, attackChance: 0.7, img: 'rolling_pin_hammer.png' },
+  { id: 'exploding_ice_cream', name: 'Exploding Ice Cream', type: 'weapon', biome: 'desert', attack: 4, attackChance: 0.5, img: 'exploding_ice_cream.png' },
   // Medium Armor (desert)
-  { id: 'ice_cream_armor', name: 'Ice Cream Armor', type: 'armor', biome: 'desert', defense: 3, block: 3, img: 'ice_cream_armor.png' },
-  { id: 'knittted_armor', name: 'Knittted Armor', type: 'armor', biome: 'desert', defense: 4, block: 4, img: 'knittted_armor.png' },
-  { id: 'kitty_crown', name: 'Kitty Crown', type: 'armor', biome: 'desert', defense: 3, block: 5, img: 'kitty_crown.png' },
-  { id: 'fuzzy_armguards', name: 'Fuzzy Armguards', type: 'armor', biome: 'desert', defense: 4, block: 3, img: 'fuzzy_armguards.png' },
-  { id: 'cow_leather_jacket', name: 'Cow Leather Jacket', type: 'armor', biome: 'desert', defense: 3, block: 4, img: 'cow_leather_jacket.png' },
-  { id: 'honey_helmet', name: 'Honey Helmet', type: 'armor', biome: 'desert', defense: 4, block: 5, img: 'honey_helmet.png' },
-  { id: 'vacuum_armor', name: 'Vacuum Armor', type: 'armor', biome: 'desert', defense: 3, block: 4, img: 'vacuum_armor.png' },
-  { id: 'crystal_boots', name: 'Crystal Boots', type: 'armor', biome: 'desert', defense: 4, block: 3, img: 'crystal_boots.png' },
-  { id: 'stained_glass_shield', name: 'Stained Glass Shield', type: 'armor', biome: 'desert', defense: 3, block: 5, img: 'stained_glass_shield.png' },
-  { id: 'jesters_cap', name: "Jester's Cap", type: 'armor', biome: 'desert', defense: 4, block: 4, img: "jesters_cap.png" },
-  { id: 'colorful_quilted_tunic', name: 'Colorful Quilted Tunic', type: 'armor', biome: 'desert', defense: 3, block: 3, img: 'colorful_quilted_tunic.png' },
-  { id: 'feathered_boots', name: 'Feathered Boots', type: 'armor', biome: 'desert', defense: 4, block: 5, img: 'feathered_boots.png' },
-  { id: 'bamboo_armor', name: 'Bamboo Armor', type: 'armor', biome: 'desert', defense: 3, block: 4, img: 'bamboo_armor.png' },
-  { id: 'colander_helm', name: 'Colander Helm', type: 'armor', biome: 'desert', defense: 4, block: 3, img: 'colander_helm.png' },
-  { id: 'fox_helmet', name: 'Fox Helmet', type: 'armor', biome: 'desert', defense: 3, block: 4, img: 'fox_helmet.png' },
-  { id: 'metal_mittens', name: 'Metal Mittens', type: 'armor', biome: 'desert', defense: 4, block: 5, img: 'metal_mittens.png' },
-  { id: 'snail_shell_helmet', name: 'Snail Shell Helmet', type: 'armor', biome: 'desert', defense: 3, block: 3, img: 'snail_shell_helmet.png' },
-  { id: 'oven_armor', name: 'Oven Armor', type: 'armor', biome: 'desert', defense: 4, block: 4, img: 'oven_armor.png' },
+  { id: 'ice_cream_armor', name: 'Ice Cream Armor', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.5, img: 'ice_cream_armor.png' },
+  { id: 'knittted_armor', name: 'Knittted Armor', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.7, img: 'knittted_armor.png' },
+  { id: 'kitty_crown', name: 'Kitty Crown', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.9, img: 'kitty_crown.png' },
+  { id: 'fuzzy_armguards', name: 'Fuzzy Armguards', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.5, img: 'fuzzy_armguards.png' },
+  { id: 'cow_leather_jacket', name: 'Cow Leather Jacket', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.7, img: 'cow_leather_jacket.png' },
+  { id: 'honey_helmet', name: 'Honey Helmet', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.9, img: 'honey_helmet.png' },
+  { id: 'vacuum_armor', name: 'Vacuum Armor', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.7, img: 'vacuum_armor.png' },
+  { id: 'crystal_boots', name: 'Crystal Boots', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.5, img: 'crystal_boots.png' },
+  { id: 'stained_glass_shield', name: 'Stained Glass Shield', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.9, img: 'stained_glass_shield.png' },
+  { id: 'jesters_cap', name: "Jester's Cap", type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.7, img: "jesters_cap.png" },
+  { id: 'colorful_quilted_tunic', name: 'Colorful Quilted Tunic', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.5, img: 'colorful_quilted_tunic.png' },
+  { id: 'feathered_boots', name: 'Feathered Boots', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.9, img: 'feathered_boots.png' },
+  { id: 'bamboo_armor', name: 'Bamboo Armor', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.7, img: 'bamboo_armor.png' },
+  { id: 'colander_helm', name: 'Colander Helm', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.5, img: 'colander_helm.png' },
+  { id: 'fox_helmet', name: 'Fox Helmet', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.7, img: 'fox_helmet.png' },
+  { id: 'metal_mittens', name: 'Metal Mittens', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.9, img: 'metal_mittens.png' },
+  { id: 'snail_shell_helmet', name: 'Snail Shell Helmet', type: 'armor', biome: 'desert', defense: 3, defenseChance: 0.5, img: 'snail_shell_helmet.png' },
+  { id: 'oven_armor', name: 'Oven Armor', type: 'armor', biome: 'desert', defense: 4, defenseChance: 0.7, img: 'oven_armor.png' },
   // Hard Weapons (volcano, cave)
-  { id: 'exploding_pie', name: 'Exploding Pie', type: 'weapon', biome: 'volcano,cave', attack: 3, hit: 3, img: 'exploding_pie.png' },
-  { id: 'flaming_tuba', name: 'Flaming Tuba', type: 'weapon', biome: 'volcano,cave', attack: 4, hit: 4, img: 'flaming_tuba.png' },
-  { id: 'glass_hammer', name: 'Glass Hammer', type: 'weapon', biome: 'volcano,cave', attack: 5, hit: 5, img: 'glass_hammer.png' },
-  { id: 'octopus_launcher', name: 'Octopus Launcher', type: 'weapon', biome: 'volcano,cave', attack: 3, hit: 4, img: 'octopus_launcher.png' },
-  { id: 'gummy_bear_mace', name: 'Gummy Bear Mace', type: 'weapon', biome: 'volcano,cave', attack: 4, hit: 5, img: 'gummy_bear_mace.png' },
-  { id: 'mud_shotgun', name: 'Mud Shotgun', type: 'weapon', biome: 'volcano,cave', attack: 5, hit: 3, img: 'mud_shotgun.png' },
-  { id: 'whacky_wizard_staff', name: 'Whacky Wizard Staff', type: 'weapon', biome: 'volcano,cave', attack: 3, hit: 5, img: 'whacky_wizard_staff.png' },
-  { id: 'bagpipe_cannon', name: 'Bagpipe Cannon', type: 'weapon', biome: 'volcano,cave', attack: 4, hit: 3, img: 'bagpipe_cannon.png' },
-  { id: 'piranha_on_a_stick', name: 'Piranha on a Stick', type: 'weapon', biome: 'volcano,cave', attack: 5, hit: 4, img: 'piranha_on_a_stick.png' },
-  { id: 'scorpion_tail_spear', name: 'Scorpion tail Spear', type: 'weapon', biome: 'volcano,cave', attack: 3, hit: 5, img: 'scorpion_tail_spear.png' },
-  { id: 'box_of_tiny_lion', name: 'Box of Tiny Lion', type: 'weapon', biome: 'volcano,cave', attack: 4, hit: 3, img: 'box_of_tiny_lion.png' },
-  { id: 'danger_noodle_whip', name: 'Danger Noodle Whip', type: 'weapon', biome: 'volcano,cave', attack: 5, hit: 4, img: 'danger_noodle_whip.png' },
-  { id: 'giggle_daggers', name: 'Giggle Daggers', type: 'weapon', biome: 'volcano,cave', attack: 3, hit: 4, img: 'giggle_daggers.png' },
-  { id: 'rubber_chicken_axe', name: 'Rubber Chicken Axe', type: 'weapon', biome: 'volcano,cave', attack: 4, hit: 5, img: 'rubber_chicken_axe.png' },
-  { id: 'shark_head_hammer', name: 'Shark Head Hammer', type: 'weapon', biome: 'volcano,cave', attack: 5, hit: 5, img: 'shark_head_hammer.png' },
-  { id: 'roaring_great_sword', name: 'Roaring Great Sword', type: 'weapon', biome: 'volcano,cave', attack: 3, hit: 3, img: 'roaring_great_sword.png' },
-  { id: 'wild_whirl_scythe', name: 'Wild Whirl Scythe', type: 'weapon', biome: 'volcano,cave', attack: 4, hit: 4, img: 'wild_whirl_scythe.png' },
-  { id: 'crazy_cat_launcher', name: 'Crazy Cat Launcher', type: 'weapon', biome: 'volcano,cave', attack: 5, hit: 5, img: 'crazy_cat_launcher.png' },
+  { id: 'exploding_pie', name: 'Exploding Pie', type: 'weapon', biome: 'volcano,cave', attack: 3, attackChance: 0.5, img: 'exploding_pie.png' },
+  { id: 'flaming_tuba', name: 'Flaming Tuba', type: 'weapon', biome: 'volcano,cave', attack: 4, attackChance: 0.7, img: 'flaming_tuba.png' },
+  { id: 'glass_hammer', name: 'Glass Hammer', type: 'weapon', biome: 'volcano,cave', attack: 5, attackChance: 0.9, img: 'glass_hammer.png' },
+  { id: 'octopus_launcher', name: 'Octopus Launcher', type: 'weapon', biome: 'volcano,cave', attack: 3, attackChance: 0.7, img: 'octopus_launcher.png' },
+  { id: 'gummy_bear_mace', name: 'Gummy Bear Mace', type: 'weapon', biome: 'volcano,cave', attack: 4, attackChance: 0.9, img: 'gummy_bear_mace.png' },
+  { id: 'mud_shotgun', name: 'Mud Shotgun', type: 'weapon', biome: 'volcano,cave', attack: 5, attackChance: 0.5, img: 'mud_shotgun.png' },
+  { id: 'whacky_wizard_staff', name: 'Whacky Wizard Staff', type: 'weapon', biome: 'volcano,cave', attack: 3, attackChance: 0.9, img: 'whacky_wizard_staff.png' },
+  { id: 'bagpipe_cannon', name: 'Bagpipe Cannon', type: 'weapon', biome: 'volcano,cave', attack: 4, attackChance: 0.7, img: 'bagpipe_cannon.png' },
+  { id: 'piranha_on_a_stick', name: 'Piranha on a Stick', type: 'weapon', biome: 'volcano,cave', attack: 5, attackChance: 0.7, img: 'piranha_on_a_stick.png' },
+  { id: 'scorpion_tail_spear', name: 'Scorpion tail Spear', type: 'weapon', biome: 'volcano,cave', attack: 3, attackChance: 0.9, img: 'scorpion_tail_spear.png' },
+  { id: 'box_of_tiny_lion', name: 'Box of Tiny Lion', type: 'weapon', biome: 'volcano,cave', attack: 4, attackChance: 0.7, img: 'box_of_tiny_lion.png' },
+  { id: 'danger_noodle_whip', name: 'Danger Noodle Whip', type: 'weapon', biome: 'volcano,cave', attack: 5, attackChance: 0.9, img: 'danger_noodle_whip.png' },
+  { id: 'giggle_daggers', name: 'Giggle Daggers', type: 'weapon', biome: 'volcano,cave', attack: 3, attackChance: 0.7, img: 'giggle_daggers.png' },
+  { id: 'rubber_chicken_axe', name: 'Rubber Chicken Axe', type: 'weapon', biome: 'volcano,cave', attack: 4, attackChance: 0.9, img: 'rubber_chicken_axe.png' },
+  { id: 'shark_head_hammer', name: 'Shark Head Hammer', type: 'weapon', biome: 'volcano,cave', attack: 5, attackChance: 0.9, img: 'shark_head_hammer.png' },
+  { id: 'roaring_great_sword', name: 'Roaring Great Sword', type: 'weapon', biome: 'volcano,cave', attack: 3, attackChance: 0.5, img: 'roaring_great_sword.png' },
+  { id: 'wild_whirl_scythe', name: 'Wild Whirl Scythe', type: 'weapon', biome: 'volcano,cave', attack: 4, attackChance: 0.7, img: 'wild_whirl_scythe.png' },
+  { id: 'crazy_cat_launcher', name: 'Crazy Cat Launcher', type: 'weapon', biome: 'volcano,cave', attack: 5, attackChance: 0.9, img: 'crazy_cat_launcher.png' },
   // Hard Armor (volcano, cave)
-  { id: 'wooden_buckler', name: 'Wooden Buckler', type: 'armor', biome: 'volcano,cave', defense: 3, block: 3, img: 'wooden_buckler.png' },
-  { id: 'barrel_lid_shield', name: 'Barrel Lid Shield', type: 'armor', biome: 'volcano,cave', defense: 4, block: 4, img: 'barrel_lid_shield.png' },
-  { id: 'feather_helmet', name: 'Feather Helmet', type: 'armor', biome: 'volcano,cave', defense: 5, block: 5, img: 'feather_helmet.png' },
-  { id: 'plant_shield', name: 'Plant Shield', type: 'armor', biome: 'volcano,cave', defense: 3, block: 4, img: 'plant_shield.png' },
-  { id: 'sturdy_fish_shield', name: 'Sturdy Fish Shield', type: 'armor', biome: 'volcano,cave', defense: 4, block: 5, img: 'sturdy_fish_shield.png' },
-  { id: 'vortex_cape', name: 'Vortex Cape', type: 'armor', biome: 'volcano,cave', defense: 5, block: 3, img: 'vortex_cape.png' },
-  { id: 'clock_shield', name: 'Clock Shield', type: 'armor', biome: 'volcano,cave', defense: 3, block: 5, img: 'clock_shield.png' },
-  { id: 'spider_silk_gloves', name: 'Spider Silk Gloves', type: 'armor', biome: 'volcano,cave', defense: 4, block: 3, img: 'spider_silk_gloves.png' },
-  { id: 'lightning_shield', name: 'Lightning Shield', type: 'armor', biome: 'volcano,cave', defense: 5, block: 4, img: 'lightning_shield.png' },
-  { id: 'chicken_shield', name: 'Chicken Shield', type: 'armor', biome: 'volcano,cave', defense: 3, block: 5, img: 'chicken_shield.png' },
-  { id: 'guardian_shield', name: 'Guardian Shield', type: 'armor', biome: 'volcano,cave', defense: 4, block: 3, img: 'guardian_shield.png' },
-  { id: 'superhero_shield', name: 'Superhero Shield', type: 'armor', biome: 'volcano,cave', defense: 5, block: 4, img: 'superhero_shield.png' },
-  { id: 'boulder_armor', name: 'Boulder Armor', type: 'armor', biome: 'volcano,cave', defense: 3, block: 4, img: 'boulder_armor.png' },
-  { id: 'phoenix_cloak', name: 'Phoenix Cloak', type: 'armor', biome: 'volcano,cave', defense: 4, block: 5, img: 'phoenix_cloak.png' },
-  { id: 'shark_armor', name: 'Shark Armor', type: 'armor', biome: 'volcano,cave', defense: 5, block: 3, img: 'shark_armor.png' },
-  { id: 'serpent_scale', name: 'Serpent Scale', type: 'armor', biome: 'volcano,cave', defense: 3, block: 4, img: 'serpent_scale.png' },
-  { id: 'dragon_scale_armor', name: 'Dragon Scale Armor', type: 'armor', biome: 'volcano,cave', defense: 4, block: 5, img: 'dragon_scale_armor.png' },
-  { id: 'astral_plate_armor', name: 'Astral Plate Armor', type: 'armor', biome: 'volcano,cave', defense: 5, block: 5, img: 'astral_plate_armor.png' },
+  { id: 'wooden_buckler', name: 'Wooden Buckler', type: 'armor', biome: 'volcano,cave', defense: 3, defenseChance: 0.5, img: 'wooden_buckler.png' },
+  { id: 'barrel_lid_shield', name: 'Barrel Lid Shield', type: 'armor', biome: 'volcano,cave', defense: 4, defenseChance: 0.7, img: 'barrel_lid_shield.png' },
+  { id: 'feather_helmet', name: 'Feather Helmet', type: 'armor', biome: 'volcano,cave', defense: 5, defenseChance: 0.9, img: 'feather_helmet.png' },
+  { id: 'plant_shield', name: 'Plant Shield', type: 'armor', biome: 'volcano,cave', defense: 3, defenseChance: 0.7, img: 'plant_shield.png' },
+  { id: 'sturdy_fish_shield', name: 'Sturdy Fish Shield', type: 'armor', biome: 'volcano,cave', defense: 4, defenseChance: 0.9, img: 'sturdy_fish_shield.png' },
+  { id: 'vortex_cape', name: 'Vortex Cape', type: 'armor', biome: 'volcano,cave', defense: 5, defenseChance: 0.5, img: 'vortex_cape.png' },
+  { id: 'clock_shield', name: 'Clock Shield', type: 'armor', biome: 'volcano,cave', defense: 3, defenseChance: 0.9, img: 'clock_shield.png' },
+  { id: 'spider_silk_gloves', name: 'Spider Silk Gloves', type: 'armor', biome: 'volcano,cave', defense: 4, defenseChance: 0.7, img: 'spider_silk_gloves.png' },
+  { id: 'lightning_shield', name: 'Lightning Shield', type: 'armor', biome: 'volcano,cave', defense: 5, defenseChance: 0.9, img: 'lightning_shield.png' },
+  { id: 'chicken_shield', name: 'Chicken Shield', type: 'armor', biome: 'volcano,cave', defense: 3, defenseChance: 0.9, img: 'chicken_shield.png' },
+  { id: 'guardian_shield', name: 'Guardian Shield', type: 'armor', biome: 'volcano,cave', defense: 4, defenseChance: 0.7, img: 'guardian_shield.png' },
+  { id: 'superhero_shield', name: 'Superhero Shield', type: 'armor', biome: 'volcano,cave', defense: 5, defenseChance: 0.9, img: 'superhero_shield.png' },
+  { id: 'boulder_armor', name: 'Boulder Armor', type: 'armor', biome: 'volcano,cave', defense: 3, defenseChance: 0.7, img: 'boulder_armor.png' },
+  { id: 'phoenix_cloak', name: 'Phoenix Cloak', type: 'armor', biome: 'volcano,cave', defense: 4, defenseChance: 0.9, img: 'phoenix_cloak.png' },
+  { id: 'shark_armor', name: 'Shark Armor', type: 'armor', biome: 'volcano,cave', defense: 5, defenseChance: 0.5, img: 'shark_armor.png' },
+  { id: 'serpent_scale', name: 'Serpent Scale', type: 'armor', biome: 'volcano,cave', defense: 3, defenseChance: 0.7, img: 'serpent_scale.png' },
+  { id: 'dragon_scale_armor', name: 'Dragon Scale Armor', type: 'armor', biome: 'volcano,cave', defense: 4, defenseChance: 0.9, img: 'dragon_scale_armor.png' },
+  { id: 'astral_plate_armor', name: 'Astral Plate Armor', type: 'armor', biome: 'volcano,cave', defense: 5, defenseChance: 0.5, img: 'astral_plate_armor.png' },
   // Items
   { id: 'teleport', name: 'Teleport', type: 'item', biome: 'any', effect: 'teleport', img: 'teleport.png' },
   { id: 'small_potion', name: 'Small Health Potion', type: 'item', biome: 'any', heal: 3, img: 'small_potion.png' },
@@ -220,12 +220,112 @@ const ITEM_DEFS = [
   { id: 'extra_heart', name: 'Additional Heart', type: 'item', biome: 'any', effect: 'extra_heart', img: 'extra_heart.png' },
 ];
 
+
+// --- Monster definitions ---
+const MONSTER_DEFS = [
+  // Plains/Forest
+  { id: 'weak_trollkin', name: 'Weak Trollkin', biome: 'plains,forest', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_trollkin.png' },
+  { id: 'trollkin', name: 'Trollkin', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'trollkin.png' },
+  { id: 'strong_trollkin', name: 'Strong Trollkin', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_trollkin.png' },
+  { id: 'weak_bat', name: 'Weak Bat', biome: 'plains,forest', attack: 1, attackChance: 0.7, defense: 1, defenseChance: 0.33, img: 'weak_bat.png' },
+  { id: 'bat', name: 'Bat', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'bat.png' },
+  { id: 'strong_bat', name: 'Strong Bat', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_bat.png' },
+  { id: 'weak_fairy', name: 'Weak Fairy', biome: 'plains,forest', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_fairy.png' },
+  { id: 'fairy', name: 'Fairy', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'fairy.png' },
+  { id: 'strong_fairy', name: 'Strong Fairy', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_fairy.png' },
+  { id: 'weak_black_cat', name: 'Weak Black Cat', biome: 'plains,forest', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_black_cat.png' },
+  { id: 'black_cat', name: 'Black Cat', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'black_cat.png' },
+  { id: 'strong_black_cat', name: 'Strong Black Cat', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_black_cat.png' },
+  { id: 'weak_goblin', name: 'Weak Goblin', biome: 'plains,forest', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_goblin.png' },
+  { id: 'goblin', name: 'Goblin', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'goblin.png' },
+  { id: 'strong_goblin', name: 'Strong Goblin', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_goblin.png' },
+  { id: 'weak_bigfoot', name: 'Weak Bigfoot', biome: 'plains,forest', attack: 1, attackChance: 0.7, defense: 1, defenseChance: 0.33, img: 'weak_bigfoot.png' },
+  { id: 'bigfoot', name: 'Bigfoot', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'bigfoot.png' },
+  { id: 'strong_bigfoot', name: 'Strong Bigfoot', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_bigfoot.png' },
+  { id: 'weak_giant_spider', name: 'Weak Giant Spider', biome: 'plains,forest', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_giant_spider.png' },
+  { id: 'giant_spider', name: 'Giant Spider', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'giant_spider.png' },
+  { id: 'strong_giant_spider', name: 'Strong Giant Spider', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_giant_spider.png' },
+  { id: 'weak_ogre', name: 'Weak Ogre', biome: 'plains,forest', attack: 1, attackChance: 0.7, defense: 1, defenseChance: 0.33, img: 'weak_ogre.png' },
+  { id: 'ogre', name: 'Ogre', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'ogre.png' },
+  { id: 'strong_ogre', name: 'Strong Ogre', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_ogre.png' },
+  { id: 'weak_warewolf', name: 'Weak Warewolf', biome: 'plains,forest', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_warewolf.png' },
+  { id: 'warewolf', name: 'Warewolf', biome: 'plains,forest', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'warewolf.png' },
+  { id: 'strong_warewolf', name: 'Strong Warewolf', biome: 'plains,forest', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_warewolf.png' },
+  // Desert
+  { id: 'weak_spiky_lizard', name: 'Weak Spiky Lizard', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_spiky_lizard.png' },
+  { id: 'spiky_lizard', name: 'Spiky Lizard', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'spiky_lizard.png' },
+  { id: 'strong_spiky_lizard', name: 'Strong Spiky Lizard', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_spiky_lizard.png' },
+  { id: 'weak_scorpion', name: 'Weak Scorpion', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_scorpion.png' },
+  { id: 'scorpion', name: 'Scorpion', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'scorpion.png' },
+  { id: 'strong_scorpion', name: 'Strong Scorpion', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_scorpion.png' },
+  { id: 'weak_snake', name: 'Weak Snake', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_snake.png' },
+  { id: 'snake', name: 'Snake', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'snake.png' },
+  { id: 'strong_snake', name: 'Strong Snake', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_snake.png' },
+  { id: 'weak_vulture', name: 'Weak Vulture', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_vulture.png' },
+  { id: 'vulture', name: 'Vulture', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'vulture.png' },
+  { id: 'strong_vulture', name: 'Strong Vulture', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_vulture.png' },
+  { id: 'weak_harpy', name: 'Weak Harpy', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_harpy.png' },
+  { id: 'harpy', name: 'Harpy', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'harpy.png' },
+  { id: 'strong_harpy', name: 'Strong Harpy', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_harpy.png' },
+  { id: 'weak_centaur', name: 'Weak Centaur', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_centaur.png' },
+  { id: 'centaur', name: 'Centaur', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'centaur.png' },
+  { id: 'strong_centaur', name: 'Strong Centaur', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_centaur.png' },
+  { id: 'weak_sand_golem', name: 'Weak Sand Golem', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_sand_golem.png' },
+  { id: 'sand_golem', name: 'Sand Golem', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'sand_golem.png' },
+  { id: 'strong_sand_golem', name: 'Strong Sand Golem', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_sand_golem.png' },
+  { id: 'weak_pheonix', name: 'Weak Pheonix', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_pheonix.png' },
+  { id: 'pheonix', name: 'Pheonix', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'pheonix.png' },
+  { id: 'strong_pheonix', name: 'Strong Pheonix', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_pheonix.png' },
+  { id: 'weak_gryphon', name: 'Weak Gryphon', biome: 'desert', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_gryphon.png' },
+  { id: 'gryphon', name: 'Gryphon', biome: 'desert', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'gryphon.png' },
+  { id: 'strong_gryphon', name: 'Strong Gryphon', biome: 'desert', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_gryphon.png' },
+  // Cave/Volcano
+  { id: 'weak_fire_butterfly', name: 'Weak Fire Butterfly', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_fire_butterfly.png' },
+  { id: 'fire_butterfly', name: 'Fire Butterfly', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'fire_butterfly.png' },
+  { id: 'strong_fire_butterfly', name: 'Strong Fire Butterfly', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_fire_butterfly.png' },
+  { id: 'weak_magma_cube', name: 'Weak Magma Cube', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_magma_cube.png' },
+  { id: 'magma_cube', name: 'Magma Cube', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'magma_cube.png' },
+  { id: 'strong_magma_cube', name: 'Strong Magma Cube', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_magma_cube.png' },
+  { id: 'weak_ember_imp', name: 'Weak Ember Imp', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_ember_imp.png' },
+  { id: 'ember_imp', name: 'Ember Imp', type: 'weapon', biome: 'volcano,cave', attack: 2, attackChance: 0.7, img: 'ember_imp.png' },
+  { id: 'strong_ember_imp', name: 'Strong Ember Imp', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_ember_imp.png' },
+  { id: 'weak_skeleton', name: 'Weak Skeleton', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_skeleton.png' },
+  { id: 'skeleton', name: 'Skeleton', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'skeleton.png' },
+  { id: 'strong_skeleton', name: 'Strong Skeleton', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_skeleton.png' },
+  { id: 'weak_rock_troll', name: 'Weak Rock Troll', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_rock_troll.png' },
+  { id: 'rock_troll', name: 'Rock Troll', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'rock_troll.png' },
+  { id: 'strong_rock_troll', name: 'Strong Rock Troll', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_rock_troll.png' },
+  { id: 'weak_medusa', name: 'Weak Medusa', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_medusa.png' },
+  { id: 'medusa', name: 'Medusa', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'medusa.png' },
+  { id: 'strong_medusa', name: 'Strong Medusa', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_medusa.png' },
+  { id: 'weak_wizard', name: 'Weak Wizard', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_wizard.png' },
+  { id: 'wizard', name: 'Wizard', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'wizard.png' },
+  { id: 'strong_wizard', name: 'Strong Wizard', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_wizard.png' },
+  { id: 'weak_red_dragon', name: 'Weak Red Dragon', biome: 'volcano,cave', attack: 1, attackChance: 0.7, defense: 1, defenseChance: 0.33, img: 'weak_red_dragon.png' },
+  { id: 'red_dragon', name: 'Red Dragon', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'red_dragon.png' },
+  { id: 'strong_red_dragon', name: 'Strong Red Dragon', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_red_dragon.png' },
+  { id: 'weak_dark_unicorn', name: 'Weak Dark Unicorn', biome: 'volcano,cave', attack: 1, attackChance: 0.5, defense: 1, defenseChance: 0.33, img: 'weak_dark_unicorn.png' },
+  { id: 'dark_unicorn', name: 'Dark Unicorn', biome: 'volcano,cave', attack: 2, attackChance: 0.7, defense: 2, defenseChance: 0.5, img: 'dark_unicorn.png' },
+  { id: 'strong_dark_unicorn', name: 'Strong Dark Unicorn', biome: 'volcano,cave', attack: 3, attackChance: 0.9, defense: 3, defenseChance: 0.7, img: 'strong_dark_unicorn.png' },
+];
+
+// --- Biome encounter rates ---
+const BIOME_ENCOUNTER_RATES = {
+  plains: 0.20,
+  forest: 0.35,
+  desert: 0.50,
+  cave: 0.75,
+  volcano: 0.75,
+  castle: 0.0,
+  town: 0.0
+};
+
+
 function getRandomItemForBiome(tilebiome) {
   // Only give biome-appropriate items (or biome:any), and not 'fist'
   const pool = ITEM_DEFS.filter(i => (i.biome === 'any' || (i.biome && i.biome.indexOf(tilebiome) !== -1)) && !i.noRandom);
   return pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
-
 // --- Biome grid generation ---
 function generateBiomeGrid(width, height) {
   // Start with all plains
@@ -529,42 +629,54 @@ app.post('/api/games/:gameId/move', (req, res) => {
       db.all('SELECT * FROM valid_moves WHERE gameId = ?', [gameId], (err, validMoveRows) => {
         const isValid = validMoveRows.some(m => m.x === targetX && m.y === targetY);
         if (!isValid) return res.status(400).json({ error: 'Invalid move' });
-        // Move player, advance turn, clear dice/valid_moves
-        const nextTurn = (gameState.currentTurn + 1) % playerRows.length;
+        // Move player, clear dice/valid_moves
+        // --- Only advance turn if no battle is encountered ---
+        let advanceTurn = true;
         // Update player state
         const playerState = player.playerStateJson ? JSON.parse(player.playerStateJson) : {};
         playerState.positionX = targetX;
         playerState.positionY = targetY;
         // --- Reduce health by 1 if moving onto cave biome ---
         const biome = gameState.biomeGrid?.[targetY]?.[targetX] || 'plains';
-        if (biome === 'cave') {
-          playerState.damage = Math.min((playerState.damage || 0) + 1, (playerState.maxHearts || 5) - 1);
+        if (biome === 'town') {
+          playerState.damage = 0;
         }
-        // --- Gift a random item from the biome set ---
-        let foundItem = null;
-        if (biome !== 'town' && biome !== 'castle') { // Don't gift in towns/castle
-          foundItem = getRandomItemForBiome(biome);
-          if (foundItem) {
-            // Add to inventory (by type)
-            if (foundItem.type === 'weapon') {
-              if (!playerState.inventory.weapons.includes(foundItem.id)) playerState.inventory.weapons.push(foundItem.id);
-            } else if (foundItem.type === 'armor') {
-              if (!playerState.inventory.armor.includes(foundItem.id)) playerState.inventory.armor.push(foundItem.id);
-            } else if (foundItem.type === 'item') {
-              playerState.inventory.items.push(foundItem.id);
+        // --- Remove gifting item on every move ---
+        gameState.recentlyFoundItem = null;
+        // --- Monster encounter logic ---
+        let encounter = false;
+        let encounteredMonster = null;
+        // Only start a new battle if there is not already a battle for this player
+        if (!gameState.currentBattle) {
+          if (BIOME_ENCOUNTER_RATES[biome] > 0 && Math.random() < BIOME_ENCOUNTER_RATES[biome]) {
+            // Find monsters for this biome
+            const biomeMonsters = MONSTER_DEFS.filter(m => m.biome.split(',').includes(biome));
+            if (biomeMonsters.length > 0) {
+              encounter = true;
+              encounteredMonster = biomeMonsters[Math.floor(Math.random() * biomeMonsters.length)];
+              // Set battle state in gameState
+              gameState.currentBattle = {
+                playerId,
+                monster: encounteredMonster,
+                playerHealth: (playerState.maxHearts || 5) - (playerState.damage || 0),
+                monsterHealth: encounteredMonster.defense * 2, // Monster health = 2x defense
+                battleLog: [
+                  `A wild ${encounteredMonster.name} appeared!`,
+                  `Player: ${playerRows.find(p => p.id === playerId)?.name || 'Player'} vs ${encounteredMonster.name}`
+                ],
+                battleActive: true,
+                ts: Date.now()
+              };
+              advanceTurn = false;
             }
-            // Add to game state for modal
-            gameState.recentlyFoundItem = {
-              playerId,
-              item: foundItem,
-              ts: Date.now()
-            };
+          } else {
+            gameState.currentBattle = null;
           }
-        } else {
-          gameState.recentlyFoundItem = null;
         }
-        // Update game state
-        gameState.currentTurn = nextTurn;
+        // Only advance turn if no battle was started
+        if (advanceTurn) {
+          gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+        }
         gameState.currentDiceRoll = null;
         db.serialize(() => {
           db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId]);
@@ -583,6 +695,207 @@ app.post('/api/games/:gameId/move', (req, res) => {
     });
   });
 });
+
+// --- BATTLE ENDPOINTS ---
+// Player attacks monster
+app.post('/api/games/:gameId/battle/attack', (req, res) => {
+  const { gameId } = req.params;
+  const { playerId } = req.body;
+  db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+    if (!gameRow) return res.status(404).json({ error: 'Game not found' });
+    const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+    const battle = gameState.currentBattle;
+    if (!battle || !battle.battleActive) return res.status(400).json({ error: 'No active battle' });
+    if (battle.playerId !== playerId) return res.status(403).json({ error: 'Not your battle' });
+    db.get('SELECT * FROM players WHERE id = ?', [playerId], (err, playerRow) => {
+      if (!playerRow) return res.status(404).json({ error: 'Player not found' });
+      const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
+      // Player attack
+      const weaponId = playerState.inventory.equippedWeaponId || 'fist';
+      const weapon = ITEM_DEFS.find(i => i.id === weaponId) || ITEM_DEFS.find(i => i.id === 'fist');
+      let log = battle.battleLog || [];
+      let playerHit = Math.random() < (weapon.attackChance || 0.5);
+      let monsterBlock = Math.random() < (battle.monster.defenseChance || 0);
+      let playerDmg = 0;
+      if (playerHit) {
+        playerDmg = weapon.attack || 1;
+        if (monsterBlock) {
+          playerDmg = Math.max(0, playerDmg - (battle.monster.defense || 0));
+          log.push(`Monster blocks! Damage reduced.`);
+        }
+        battle.monsterHealth -= playerDmg;
+        log.push(`Player attacks with ${weapon.name}: ${playerHit ? 'Hit' : 'Miss'}${playerDmg > 0 ? ` for ${playerDmg} damage!` : ''}`);
+      } else {
+        log.push(`Player attacks with ${weapon.name}: Miss!`);
+      }
+      // Check if monster defeated
+      if (battle.monsterHealth <= 0) {
+        log.push(`Monster ${battle.monster.name} defeated!`);
+        battle.battleActive = false;
+        // Do NOT clear currentBattle or advance turn here
+      } else {
+        // Monster attacks back if alive
+        const armorId = playerState.inventory.equippedArmorId;
+        const armor = armorId ? ITEM_DEFS.find(i => i.id === armorId) : null;
+        let monsterHit = Math.random() < (battle.monster.attackChance || 0.5);
+        let playerBlock = armor ? Math.random() < (armor.defenseChance || 0) : false;
+        let monsterDmg = 0;
+        if (monsterHit) {
+          monsterDmg = battle.monster.attack || 1;
+          if (playerBlock) {
+            monsterDmg = Math.max(0, monsterDmg - (armor?.defense || 0));
+            log.push(`Player blocks! Damage reduced.`);
+          }
+          battle.playerHealth -= monsterDmg;
+          log.push(`Monster attacks: ${monsterHit ? 'Hit' : 'Miss'}${monsterDmg > 0 ? ` for ${monsterDmg} damage!` : ''}`);
+        } else {
+          log.push(`Monster attacks: Miss!`);
+        }
+        // Update player damage
+        const maxHearts = playerState.maxHearts || 5;
+        playerState.damage = Math.max(0, maxHearts - battle.playerHealth);
+        // Check if player fainted
+        if (battle.playerHealth <= 0) {
+          log.push(`Player fainted due to injuries.`);
+          battle.battleActive = false;
+          // Do NOT clear currentBattle or advance turn here
+        }
+      }
+      // Save state and return
+      battle.battleLog = log;
+      gameState.currentBattle = battle;
+      db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], () => {
+        db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+          res.json({ success: true, battleLog: log, battleActive: battle.battleActive });
+        });
+      });
+    });
+  });
+});
+
+// Player runs away
+app.post('/api/games/:gameId/battle/run', (req, res) => {
+  const { gameId } = req.params;
+  const { playerId } = req.body;
+  db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+    if (!gameRow) return res.status(404).json({ error: 'Game not found' });
+    const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+    const battle = gameState.currentBattle;
+    if (!battle || !battle.battleActive) return res.status(400).json({ error: 'No active battle' });
+    if (battle.playerId !== playerId) return res.status(403).json({ error: 'Not your battle' });
+    battle.battleActive = false;
+    battle.battleLog.push('Player ran away! The battle is over.');
+    // Add notification for all players
+    if (!gameState.recentActions) gameState.recentActions = [];
+    
+    db.get('SELECT * FROM players WHERE id = ?', [playerId], (err, playerRow) => {
+      if (!playerRow) return res.status(404).json({ error: 'Player not found' });
+      addRecentAction(gameState, 'battle-end', playerRow.name || 'Player', `ran away from ${battle.monster?.name || 'a monster'}`);
+      
+      // Advance turn and clear battle
+      db.all('SELECT * FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
+        gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+        gameState.currentBattle = null;
+        db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+          res.json({ success: true, battleLog: battle.battleLog, ranAway: true });
+        });
+      });
+    });
+  });
+});
+
+// Player collects loot after winning
+app.post('/api/games/:gameId/battle/collect-loot', (req, res) => {
+  const { gameId } = req.params;
+  const { playerId } = req.body;
+  db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+    if (!gameRow) return res.status(404).json({ error: 'Game not found' });
+    const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+    const battle = gameState.currentBattle;
+    // Only allow if player won (monsterHealth <= 0, playerHealth > 0, battleActive is false)
+    if (!battle || battle.playerId !== playerId || battle.monsterHealth > 0 || battle.playerHealth <= 0 || battle.battleActive !== false) {
+      return res.status(400).json({ error: 'Cannot collect loot unless you have won the battle.' });
+    }
+    db.get('SELECT * FROM players WHERE id = ?', [playerId], (err, playerRow) => {
+      if (!playerRow) return res.status(404).json({ error: 'Player not found' });
+      const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
+      // Reward item
+      const biome = battle.monster.biome.split(',')[0];
+      const reward = getRandomItemForBiome(biome);
+      if (reward) {
+        if (reward.type === 'weapon' && !playerState.inventory.weapons.includes(reward.id)) playerState.inventory.weapons.push(reward.id);
+        else if (reward.type === 'armor' && !playerState.inventory.armor.includes(reward.id)) playerState.inventory.armor.push(reward.id);
+        else if (reward.type === 'item') playerState.inventory.items.push(reward.id);
+      }
+      // Add to recentlyFoundItem for modal
+      gameState.recentlyFoundItem = {
+        playerId,
+        item: reward,
+        ts: Date.now()
+      };
+      // Add notification for all players
+      addRecentAction(gameState, 'battle-end', playerRow.name, `defeated ${battle.monster?.name || 'a monster'}`);
+      // Advance turn and clear battle
+      gameState.currentBattle = null;
+      db.all('SELECT * FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
+        gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+        db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], () => {
+          db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+            res.json({ success: true, reward });
+          });
+        });
+      });
+    });
+  });
+});
+
+// Player returns to town after fainting (button for UI)
+app.post('/api/games/:gameId/battle/return-to-town', (req, res) => {
+  const { gameId } = req.params;
+  const { playerId } = req.body;
+  db.get('SELECT * FROM players WHERE id = ?', [playerId], (err, playerRow) => {
+    if (!playerRow) return res.status(404).json({ error: 'Player not found' });
+    const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
+    db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+      if (!gameRow) return res.status(404).json({ error: 'Game not found' });
+      const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+      const battle = gameState.currentBattle;
+      // Only allow if player lost (playerHealth <= 0, battleActive is false)
+      if (!battle || battle.playerId !== playerId || battle.playerHealth > 0 || battle.battleActive !== false) {
+        return res.status(400).json({ error: 'Cannot return to town unless you have lost the battle.' });
+      }
+      // Move player to nearest town
+      const biomeGrid = gameState.biomeGrid;
+      if (biomeGrid) {
+        let minDist = Infinity, tx = 0, ty = 0;
+        for (let y = 0; y < biomeGrid.length; y++) {
+          for (let x = 0; x < biomeGrid[0].length; x++) {
+            if (biomeGrid[y][x] === 'town') {
+              const dist = Math.abs(playerState.positionX - x) + Math.abs(playerState.positionY - y);
+              if (dist < minDist) { minDist = dist; tx = x; ty = y; }
+            }
+          }
+        }
+        playerState.positionX = tx;
+        playerState.positionY = ty;
+      }
+      playerState.damage = 0;
+      // Add notification for all players
+      addRecentAction(gameState, 'battle-end', playerRow.name, 'returned to town after fainting');
+      // Advance turn and clear battle
+      gameState.currentBattle = null;
+      db.all('SELECT * FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
+        gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+        db.run('UPDATE players SET playerStateJson = ? WHERE id = ?', [JSON.stringify(playerState), playerId], () => {
+          db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
+            res.json({ success: true, returnedToTown: true });
+          });
+        });
+      });
+    });
+  });
+});
+
 
 // Fetch the latest game state
 app.get('/api/games/:gameId/state', (req, res) => {
