@@ -1,12 +1,12 @@
 import React from 'react';
-import type { GameState } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface StatusBarProps {
-  gameState: GameState;
-  playerId: string;
-}
-
-const StatusBar: React.FC<StatusBarProps> = ({ gameState, playerId }) => {
+const StatusBar: React.FC = observer(() => {
+  const store = useStore();
+  const gameState = store.gameState;
+  const playerId = store.playerId;
+  if (!gameState || !playerId) return null;
   const currentPlayer = gameState.players[gameState.currentTurn];
   const isMyTurn = currentPlayer?.id === playerId;
   return (
@@ -18,6 +18,6 @@ const StatusBar: React.FC<StatusBarProps> = ({ gameState, playerId }) => {
       )}
     </div>
   );
-};
+});
 
 export default StatusBar;

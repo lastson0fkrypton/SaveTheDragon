@@ -1,10 +1,6 @@
 import React from 'react';
-import type { GameState } from '../types';
-
-interface GameBoardProps {
-  gameState: GameState;
-  onCellClick?: (x: number, y: number) => void;
-}
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
 const biomeImages: Record<string, string> = {
   castle: '/biomes/castle.png',
@@ -16,8 +12,10 @@ const biomeImages: Record<string, string> = {
   volcano: '/biomes/volcano.png',
 };
 
-const GameBoard: React.FC<GameBoardProps> = ({ gameState, onCellClick }) => {
-  if (!gameState.biomeGrid) return null;
+const GameBoard: React.FC = observer(() => {
+  const store = useStore();
+  const gameState = store.gameState;
+  if (!gameState?.biomeGrid) return null;
   return (
     <div style={{ display: 'inline-block', border: '2px solid #333', background: '#222' }}>
       {gameState.biomeGrid.map((row, y) => (
@@ -37,7 +35,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ gameState, onCellClick }) => {
                   cursor: isValid ? 'pointer' : 'default',
                   opacity: isValid ? 0.8 : 1,
                 }}
-                onClick={() => isValid && onCellClick && onCellClick(x, y)}
+                onClick={() => isValid && store.service.movePlayer(x, y)}
               >
                 {player && (
                   <img
@@ -53,6 +51,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ gameState, onCellClick }) => {
       ))}
     </div>
   );
-};
+});
 
 export default GameBoard;

@@ -1,14 +1,12 @@
 import React from 'react';
-import type { GameState, Player } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface InventoryProps {
-  gameState: GameState;
-  playerId: string;
-  onEquip?: (itemId: string) => void;
-  onUseItem?: (itemId: string) => void;
-}
-
-const Inventory: React.FC<InventoryProps> = ({ gameState, playerId, onEquip, onUseItem }) => {
+const Inventory: React.FC = observer(() => {
+  const store = useStore();
+  const gameState = store.gameState;
+  const playerId = store.playerId;
+  if (!gameState || !playerId) return null;
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) return null;
   const { inventory } = player;
@@ -23,7 +21,7 @@ const Inventory: React.FC<InventoryProps> = ({ gameState, playerId, onEquip, onU
               <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/vite.svg'} alt={id} style={{ width: 32, height: 32 }} />
               <div style={{ fontSize: 12 }}>{gameState.itemMeta?.[id]?.name || id}</div>
               {id !== inventory.equippedWeaponId && (
-                <button onClick={() => onEquip && onEquip(id)} style={{ fontSize: 10, marginTop: 2 }}>Equip</button>
+                <button onClick={() => store.service.equipItem(id)} style={{ fontSize: 10, marginTop: 2 }}>Equip</button>
               )}
             </div>
           ))}
@@ -37,7 +35,7 @@ const Inventory: React.FC<InventoryProps> = ({ gameState, playerId, onEquip, onU
               <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/vite.svg'} alt={id} style={{ width: 32, height: 32 }} />
               <div style={{ fontSize: 12 }}>{gameState.itemMeta?.[id]?.name || id}</div>
               {id !== inventory.equippedArmorId && (
-                <button onClick={() => onEquip && onEquip(id)} style={{ fontSize: 10, marginTop: 2 }}>Equip</button>
+                <button onClick={() => store.service.equipItem(id)} style={{ fontSize: 10, marginTop: 2 }}>Equip</button>
               )}
             </div>
           ))}
@@ -50,13 +48,13 @@ const Inventory: React.FC<InventoryProps> = ({ gameState, playerId, onEquip, onU
             <div key={id} style={{ border: '1px solid #555', borderRadius: 6, padding: 4, background: '#333' }}>
               <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/vite.svg'} alt={id} style={{ width: 32, height: 32 }} />
               <div style={{ fontSize: 12 }}>{gameState.itemMeta?.[id]?.name || id}</div>
-              <button onClick={() => onUseItem && onUseItem(id)} style={{ fontSize: 10, marginTop: 2 }}>Use</button>
+              <button onClick={() => store.service.useItem(id)} style={{ fontSize: 10, marginTop: 2 }}>Use</button>
             </div>
           ))}
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default Inventory;

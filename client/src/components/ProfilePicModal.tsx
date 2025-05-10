@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface ProfilePicModalProps {
-  onSelect: (pic: string) => void;
-  onClose: () => void;
-}
-
-const ProfilePicModal: React.FC<ProfilePicModalProps> = ({ onSelect, onClose }) => {
+const ProfilePicModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
+  const store = useStore();
   const [pics, setPics] = useState<string[]>([]);
   useEffect(() => {
     fetch('/api/profile-pictures').then(r => r.json()).then(setPics);
@@ -16,13 +14,13 @@ const ProfilePicModal: React.FC<ProfilePicModalProps> = ({ onSelect, onClose }) 
         <h2>Choose Profile Picture</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', margin: '16px 0' }}>
           {pics.map(pic => (
-            <img key={pic} src={`/profile-pictures/${pic}`} alt={pic} style={{ width: 56, height: 56, borderRadius: 12, border: '2px solid #fff', cursor: 'pointer' }} onClick={() => onSelect(pic)} />
+            <img key={pic} src={`/profile-pictures/${pic}`} alt={pic} style={{ width: 56, height: 56, borderRadius: 12, border: '2px solid #fff', cursor: 'pointer' }} onClick={async () => { await store.service.setProfilePic(pic); onClose(); }} />
           ))}
         </div>
         <button onClick={onClose} style={{ marginTop: 16, padding: '8px 24px' }}>Cancel</button>
       </div>
     </div>
   );
-};
+});
 
 export default ProfilePicModal;

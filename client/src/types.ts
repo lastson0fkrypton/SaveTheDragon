@@ -45,3 +45,10 @@ export interface GameState {
   currentBattle?: any;
   recentActions?: any[];
 }
+
+export interface AdminGame {
+  gameId: string;
+  players: { id: string; name: string }[];
+  currentTurn: string | null;
+  currentDiceRoll: number | null;
+}

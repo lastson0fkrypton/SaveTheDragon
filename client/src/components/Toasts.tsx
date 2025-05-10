@@ -1,12 +1,11 @@
 import React from 'react';
-import type { GameState } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface ToastsProps {
-  gameState: GameState;
-}
-
-const Toasts: React.FC<ToastsProps> = ({ gameState }) => {
-  if (!gameState.recentActions || gameState.recentActions.length === 0) return null;
+const Toasts: React.FC = observer(() => {
+  const store = useStore();
+  const gameState = store.gameState;
+  if (!gameState?.recentActions || gameState.recentActions.length === 0) return null;
   return (
     <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1000 }}>
       {gameState.recentActions.slice(-3).reverse().map(action => (
@@ -16,6 +15,6 @@ const Toasts: React.FC<ToastsProps> = ({ gameState }) => {
       ))}
     </div>
   );
-};
+});
 
 export default Toasts;

@@ -1,12 +1,12 @@
 import React from 'react';
-import type { GameState, Player } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface PlayerPanelProps {
-  gameState: GameState;
-  playerId: string;
-}
-
-const PlayerPanel: React.FC<PlayerPanelProps> = ({ gameState, playerId }) => {
+const PlayerPanel: React.FC = observer(() => {
+  const store = useStore();
+  const gameState = store.gameState;
+  const playerId = store.playerId;
+  if (!gameState || !playerId) return null;
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) return null;
   return (
@@ -30,6 +30,6 @@ const PlayerPanel: React.FC<PlayerPanelProps> = ({ gameState, playerId }) => {
       </div>
     </div>
   );
-};
+});
 
 export default PlayerPanel;

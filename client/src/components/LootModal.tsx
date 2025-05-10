@@ -1,14 +1,12 @@
 import React from 'react';
-import type { GameState } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface LootModalProps {
-  gameState: GameState;
-  playerId: string;
-  onClose: () => void;
-}
-
-const LootModal: React.FC<LootModalProps> = ({ gameState, playerId, onClose }) => {
-  const loot = gameState.recentlyFoundItem;
+const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
+  const store = useStore();
+  const gameState = store.gameState;
+  const playerId = store.playerId;
+  const loot = gameState?.recentlyFoundItem;
   if (!loot || !loot.item) return null;
   const isMe = loot.playerId === playerId;
   return (
@@ -21,6 +19,6 @@ const LootModal: React.FC<LootModalProps> = ({ gameState, playerId, onClose }) =
       </div>
     </div>
   );
-};
+});
 
 export default LootModal;

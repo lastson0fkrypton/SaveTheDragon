@@ -1,18 +1,12 @@
 import React from 'react';
-import type { GameState, Player } from '../types';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../stores/useAppState';
 
-interface BattleModalProps {
-  gameState: GameState;
-  playerId: string;
-  onAttack: () => void;
-  onRun: () => void;
-  onCollectLoot: () => void;
-  onReturnToTown: () => void;
-  onClose: () => void;
-}
-
-const BattleModal: React.FC<BattleModalProps> = ({ gameState, playerId, onAttack, onRun, onCollectLoot, onReturnToTown, onClose }) => {
-  const battle = gameState.currentBattle;
+const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
+  const store = useStore();
+  const gameState = store.gameState;
+  const playerId = store.playerId;
+  const battle = gameState?.currentBattle;
   if (!battle) return null;
   const player = gameState.players.find(p => p.id === battle.playerId);
   const isMe = playerId === battle.playerId;
@@ -40,24 +34,24 @@ const BattleModal: React.FC<BattleModalProps> = ({ gameState, playerId, onAttack
         </div>
         {isMe && battle.battleActive && (
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <button onClick={onAttack} style={{ padding: '8px 24px' }}>Attack</button>
-            <button onClick={onRun} style={{ padding: '8px 24px' }}>Run Away</button>
+            <button onClick={() => store.service.attack()} style={{ padding: '8px 24px' }}>Attack</button>
+            <button onClick={() => store.service.run()} style={{ padding: '8px 24px' }}>Run Away</button>
           </div>
         )}
         {isMe && !battle.battleActive && battle.monsterHealth <= 0 && (
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={onCollectLoot} style={{ padding: '8px 24px' }}>Collect Loot</button>
+            <button onClick={() => { store.service.collectLoot(); onClose(); }} style={{ padding: '8px 24px' }}>Collect Loot</button>
           </div>
         )}
         {isMe && !battle.battleActive && battle.playerHealth <= 0 && (
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={onReturnToTown} style={{ padding: '8px 24px' }}>Return to Town</button>
+            <button onClick={() => { store.service.returnToTown(); onClose(); }} style={{ padding: '8px 24px' }}>Return to Town</button>
           </div>
         )}
         {!isMe && <div style={{ textAlign: 'center', marginTop: 16 }}><button onClick={onClose}>Close</button></div>}
       </div>
     </div>
   );
-};
+});
 
 export default BattleModal;
