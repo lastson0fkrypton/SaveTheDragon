@@ -86,6 +86,7 @@ button:focus-visible {
   position: absolute;
   top: 0; left: 0; width: 100vw; height: 100vh;
 }
+
 #item-slot {
   position: absolute;
   bottom: 30px;
@@ -122,6 +123,7 @@ button:focus-visible {
   margin-bottom: 1em;
   display: block;
 }
+
 #quit-btn {
   position: absolute;
   top: 56px; right: 30px;

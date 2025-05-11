@@ -54,7 +54,7 @@ const AdminPage: React.FC<AdminPageProps> = observer(() => {
       <div style={{ maxWidth: 400, margin: '60px auto', background: '#23234a', color: '#fff', borderRadius: 16, padding: 32 }}>
         <h2>Admin Login</h2>
         <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" style={{ width: '100%', marginBottom: 8 }} />
-        <button onClick={() => state.fetchAdminGames(password)} style={{ width: '100%' }}>Login</button>
+        <button onClick={() => service.fetchAdminGames(password)} style={{ width: '100%' }}>Login</button>
         {state.adminError && <div style={{ color: 'red', marginTop: 8 }}>{state.adminError}</div>}
         <div style={{ textAlign: 'center', marginTop: 24 }}>
           <button onClick={handleBack} style={{ background: '#444', color: '#fff', border: 'none', padding: '8px 24px', borderRadius: 8 }}>Back</button>

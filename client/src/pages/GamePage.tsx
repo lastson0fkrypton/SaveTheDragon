@@ -9,6 +9,10 @@ import StatusBar from '../components/StatusBar';
 import Toasts from '../components/Toasts';
 import BattleModal from '../components/BattleModal';
 import LootModal from '../components/LootModal';
+import MenuPanel from '../components/MenuPanel';
+import ItemPanel from '../components/ItemPanel';
+import CharacterPanel from '../components/CharacterPanel';
+import DicePanel from '../components/DicePanel';
 
 const GamePage: React.FC = observer(() => {
   const state = getAppState();
@@ -43,9 +47,6 @@ const GamePage: React.FC = observer(() => {
     else setShowLootModal(false);
   }, [state.gameState]);
 
-  const handleRoll = async () => {
-    await state.service.rollDice();
-  };
 
   if (!state.gameId || !state.playerId) {
     return (
@@ -60,24 +61,21 @@ const GamePage: React.FC = observer(() => {
     return <div style={{ padding: 40, textAlign: 'center' }}>Loading game...</div>;
   }
   return (
-    <div className="game-root" style={{ display:'flex', flexDirection:'column', backgroundColor:'#181818', height:'100%', width:'100%', color: '#fff' }}>
-      <StatusBar />
-      <div style={{ flex:1, display: 'flex', gap: 32, justifyContent: 'center', alignItems: 'flex-start' }}>
-        <div>
-          <GameBoard />
-          {state.gameState.players[state.gameState.currentTurn]?.id === state.playerId && !state.gameState.currentDiceRoll && (
-            <button onClick={handleRoll} style={{ marginTop: 16, width: 200, height: 48, fontSize: 20 }}>Roll Dice</button>
-          )}
-        </div>
-      </div>
+    <div className="game-ui" style={{width:'100%', height:'100%'}}>
+      <GameBoard />
+      <StatusBar/>
       <PlayerPanel />
+      <MenuPanel />
+      <ItemPanel />
+      <CharacterPanel />
+      <DicePanel />
 
       <Toasts />
       {showBattleModal && (
-        <BattleModal />
+        <BattleModal onClose={()=>{setShowBattleModal(false)}}/>
       )}
       {showLootModal && (
-        <LootModal />
+        <LootModal onClose={()=>{setShowLootModal(false)}} />
       )}
     </div>
   );

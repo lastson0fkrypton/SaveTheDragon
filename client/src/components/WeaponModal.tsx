@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../stores/AppState';
 
-const Inventory: React.FC = observer(() => {
+const WeaponModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
   const state = getAppState();
   const service = state.service;
 
@@ -13,8 +13,10 @@ const Inventory: React.FC = observer(() => {
   if (!player) return null;
   const { inventory } = player;
   return (
-    <div style={{ background: '#222', color: '#fff', padding: 16, borderRadius: 8, marginTop: 16 }}>
-      <h3>Inventory</h3>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000a', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, minWidth: 320, maxWidth: 400, textAlign: 'center' }}>
+        <h2>Inventory</h2>
+
       <div>
         <b>Weapons:</b>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -55,8 +57,10 @@ const Inventory: React.FC = observer(() => {
           ))}
         </div>
       </div>
+      <button onClick={onClose} style={{ marginTop: 16, padding: '8px 24px' }}>Close</button>
+      </div>
     </div>
   );
 });
 
-export default Inventory;
+export default WeaponModal;
