@@ -25,7 +25,7 @@ const Toasts: React.FC = observer(() => {
   // Auto-hide after 4 seconds
   useEffect(() => {
     if (toasts.length === 0) return;
-    const timers = toasts.map((toast, i) =>
+    const timers = toasts.map((_, i) =>
       setTimeout(() => {
         setToasts(prev => prev.map((t, idx) => idx === i ? { ...t, visible: false } : t));
       }, 4000)

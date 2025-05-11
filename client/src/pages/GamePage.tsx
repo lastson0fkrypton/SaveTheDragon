@@ -6,11 +6,9 @@ import { getAppState } from '../stores/AppState';
 import GameBoard from '../components/GameBoard';
 import PlayerPanel from '../components/PlayerPanel';
 import StatusBar from '../components/StatusBar';
-import Inventory from '../components/Inventory';
 import Toasts from '../components/Toasts';
 import BattleModal from '../components/BattleModal';
 import LootModal from '../components/LootModal';
-import ProfilePicModal from '../components/ProfilePicModal';
 
 const GamePage: React.FC = observer(() => {
   const state = getAppState();
@@ -34,7 +32,6 @@ const GamePage: React.FC = observer(() => {
     }
   }, []);
 
-  const [showProfileModal, setShowProfileModal] = useState(false);
   const [showLootModal, setShowLootModal] = useState(false);
   const [showBattleModal, setShowBattleModal] = useState(false);
 
@@ -63,14 +60,9 @@ const GamePage: React.FC = observer(() => {
     return <div style={{ padding: 40, textAlign: 'center' }}>Loading game...</div>;
   }
   return (
-    <div className="game-root" style={{ background: '#181818', height:'100%', width:'100%', color: '#fff' }}>
+    <div className="game-root" style={{ display:'flex', flexDirection:'column', backgroundColor:'#181818', height:'100%', width:'100%', color: '#fff' }}>
       <StatusBar />
-      <div style={{ display: 'flex', gap: 32, justifyContent: 'center', alignItems: 'flex-start' }}>
-        <div>
-          <PlayerPanel />
-          <button onClick={() => setShowProfileModal(true)} style={{ marginBottom: 8 }}>Change Profile Picture</button>
-          <Inventory />
-        </div>
+      <div style={{ flex:1, display: 'flex', gap: 32, justifyContent: 'center', alignItems: 'flex-start' }}>
         <div>
           <GameBoard />
           {state.gameState.players[state.gameState.currentTurn]?.id === state.playerId && !state.gameState.currentDiceRoll && (
@@ -78,15 +70,14 @@ const GamePage: React.FC = observer(() => {
           )}
         </div>
       </div>
+      <PlayerPanel />
+
       <Toasts />
       {showBattleModal && (
         <BattleModal />
       )}
       {showLootModal && (
         <LootModal />
-      )}
-      {showProfileModal && (
-        <ProfilePicModal />
       )}
     </div>
   );
