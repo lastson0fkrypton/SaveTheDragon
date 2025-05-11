@@ -1,11 +1,12 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { useStore } from '../stores/useAppState';
+import { getAppState } from '../stores/AppState';
 
 const PlayerPanel: React.FC = observer(() => {
-  const store = useStore();
-  const gameState = store.gameState;
-  const playerId = store.playerId;
+  const state = getAppState();
+
+  const gameState = state.gameState;
+  const playerId = state.playerId;
   if (!gameState || !playerId) return null;
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) return null;

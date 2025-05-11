@@ -1,123 +1,95 @@
 import React, { useEffect, useState } from 'react';
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import { useAppState } from '../stores/useAppState';
-// import GameBoard from '../components/GameBoard';
-// import PlayerPanel from '../components/PlayerPanel';
-// import StatusBar from '../components/StatusBar';
-// import Inventory from '../components/Inventory';
-// import Toasts from '../components/Toasts';
-// import BattleModal from '../components/BattleModal';
-// import LootModal from '../components/LootModal';
-// import ProfilePicModal from '../components/ProfilePicModal';
+import { getAppState } from '../stores/AppState';
+import GameBoard from '../components/GameBoard';
+import PlayerPanel from '../components/PlayerPanel';
+import StatusBar from '../components/StatusBar';
+import Inventory from '../components/Inventory';
+import Toasts from '../components/Toasts';
+import BattleModal from '../components/BattleModal';
+import LootModal from '../components/LootModal';
+import ProfilePicModal from '../components/ProfilePicModal';
 
 const GamePage: React.FC = observer(() => {
-  const state = useAppState();
+  const state = getAppState();
+  const service = state.service;
   const navigate = useNavigate();
 
-  // const [showProfileModal, setShowProfileModal] = useState(false);
-  // const [showLootModal, setShowLootModal] = useState(false);
-  // const [showBattleModal, setShowBattleModal] = useState(false);
+  let watchGameStateInterval: any;
+  useEffect(() => {
+    clearInterval(watchGameStateInterval);
+    watchGameStateInterval = setInterval(async () => {
 
-  // // Poll for game state
-  // useEffect(() => {
-  //   if (!store.gameId || !store.playerId) {
-  //     navigate('/');
-  //     return;
-  //   }
-  //   let stopped = false;
-  //   const poll = async () => {
-  //     await store.pollGameState();
-  //     if (!stopped) setTimeout(poll, 1500);
-  //   };
-  //   poll();
-  //   return () => { stopped = true; };
-  // }, [store, navigate]);
+      if (!state.gameId) return;
+      const newState = await service.fetchGameState(state.gameId);
+      runInAction(() => {
+        state.setGameState(newState);
+      });
 
-  // // Show modals based on game state
-  // useEffect(() => {
-  //   if (store.gameState?.currentBattle) setShowBattleModal(true);
-  //   else setShowBattleModal(false);
-  //   if (store.gameState?.recentlyFoundItem) setShowLootModal(true);
-  //   else setShowLootModal(false);
-  // }, [store.gameState]);
+    }, 1000);
+    return () => {
+      clearInterval(watchGameStateInterval);
+    }
+  }, []);
 
-  // // --- Game action handlers ---
-  // const handleCellClick = async (x: number, y: number) => {
-  //   await store.service.movePlayer(x, y);
-  // };
-  // const handleRoll = async () => {
-  //   await store.service.rollDice();
-  // };
-  // const handleEquip = async (itemId: string) => {
-  //   await store.service.equipItem(itemId);
-  // };
-  // const handleUseItem = async (itemId: string) => {
-  //   await store.service.useItem(itemId);
-  // };
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showLootModal, setShowLootModal] = useState(false);
+  const [showBattleModal, setShowBattleModal] = useState(false);
 
-  // // --- Battle modal handlers ---
-  // const handleAttack = async () => {
-  //   await store.service.attack();
-  // };
-  // const handleRun = async () => {
-  //   await store.service.run();
-  // };
-  // const handleCollectLoot = async () => {
-  //   await store.service.collectLoot();
-  //   setShowBattleModal(false);
-  // };
-  // const handleReturnToTown = async () => {
-  //   await store.service.returnToTown();
-  //   setShowBattleModal(false);
-  // };
+  // Show modals based on game state
+  useEffect(() => {
+    if (state.gameState?.currentBattle) setShowBattleModal(true);
+    else setShowBattleModal(false);
+    if (state.gameState?.recentlyFoundItem) setShowLootModal(true);
+    else setShowLootModal(false);
+  }, [state.gameState]);
 
-  // // --- Profile picture modal handler ---
-  // const handleProfilePicSelect = async (pic: string) => {
-  //   await store.service.setProfilePic(pic);
-  //   setShowProfileModal(false);
-  // };
+  const handleRoll = async () => {
+    await state.service.rollDice();
+  };
 
-  //if (!store.gameState || !store.playerId) {
+  if (!state.gameId || !state.playerId) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center' }}>
+        <h1>Game not found</h1>
+        <p>Please create or join a game first.</p>
+        <button onClick={() => navigate('/')}>Go to Home</button>
+      </div>
+    );
+  }
+  if (!state.gameState) {
     return <div style={{ padding: 40, textAlign: 'center' }}>Loading game...</div>;
-  // }
-  // return (
-  //   <div className="app-root" style={{ background: '#181818', minHeight: '100vh', color: '#fff' }}>
-  //     <StatusBar gameState={store.gameState} playerId={store.playerId} />
-  //     <button onClick={() => navigate('/')} style={{ position: 'absolute', top: 12, left: 12, zIndex: 10 }}>Home</button>
-  //     <div style={{ display: 'flex', gap: 32, justifyContent: 'center', alignItems: 'flex-start' }}>
-  //       <div>
-  //         <PlayerPanel gameState={store.gameState} playerId={store.playerId} />
-  //         <button onClick={() => setShowProfileModal(true)} style={{ marginBottom: 8 }}>Change Profile Picture</button>
-  //         <Inventory gameState={store.gameState} playerId={store.playerId} onEquip={handleEquip} onUseItem={handleUseItem} />
-  //       </div>
-  //       <div>
-  //         <GameBoard gameState={store.gameState} onCellClick={handleCellClick} />
-  //         {store.gameState.players[store.gameState.currentTurn]?.id === store.playerId && !store.gameState.currentDiceRoll && (
-  //           <button onClick={handleRoll} style={{ marginTop: 16, width: 200, height: 48, fontSize: 20 }}>Roll Dice</button>
-  //         )}
-  //       </div>
-  //     </div>
-  //     <Toasts gameState={store.gameState} />
-  //     {showBattleModal && store.gameState && (
-  //       <BattleModal
-  //         gameState={store.gameState}
-  //         playerId={store.playerId}
-  //         onAttack={handleAttack}
-  //         onRun={handleRun}
-  //         onCollectLoot={handleCollectLoot}
-  //         onReturnToTown={handleReturnToTown}
-  //         onClose={() => setShowBattleModal(false)}
-  //       />
-  //     )}
-  //     {showLootModal && store.gameState && (
-  //       <LootModal gameState={store.gameState} playerId={store.playerId} onClose={() => setShowLootModal(false)} />
-  //     )}
-  //     {showProfileModal && (
-  //       <ProfilePicModal onSelect={handleProfilePicSelect} onClose={() => setShowProfileModal(false)} />
-  //     )}
-  //   </div>
-  // );
+  }
+  return (
+    <div className="game-root" style={{ background: '#181818', height:'100%', width:'100%', color: '#fff' }}>
+      <StatusBar />
+      <div style={{ display: 'flex', gap: 32, justifyContent: 'center', alignItems: 'flex-start' }}>
+        <div>
+          <PlayerPanel />
+          <button onClick={() => setShowProfileModal(true)} style={{ marginBottom: 8 }}>Change Profile Picture</button>
+          <Inventory />
+        </div>
+        <div>
+          <GameBoard />
+          {state.gameState.players[state.gameState.currentTurn]?.id === state.playerId && !state.gameState.currentDiceRoll && (
+            <button onClick={handleRoll} style={{ marginTop: 16, width: 200, height: 48, fontSize: 20 }}>Roll Dice</button>
+          )}
+        </div>
+      </div>
+      <Toasts />
+      {showBattleModal && (
+        <BattleModal />
+      )}
+      {showLootModal && (
+        <LootModal />
+      )}
+      {showProfileModal && (
+        <ProfilePicModal />
+      )}
+    </div>
+  );
 });
 
 export default GamePage;

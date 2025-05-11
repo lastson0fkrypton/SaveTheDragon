@@ -1,11 +1,12 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { useStore } from '../stores/useAppState';
+import { getAppState } from '../stores/AppState';
 
 const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
-  const store = useStore();
-  const gameState = store.gameState;
-  const playerId = store.playerId;
+  const state = getAppState();
+  
+  const gameState = state.gameState;
+  const playerId = state.playerId;
   const loot = gameState?.recentlyFoundItem;
   if (!loot || !loot.item) return null;
   const isMe = loot.playerId === playerId;

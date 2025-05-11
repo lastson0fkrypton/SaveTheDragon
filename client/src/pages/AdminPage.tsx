@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react';
-import { useAppState } from '../stores/useAppState';
+import { getAppState } from '../stores/AppState';
 
 interface AdminPageProps {
 }
 
 const AdminPage: React.FC<AdminPageProps> = observer(() => {
-  const state = useAppState();
+  const state = getAppState();
+  const service = state.service;
 
   const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
-  const [polling, setPolling] = useState(true); // Add a flag to control polling
 
   let watchGamesInterval: any;
 
   const handleDelete = async (gameId: string) => {
     if (window.confirm('Are you sure you want to delete this game?')) {
-      await state.deleteAdminGame(gameId, state.adminPassword);
-      state.fetchAdminGames(state.adminPassword);
+      await service.deleteAdminGame(gameId, state.adminPassword);
+      service.fetchAdminGames(state.adminPassword);
     }
   };
 
@@ -40,9 +40,8 @@ const AdminPage: React.FC<AdminPageProps> = observer(() => {
   useEffect(() => {
     clearInterval(watchGamesInterval);
     watchGamesInterval = setInterval(async () => {
-      console.log('fetching', state.adminLoggedIn, state.adminPassword);
       if (state.adminLoggedIn && state.adminPassword.length > 0) {
-        await state.fetchAdminGames(state.adminPassword);
+        await service.fetchAdminGames(state.adminPassword);
       }
     }, 1000);
     return () => {

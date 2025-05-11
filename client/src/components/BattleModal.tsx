@@ -1,11 +1,12 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { useStore } from '../stores/useAppState';
+import { getAppState } from '../stores/AppState';
 
 const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
-  const store = useStore();
-  const gameState = store.gameState;
-  const playerId = store.playerId;
+  const state = getAppState();
+  const gameState = state.gameState;
+  const service = state.service;
+  const playerId = state.playerId;
   const battle = gameState?.currentBattle;
   if (!battle) return null;
   const player = gameState.players.find(p => p.id === battle.playerId);
@@ -34,18 +35,18 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
         </div>
         {isMe && battle.battleActive && (
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <button onClick={() => store.service.attack()} style={{ padding: '8px 24px' }}>Attack</button>
-            <button onClick={() => store.service.run()} style={{ padding: '8px 24px' }}>Run Away</button>
+            <button onClick={() => service.attack()} style={{ padding: '8px 24px' }}>Attack</button>
+            <button onClick={() => service.run()} style={{ padding: '8px 24px' }}>Run Away</button>
           </div>
         )}
         {isMe && !battle.battleActive && battle.monsterHealth <= 0 && (
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={() => { store.service.collectLoot(); onClose(); }} style={{ padding: '8px 24px' }}>Collect Loot</button>
+            <button onClick={() => { service.collectLoot(); onClose(); }} style={{ padding: '8px 24px' }}>Collect Loot</button>
           </div>
         )}
         {isMe && !battle.battleActive && battle.playerHealth <= 0 && (
           <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={() => { store.service.returnToTown(); onClose(); }} style={{ padding: '8px 24px' }}>Return to Town</button>
+            <button onClick={() => { service.returnToTown(); onClose(); }} style={{ padding: '8px 24px' }}>Return to Town</button>
           </div>
         )}
         {!isMe && <div style={{ textAlign: 'center', marginTop: 16 }}><button onClick={onClose}>Close</button></div>}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { useStore } from '../stores/useAppState';
+import { getAppState } from '../stores/AppState';
 
 const biomeImages: Record<string, string> = {
   castle: '/biomes/castle.png',
@@ -13,8 +13,8 @@ const biomeImages: Record<string, string> = {
 };
 
 const GameBoard: React.FC = observer(() => {
-  const store = useStore();
-  const gameState = store.gameState;
+  const state = getAppState();
+  const gameState = state.gameState;
   if (!gameState?.biomeGrid) return null;
   return (
     <div style={{ display: 'inline-block', border: '2px solid #333', background: '#222' }}>
@@ -35,7 +35,7 @@ const GameBoard: React.FC = observer(() => {
                   cursor: isValid ? 'pointer' : 'default',
                   opacity: isValid ? 0.8 : 1,
                 }}
-                onClick={() => isValid && store.service.movePlayer(x, y)}
+                onClick={() => isValid && state.service.movePlayer(x, y)}
               >
                 {player && (
                   <img

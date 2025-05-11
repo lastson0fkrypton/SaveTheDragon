@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import { useAppState } from '../stores/useAppState';
+import { getAppState } from '../stores/AppState';
 
 const HomePage: React.FC = observer(() => {
-  const state = useAppState();
+  const state = getAppState();
+  const service = state.service;
   const navigate = useNavigate();
   const [playerNameNew, setPlayerNameNew] = useState('');
   const [gridSizeX, setGridSizeX] = useState(10);
@@ -14,12 +15,12 @@ const HomePage: React.FC = observer(() => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    await state.createGame(playerNameNew, gridSizeX, gridSizeY);
+    await service.createGame(playerNameNew, gridSizeX, gridSizeY);
     navigate('/game');
   };
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    await state.joinGame(gameId, playerNameJoin);
+    await service.joinGame(gameId, playerNameJoin);
     navigate('/game');
   };
 
