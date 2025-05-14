@@ -208,6 +208,8 @@ button:focus-visible {
   align-items: flex-end;
   pointer-events: auto;
 
+  gap:20px;
+
   
   background: rgba(30,30,30,0.95);
   color: #fff;
@@ -217,10 +219,15 @@ button:focus-visible {
   border-radius: 10px;
 }
 .character-panel .profile-panel {
+  width:150px;
+  height:200px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color:#242424;
+  border-radius: 8px;
+  border:1px solid #444;
 }
 .character-panel .profile-panel .profile-pic {
   width: 64px;

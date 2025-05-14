@@ -45,11 +45,12 @@ const percent = (val: number, max: number): string => {
             </div>
             <div className="profile-panel">
                 <img
-                    src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/vite.svg'}
+                    src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'}
                     alt={player.name}
                     className="profile-pic"
                 />
                 <div className="font-size:0.95em;">{player.name}</div>
+                <button onClick={() => setShowProfileModal(true)} style={{ marginBottom: 8 }}>Change Profile Picture</button>
             </div>
             <div className="armor-panel">
                 <div className="panel-title" onClick={() => { setShowArmorModal(true) }}>

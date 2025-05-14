@@ -4,19 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "start:backend": "node server/index.js"
+    "start": "node index.js"
   },
   "devDependencies": {
-    "typescript": "~5.7.2",
-    "vite": "^6.3.1"
   },
   "dependencies": {
     "@types/express": "^5.0.1",
     "express": "^5.1.0",
-    "react-router-dom": "^7.6.0",
     "sqlite3": "^5.1.7"
   }
 }

@@ -23,7 +23,7 @@ const PlayerPanel: React.FC = observer(() => {
           const hearts = Math.max(1, (p.maxHearts || 5) - (p.damage || 0));
           return (
             <li className={['player-list-item', idx === gameState.currentTurn ? 'current-turn' : ''].join(' ')} key={p.id}>
-              <img className="player-profile-pic" src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/vite.svg'} alt="profile" />
+              <img className="player-profile-pic" src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'} alt="profile" />
               <span className="player-name">{p.name}</span>
               <span className="player-hearts">
                 {Array.from({ length: p.maxHearts || 5 }, (_, i) => {
@@ -41,7 +41,7 @@ const PlayerPanel: React.FC = observer(() => {
     // <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, background: '#222', color: '#fff', borderRadius: 8 }}>
     //   <div>
     //     <img
-    //       src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/vite.svg'}
+    //       src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'}
     //       alt={player.name}
     //       style={{ width: 48, height: 48, borderRadius: 12, border: '2px solid #fff', marginRight: 16 }}
     //     />

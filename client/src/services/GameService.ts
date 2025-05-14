@@ -125,7 +125,7 @@ class GameService {
   // Update profile picture
   async updateProfilePic(profilePic: string) {
     if (!this.store.gameId || !this.store.playerId) return;
-    const response = await fetch(`/api/games/${this.store.gameId}/profile-pic`, {
+    const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/profile-pic`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerId: this.store.playerId, profilePic }),

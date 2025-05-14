@@ -21,7 +21,7 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {inventory.armor.map(id => (
               <div key={id} style={{ border: id === inventory.equippedArmorId ? '2px solid #0f0' : '1px solid #555', borderRadius: 6, padding: 4, background: '#333' }}>
-                <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/vite.svg'} alt={id} style={{ width: 32, height: 32 }} />
+                <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/items/nothing.png'} alt={id} style={{ width: 32, height: 32 }} />
                 <div style={{ fontSize: 12 }}>{gameState.itemMeta?.[id]?.name || id}</div>
                 {id !== inventory.equippedArmorId && (
                   <button onClick={() => service.equipItem(id, 'armor')} style={{ fontSize: 10, marginTop: 2 }}>Equip</button>

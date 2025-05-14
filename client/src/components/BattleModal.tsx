@@ -18,7 +18,7 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
         <h2>Battle!</h2>
         <div style={{ display: 'flex', gap: 32, alignItems: 'center', marginBottom: 16 }}>
           <div style={{ textAlign: 'center' }}>
-            <img src={player?.profilePic ? `/profile-pictures/${player.profilePic}` : '/vite.svg'} alt={player?.name} style={{ width: 64, height: 64, borderRadius: 12, border: '2px solid #fff' }} />
+            <img src={player?.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'} alt={player?.name} style={{ width: 64, height: 64, borderRadius: 12, border: '2px solid #fff' }} />
             <div>{player?.name}</div>
             <div>❤️ {battle.playerHealth}</div>
           </div>
