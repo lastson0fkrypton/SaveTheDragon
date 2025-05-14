@@ -18,15 +18,31 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
         <h2>Battle!</h2>
         <div style={{ display: 'flex', gap: 32, alignItems: 'center', marginBottom: 16 }}>
           <div style={{ textAlign: 'center' }}>
-            <img src={player?.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'} alt={player?.name} style={{ width: 64, height: 64, borderRadius: 12, border: '2px solid #fff' }} />
+            <img src={player?.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'} alt={player?.name} style={{ width: 256, height: 256, borderRadius: 12, border: '2px solid #fff' }} />
             <div>{player?.name}</div>
-            <div>❤️ {battle.playerHealth}</div>
+            {Array.from({ length: player?.maxHearts || 0 }, (_, i) => (
+                <img
+                    key={i}
+                    src="/heart.svg"
+                    alt="heart"
+                    style={{ width:16, height:16, marginRight:5, opacity: i < ((player?.maxHearts || 0) - (player?.damage || 0)) ? 1 : 0.2 }}
+                    className="heart-icon"
+                />
+            ))}
           </div>
           <div style={{ fontSize: 32 }}>VS</div>
           <div style={{ textAlign: 'center' }}>
-            <img src={`/monsters/${monster?.img || 'nothing.png'}`} alt={monster?.name} style={{ width: 64, height: 64, borderRadius: 12, border: '2px solid #fff' }} />
+            <img src={`/monsters/${monster?.img || 'nothing.png'}`} alt={monster?.name} style={{ width: 256, height: 256, borderRadius: 12, border: '2px solid #fff' }} />
             <div>{monster?.name}</div>
-            <div>❤️ {battle.monsterHealth}</div>
+            {Array.from({ length: (monster?.defense * 2) || 0 }, (_, i) => (
+                <img
+                    key={i}
+                    src="/heart.svg"
+                    alt="heart"
+                    style={{ width:16, height:16, marginRight:5, opacity: (i < (monster?.defense * 2)-battle.monsterHealth) ? 1 : 0.2 }}
+                    className="heart-icon"
+                />
+            ))}
           </div>
         </div>
         <div style={{ background: '#222', borderRadius: 8, padding: 12, minHeight: 80, marginBottom: 16 }}>
