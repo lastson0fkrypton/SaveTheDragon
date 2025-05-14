@@ -112,10 +112,10 @@ class GameService {
   // Equip a weapon or armor
   async equipItem(itemId: string, type: 'weapon' | 'armor') {
     if (!this.store.gameId || !this.store.playerId) return;
-    const response = await fetch(`/api/games/${this.store.gameId}/equip`, {
+    const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/equip`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId: this.store.playerId, itemId, type }),
+      body: JSON.stringify({ itemId, type }),
     });
     if (!response.ok) {
       console.error('Failed to equip item');

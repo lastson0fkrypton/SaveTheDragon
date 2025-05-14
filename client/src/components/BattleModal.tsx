@@ -24,7 +24,7 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
           </div>
           <div style={{ fontSize: 32 }}>VS</div>
           <div style={{ textAlign: 'center' }}>
-            <img src={`/ai-pictures/${monster?.img || 'baby_dragon.png'}`} alt={monster?.name} style={{ width: 64, height: 64, borderRadius: 12, border: '2px solid #fff' }} />
+            <img src={`/monsters/${monster?.img || 'nothing.png'}`} alt={monster?.name} style={{ width: 64, height: 64, borderRadius: 12, border: '2px solid #fff' }} />
             <div>{monster?.name}</div>
             <div>❤️ {battle.monsterHealth}</div>
           </div>
