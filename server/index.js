@@ -82,7 +82,7 @@ function serializeGame(gameRow, playerRows, validMoveRows) {
 function addRecentAction(gameState, type, playerName, itemName) {
   if (!gameState.recentActions) gameState.recentActions = [];
   const action = {
-    id: `${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     type, // 'use-item' or 'equip'
     playerName,
     itemName,
@@ -92,6 +92,16 @@ function addRecentAction(gameState, type, playerName, itemName) {
   // Keep only the latest 10 actions
   if (gameState.recentActions.length > 10) gameState.recentActions = gameState.recentActions.slice(-10);
 }
+
+const PROFILE_PICTURES = [
+  'brave_knight.png',
+  'clever_rogue.png',
+  'firey_princess.png',
+  'intelligent_wizard.png',
+  'unicorn_knight.png',
+  'unicorn_warrior.png',
+  'war_shark.png'
+]
 
 // --- Item definitions ---
 const ITEM_DEFS = [
@@ -397,7 +407,7 @@ function generateBiomeGrid(width, height) {
       dist >= 6
     ) {
       grid[y][x] = 'town';
-      townCenters.push({x, y});
+      townCenters.push({ x, y });
       // Surround town with plains (unless castle or volcano)
       for (let dx = -1; dx <= 1; dx++) {
         for (let dy = -1; dy <= 1; dy++) {
@@ -442,105 +452,98 @@ app.post('/api/games/:gameId/join', (req, res) => {
       return res.status(500).json({ error: 'DB error' });
     }
     if (!gameRow) return res.status(404).json({ error: 'Game not found' });
-    const dir = path.join(process.cwd(), 'public', 'profile-pictures');
-    fs.readdir(dir, (err, files) => {
+
+    db.all('SELECT playerStateJson FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
       if (err) {
-        console.error('Failed to list profile pictures:', err);
-        return res.status(500).json({ error: 'Failed to list profile pictures' });
+        console.error('DB error (players lookup):', err);
+        return res.status(500).json({ error: 'DB error' });
       }
-      const allPics = files.filter(f => f.match(/\.(png|jpg|jpeg|gif)$/i));
-      db.all('SELECT playerStateJson FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
+      // Remove already used pics
+      const usedPics = playerRows.map(p => JSON.parse(p.playerStateJson).profilePic);
+      const usedPositions = playerRows.map(p => {
+        const ps = JSON.parse(p.playerStateJson);
+        return ps && typeof ps.positionX === 'number' && typeof ps.positionY === 'number' ? `${ps.positionX},${ps.positionY}` : null;
+      }).filter(Boolean);
+      const availablePics = PROFILE_PICTURES.filter(pic => !usedPics.includes(pic));
+      // Pick a random available pic, or fallback to 'default.png'
+      const randomPic = availablePics.length > 0 ? availablePics[Math.floor(Math.random() * availablePics.length)] : 'default.png';
+      db.get('SELECT * FROM players WHERE gameId = ? AND name = ?', [gameId, playerName], (err, playerRow) => {
         if (err) {
           console.error('DB error (players lookup):', err);
           return res.status(500).json({ error: 'DB error' });
         }
-        // Remove already used pics
-        const usedPics = playerRows.map(p => JSON.parse(p.playerStateJson).profilePic);
-        const usedPositions = playerRows.map(p => {
-          const ps = JSON.parse(p.playerStateJson);
-          return ps && typeof ps.positionX === 'number' && typeof ps.positionY === 'number' ? `${ps.positionX},${ps.positionY}` : null;
-        }).filter(Boolean);
-        const availablePics = allPics.filter(pic => !usedPics.includes(pic));
-        // Pick a random available pic, or fallback to 'default.png'
-        const randomPic = availablePics.length > 0 ? availablePics[Math.floor(Math.random() * availablePics.length)] : 'default.png';
-        db.get('SELECT * FROM players WHERE gameId = ? AND name = ?', [gameId, playerName], (err, playerRow) => {
-          if (err) {
-            console.error('DB error (players lookup):', err);
+        if (playerRow) {
+          return res.status(200).json({ playerId: playerRow.id });
+        }
+        const playerId = Math.random().toString(36).substr(2, 9);
+        // --- Assign random position around a town not occupied by other players ---
+        const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+        const gridSizeX = gameState.gridSizeX || 10;
+        const gridSizeY = gameState.gridSizeY || 10;
+        const biomeGrid = gameState.biomeGrid;
+        let possiblePositions = [];
+        let townCenters = biomeGrid && biomeGrid._townCenters ? biomeGrid._townCenters : null;
+        if (!townCenters) {
+          // fallback: find all towns
+          townCenters = [];
+          for (let y = 0; y < gridSizeY; y++) {
+            for (let x = 0; x < gridSizeX; x++) {
+              if (biomeGrid[y][x] === 'town') townCenters.push({ x, y });
+            }
+          }
+        }
+        // Find all plains cells adjacent to a town
+        for (const { x, y } of townCenters) {
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+              if (dx === 0 && dy === 0) continue;
+              const nx = x + dx;
+              const ny = y + dy;
+              if (
+                nx >= 0 && nx < gridSizeX && ny >= 0 && ny < gridSizeY &&
+                biomeGrid[ny][nx] === 'plains' &&
+                !usedPositions.includes(`${nx},${ny}`)
+              ) {
+                possiblePositions.push({ x: nx, y: ny });
+              }
+            }
+          }
+        }
+        // fallback: any plains
+        if (possiblePositions.length === 0) {
+          for (let x = 0; x < gridSizeX; x++) {
+            for (let y = 0; y < gridSizeY; y++) {
+              if (biomeGrid[y][x] === 'plains' && !usedPositions.includes(`${x},${y}`)) {
+                possiblePositions.push({ x, y });
+              }
+            }
+          }
+        }
+        let positionX = 0, positionY = 0;
+        if (possiblePositions.length > 0) {
+          const pos = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+          positionX = pos.x;
+          positionY = pos.y;
+        }
+        const playerState = {
+          positionX, positionY,
+          maxHearts: 5,
+          damage: 0,
+          profilePic: randomPic,
+          inventory: {
+            weapons: ['fist'],
+            armor: [],
+            items: [],
+            equippedWeaponId: 'fist',
+            equippedArmorId: null
+          }
+        };
+        db.run('INSERT INTO players (id, gameId, name, playerStateJson) VALUES (?, ?, ?, ?)', [playerId, gameId, playerName, JSON.stringify(playerState)], err2 => {
+          if (err2) {
+            console.error('DB error (insert player):', err2);
             return res.status(500).json({ error: 'DB error' });
           }
-          if (playerRow) {
-            return res.status(200).json({ playerId: playerRow.id });
-          }
-          const playerId = Math.random().toString(36).substr(2, 9);
-          // --- Assign random position around a town not occupied by other players ---
-          const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
-          const gridSizeX = gameState.gridSizeX || 10;
-          const gridSizeY = gameState.gridSizeY || 10;
-          const biomeGrid = gameState.biomeGrid;
-          let possiblePositions = [];
-          let townCenters = biomeGrid && biomeGrid._townCenters ? biomeGrid._townCenters : null;
-          if (!townCenters) {
-            // fallback: find all towns
-            townCenters = [];
-            for (let y = 0; y < gridSizeY; y++) {
-              for (let x = 0; x < gridSizeX; x++) {
-                if (biomeGrid[y][x] === 'town') townCenters.push({x, y});
-              }
-            }
-          }
-          // Find all plains cells adjacent to a town
-          for (const {x, y} of townCenters) {
-            for (let dx = -1; dx <= 1; dx++) {
-              for (let dy = -1; dy <= 1; dy++) {
-                if (dx === 0 && dy === 0) continue;
-                const nx = x + dx;
-                const ny = y + dy;
-                if (
-                  nx >= 0 && nx < gridSizeX && ny >= 0 && ny < gridSizeY &&
-                  biomeGrid[ny][nx] === 'plains' &&
-                  !usedPositions.includes(`${nx},${ny}`)
-                ) {
-                  possiblePositions.push({x: nx, y: ny});
-                }
-              }
-            }
-          }
-          // fallback: any plains
-          if (possiblePositions.length === 0) {
-            for (let x = 0; x < gridSizeX; x++) {
-              for (let y = 0; y < gridSizeY; y++) {
-                if (biomeGrid[y][x] === 'plains' && !usedPositions.includes(`${x},${y}`)) {
-                  possiblePositions.push({x, y});
-                }
-              }
-            }
-          }
-          let positionX = 0, positionY = 0;
-          if (possiblePositions.length > 0) {
-            const pos = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
-            positionX = pos.x;
-            positionY = pos.y;
-          }
-          const playerState = {
-            positionX, positionY,
-            maxHearts: 5,
-            damage: 0,
-            profilePic: randomPic,
-            inventory: {
-              weapons: ['fist'],
-              armor: [],
-              items: [],
-              equippedWeaponId: 'fist',
-              equippedArmorId: null
-            }
-          };
-          db.run('INSERT INTO players (id, gameId, name, playerStateJson) VALUES (?, ?, ?, ?)', [playerId, gameId, playerName, JSON.stringify(playerState)], err2 => {
-            if (err2) {
-              console.error('DB error (insert player):', err2);
-              return res.status(500).json({ error: 'DB error' });
-            }
-            res.status(200).json({ playerId });
-          });
+          res.status(200).json({ playerId });
         });
       });
     });
@@ -756,6 +759,7 @@ app.post('/api/games/:gameId/battle/attack', (req, res) => {
         playerState.damage = Math.max(0, maxHearts - battle.playerHealth);
         // Check if player fainted
         if (battle.playerHealth <= 0) {
+          battle.playerHealth = 0;
           log.push(`Player fainted due to injuries.`);
           battle.battleActive = false;
           // Do NOT clear currentBattle or advance turn here
@@ -787,11 +791,11 @@ app.post('/api/games/:gameId/battle/run', (req, res) => {
     battle.battleLog.push('Player ran away! The battle is over.');
     // Add notification for all players
     if (!gameState.recentActions) gameState.recentActions = [];
-    
+
     db.get('SELECT * FROM players WHERE id = ?', [playerId], (err, playerRow) => {
       if (!playerRow) return res.status(404).json({ error: 'Player not found' });
       addRecentAction(gameState, 'battle-end', playerRow.name || 'Player', `ran away from ${battle.monster?.name || 'a monster'}`);
-      
+
       // Advance turn and clear battle
       db.all('SELECT * FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
         gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
@@ -963,11 +967,7 @@ app.delete('/api/admin/games/:gameId', (req, res) => {
 
 // Endpoint to list available profile pictures
 app.get('/api/profile-pictures', (req, res) => {
-  const dir = path.join(process.cwd(), 'public', 'profile-pictures');
-  fs.readdir(dir, (err, files) => {
-    if (err) return res.status(500).json({ error: 'Failed to list profile pictures' });
-    res.json(files.filter(f => f.match(/\.(png|jpg|jpeg|gif)$/i)));
-  });
+  res.json(PROFILE_PICTURES);
 });
 
 // Endpoint to update a player's profile picture

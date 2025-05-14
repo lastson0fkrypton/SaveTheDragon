@@ -26,53 +26,63 @@ const CharacterPanel: React.FC = observer(() => {
 
     const eqWeapon = gameState.itemMeta?.[player.inventory.equippedWeaponId || 'fist'];
     const eqArmor = gameState.itemMeta?.[player.inventory.equippedArmorId || 'nothing'];
-    
-const percent = (val: number, max: number): string => {
-            return Math.round((val / max) * 100) + '%';
-            }
 
+    const percent = (val: number, max: number): string => {
+        return Math.round((val / max) * 100) + '%';
+    }
+
+    const hearts = Array.from({ length: player.maxHearts || 0 }, (_, i) => (
+        <img
+            key={i}
+            src="/heart.svg"
+            alt="heart"
+            style={{ opacity: i < ((player.maxHearts || 0) - (player.damage || 0)) ? 1 : 0.2 }}
+            className="heart-icon"
+        />
+    ));
 
     return (
         <>
-        <div className='character-panel'>
-            <div className="weapon-panel">
-                <img
-                    src={eqWeapon ? `/items/${eqWeapon.id}.png` : '/items/nothing.png'}
-                    alt={player.name}
-                    className="weapon-icon"
-                />
-                {eqWeapon?.name || 'Fist'}
-            </div>
-            <div className="profile-panel">
-                <img
-                    src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'}
-                    alt={player.name}
-                    className="profile-pic"
-                />
-                <div className="font-size:0.95em;">{player.name}</div>
-                <button onClick={() => setShowProfileModal(true)} style={{ marginBottom: 8 }}>Change Profile Picture</button>
-            </div>
-            <div className="armor-panel">
-                <div className="panel-title" onClick={() => { setShowArmorModal(true) }}>
-                    Armor
+            <div className='character-panel'>
+                <div className="floating-hearts">
+                    {hearts}
                 </div>
-                <img
-                    src={player.inventory.equippedArmorId ? `/items/${player.inventory.equippedArmorId}.png` : '/items/nothing.png'}
-                    alt={player.name}
-                    className="armor-icon"
-                />
-                <div className="card-name" >${eqArmor?.name || 'None'}</div>
-                <div className="card-stats">
-                    Def: ${eqArmor?.defense ?? 0}
-                    <br />
-                    Chance: ${typeof eqArmor?.defenseChance === 'number' ? percent(eqArmor.defenseChance, 1) : '0%'}
+                <button className="weapon-panel card" onClick={() => setShowWeaponModal(true)} >
+                    <div className="card-stats">
+                        <div className="stat attack">{eqWeapon?.attack}</div>
+                        <div className="stat chance">{percent(eqWeapon?.attackChance || 0, 1)}</div>
                     </div>
-                {player.inventory.equippedArmorId ? gameState.itemMeta?.[player.inventory.equippedArmorId]?.name : 'None'}
+                    <img
+                        src={eqWeapon ? `/items/${eqWeapon.id}.png` : '/items/nothing.png'}
+                        alt={player.name}
+                        className="weapon-icon item-icon"
+                    />
+                    <div className="card-name">{eqWeapon?.name || 'Fist'}</div>
+                </button>
+                <button className="profile-panel card" onClick={() => setShowProfileModal(true)}>
+                    <img
+                        src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'}
+                        alt={player.name}
+                        className="profile-pic"
+                    />
+                    <div className="card-name">{player.name}</div>
+                </button>
+                <button className="armor-panel card" onClick={() => setShowArmorModal(true)} >
+                    <div className="card-stats">
+                        <div className="stat chance">{percent(eqWeapon?.attackChance || 0, 1)}</div>
+                        <div className="stat defense">{eqWeapon?.attack}</div>
+                    </div>
+                    <img
+                        src={eqArmor ? `/items/${eqArmor.id}.png` : '/items/nothing.png'}
+                        alt={player.name}
+                        className="armor-icon item-icon"
+                    />
+                    <div className="card-name">{eqArmor?.name || 'None'}</div>
+                </button>
             </div>
-        </div>
-        {showProfileModal && (<ProfilePicModal onClose={() => { setShowProfileModal(false) }} />)}
-        {showWeaponModal && (<WeaponModal onClose={() => { setShowWeaponModal(false) }} />)}
-        {showArmorModal && (<ArmorModal onClose={() => { setShowArmorModal(false) }} />)}
+            {showProfileModal && (<ProfilePicModal onClose={() => { setShowProfileModal(false) }} />)}
+            {showWeaponModal && (<WeaponModal onClose={() => { setShowWeaponModal(false) }} />)}
+            {showArmorModal && (<ArmorModal onClose={() => { setShowArmorModal(false) }} />)}
         </>
     );
 
