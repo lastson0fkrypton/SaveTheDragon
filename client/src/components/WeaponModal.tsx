@@ -12,22 +12,42 @@ const WeaponModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) return null;
   const { inventory } = player;
+
+  const percent = (val: number, max: number): string => {
+    return Math.round((val / max) * 100).toString();
+  }
+
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000a', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, minWidth: 320, maxWidth: 400, textAlign: 'center' }}>
+    <div className="modal">
+      <div className="modal-window">
         <h2>Weapons</h2>
-        <div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {inventory.weapons.map(id => (
-              <div key={id} style={{ border: id === inventory.equippedWeaponId ? '2px solid #0f0' : '1px solid #555', borderRadius: 6, padding: 4, background: '#333' }}>
-                <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/items/nothing.png'} alt={id} style={{ width: 32, height: 32 }} />
-                <div style={{ fontSize: 12 }}>{gameState.itemMeta?.[id]?.name || id}</div>
-                {id !== inventory.equippedWeaponId && (
-                  <button onClick={() => service.equipItem(id, 'weapon')} style={{ fontSize: 10, marginTop: 2 }}>Equip</button>
-                )}
-              </div>
-            ))}
-          </div>
+          <div className="inventory">
+            {inventory.weapons.map(id => {
+                const eqWeapon = gameState.itemMeta?.[id];
+                return (
+                  <button key={id} className={"weapon-panel card " + (id === inventory.equippedWeaponId ? "equipped" : "")} onClick={() => {
+                    if (id !== inventory.equippedWeaponId) {
+                      service.equipItem(id, 'weapon')
+                    }
+                    onClose();
+                  }
+                  }>
+                      <img
+                          src={eqWeapon ? `/items/${eqWeapon.id}.png` : '/items/nothing.png'}
+                          alt={eqWeapon?.id}
+                          className="weapon-icon item-icon"
+                      />
+                      <div className="card-overlay">
+                          <div className="stat attack">{eqWeapon?.attack || 0}</div>
+                          <div className={"stat chance chance" + percent(eqWeapon?.attackChance || 0, 1)}>
+                              <div>hit</div>
+                              <div>miss</div>
+                          </div>
+                          <div className="card-name">{eqWeapon?.name || 'Fist'}</div>
+                      </div>
+                  </button>
+                );
+            })}
         </div>
         <button onClick={onClose} style={{ marginTop: 16, padding: '8px 24px' }}>Close</button>
       </div>
