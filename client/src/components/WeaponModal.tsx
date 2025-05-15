@@ -20,7 +20,7 @@ const WeaponModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
   return (
     <div className="modal">
       <div className="modal-window">
-        <h2>Weapons</h2>
+        <h2>Select your Weapon</h2>
           <div className="inventory">
             {inventory.weapons.map(id => {
                 const eqWeapon = gameState.itemMeta?.[id];

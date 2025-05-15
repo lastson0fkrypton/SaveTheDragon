@@ -1,6 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../stores/AppState';
+import type { ItemMeta } from '../types';
 
 const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
   const state = getAppState();
@@ -12,23 +13,52 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) return null;
   const { inventory } = player;
+
+  const getItemDescription = (eqItem: ItemMeta|undefined) => {
+    if (eqItem?.heal) {
+      return `Heals ${eqItem.heal} hearts`;
+    }
+    if (eqItem?.effect === 'full_heal') {
+      return 'Heals all hearts';
+    }
+    if (eqItem?.effect === 'extra_heart') {
+      return 'Increases max hearts by 1';
+    }
+    if (eqItem?.effect === 'teleport') {
+      return 'Teleport to a random location';
+    }
+    return '';
+  }
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000a', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, minWidth: 320, maxWidth: 400, textAlign: 'center' }}>
-        <h2>Use Item</h2>
-        <div style={{ marginTop: 8 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {inventory.items.map(id => (
-              <div key={id} style={{ border: '1px solid #555', borderRadius: 6, padding: 4, background: '#333' }}>
-                <img src={gameState.itemMeta?.[id]?.img ? `/items/${gameState.itemMeta[id].img}` : '/items/nothing.png'} alt={id} style={{ width: 32, height: 32 }} />
-                <div style={{ fontSize: 12 }}>{gameState.itemMeta?.[id]?.name || id}</div>
-                <button onClick={() => service.useItem(id)} style={{ fontSize: 10, marginTop: 2 }}>Use</button>
-              </div>
-            ))}
-            {inventory.items.length === 0 && (
-              <div style={{ color: '#aaa', fontSize: 12 }}>No items available</div>
-            )}
-          </div>
+    <div className="modal">
+      <div className="modal-window">
+        <h2>Use an Item</h2>
+        <div className="inventory">
+            {inventory.items.map(id => {
+              const eqItem = gameState.itemMeta?.[id];
+	            return (<button key={id} className={"card "} onClick={() => {
+                if (id !== inventory.equippedArmorId) {
+                  service.useItem(id);
+                }
+                onClose();
+              }
+              }>
+                <img
+                  src={eqItem ? `/items/${id}.png` : '/items/nothing.png'}
+                  alt={eqItem?.id}
+                  className="item-icon"
+                />
+                <div className="card-overlay">
+                  <div className="card-name">{eqItem?.name || 'None'}</div>
+                  <div className="card-desc">{getItemDescription(eqItem) || 'None'}</div>
+                </div>
+              </button>
+            );
+          })}
+	  
+          {inventory.items.length === 0 && (
+            <div style={{ color: '#aaa', fontSize: 12 }}>No items available</div>
+          )}
         </div>
         <button onClick={onClose} style={{ marginTop: 16, padding: '8px 24px' }}>Close</button>
       </div>

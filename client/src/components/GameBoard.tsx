@@ -52,7 +52,7 @@ const GameBoard: React.FC = observer(() => {
     let toLoad = 0;
     const biomeKeys = Object.keys(biomeFiles);
     toLoad += biomeKeys.length;
-    const playerPics = gameState.players.map(p => p.profilePic).filter(Boolean);
+    const playerPics = gameState.players.map(p => p.profileId).filter(Boolean);
     toLoad += playerPics.length;
     const loadedImages: Record<string, HTMLImageElement> = {};
     // Biome images
@@ -75,7 +75,7 @@ const GameBoard: React.FC = observer(() => {
     playerPics.forEach((pic) => {
       if (!pic) return;
       const img = new window.Image();
-      img.src = `/profile-pictures/${pic}`;
+      img.src = `/profile-pictures/${pic}.png`;
       img.onload = () => {
         loadedImages[pic] = img;
         loaded++;
@@ -89,7 +89,7 @@ const GameBoard: React.FC = observer(() => {
       playerImages.current[pic] = img;
     });
     // eslint-disable-next-line
-  }, [gameState && gameState.players.map(p => p.profilePic).join(',')]);
+  }, [gameState && gameState.players.map(p => p.profileId).join(',')]);
 
   // --- Buffer canvas for main rendering, then draw to visible canvas for pan/zoom ---
   const bufferCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -166,8 +166,8 @@ const GameBoard: React.FC = observer(() => {
       // ctx.stroke();
       // Draw profile picture if available and preloaded
       
-      if (player.profilePic && playerImages.current[player.profilePic]) {
-        const img = playerImages.current[player.profilePic];
+      if (player.profileId && playerImages.current[player.profileId]) {
+        const img = playerImages.current[player.profileId];
         ctx.save();
         ctx.beginPath();
         ctx.arc(px, py, CELL_SIZE * 0.28, 0, 2 * Math.PI);

@@ -66,8 +66,8 @@ const GamePage: React.FC = observer(() => {
       <StatusBar/>
       <PlayerPanel />
       <MenuPanel />
-      <ItemPanel />
       <CharacterPanel />
+      <ItemPanel />
       <DicePanel />
 
       <Toasts />

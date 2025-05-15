@@ -20,10 +20,15 @@ export interface Inventory {
   equippedArmorId?: string;
 }
 
+export interface CharacterProfile {
+  id: string;
+  description: string;
+}
+
 export interface Player {
   id: string;
   name: string;
-  profilePic?: string;
+  profileId?: string; // new: character profile id
   maxHearts?: number;
   damage?: number;
   positionX: number;

@@ -18,7 +18,7 @@ const ItemPanel: React.FC = observer(() => {
     
     return (
         <div className='item-panel'>
-            <button onClick={() => setShowInventoryModal(true)}>Use Item</button>
+            <button className='items-button' onClick={() => setShowInventoryModal(true)}>Use Item</button>
             {showInventoryModal && (<ItemModal onClose={()=>{setShowInventoryModal(false)}} />)}
         </div>
     );

@@ -93,14 +93,14 @@ function addRecentAction(gameState, type, playerName, itemName) {
   if (gameState.recentActions.length > 10) gameState.recentActions = gameState.recentActions.slice(-10);
 }
 
-const PROFILE_PICTURES = [
-  'brave_knight.png',
-  'clever_rogue.png',
-  'firey_princess.png',
-  'intelligent_wizard.png',
-  'unicorn_knight.png',
-  'unicorn_warrior.png',
-  'war_shark.png'
+const CHARACTERS = [
+  { id: 'brave_knight', description: 'Brave Knight'},
+  { id: 'clever_rogue', description: 'Clever Rogue'},
+  { id: 'firey_princess', description: 'Firey Princess'},
+  { id: 'intelligent_wizard', description: 'Intelligent Wizard'},
+  { id: 'unicorn_knight', description: 'Unicorn Knight'},
+  { id: 'unicorn_warrior', description: 'Unicorn Warrior'},
+  { id: 'war_shark', description: 'War Shark'}
 ]
 
 // --- Item definitions ---
@@ -464,9 +464,9 @@ app.post('/api/games/:gameId/join', (req, res) => {
         const ps = JSON.parse(p.playerStateJson);
         return ps && typeof ps.positionX === 'number' && typeof ps.positionY === 'number' ? `${ps.positionX},${ps.positionY}` : null;
       }).filter(Boolean);
-      const availablePics = PROFILE_PICTURES.filter(pic => !usedPics.includes(pic));
+      const availablePics = CHARACTERS.filter(pic => !usedPics.includes(pic.id));
       // Pick a random available pic, or fallback to 'default.png'
-      const randomPic = availablePics.length > 0 ? availablePics[Math.floor(Math.random() * availablePics.length)] : 'default.png';
+      const randomPic = availablePics.length > 0 ? availablePics[Math.floor(Math.random() * availablePics.length)].id : 'none';
       db.get('SELECT * FROM players WHERE gameId = ? AND name = ?', [gameId, playerName], (err, playerRow) => {
         if (err) {
           console.error('DB error (players lookup):', err);
@@ -965,21 +965,21 @@ app.delete('/api/admin/games/:gameId', (req, res) => {
   });
 });
 
-// Endpoint to list available profile pictures
-app.get('/api/profile-pictures', (req, res) => {
-  res.json(PROFILE_PICTURES);
+// Endpoint to list available character profiles
+app.get('/api/characters', (req, res) => {
+  res.json(CHARACTERS);
 });
 
-// Endpoint to update a player's profile picture
-app.post('/api/games/:gameId/player/:playerId/profile-pic', (req, res) => {
+// Endpoint to update a player's character profile
+app.post('/api/games/:gameId/player/:playerId/character', (req, res) => {
   const { gameId, playerId } = req.params;
-  const { profilePic } = req.body;
+  const { profileId } = req.body;
   db.get('SELECT * FROM players WHERE id = ? AND gameId = ?', [playerId, gameId], (err, playerRow) => {
     if (!playerRow) return res.status(404).json({ error: 'Player not found' });
     const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
-    playerState.profilePic = profilePic;
+    playerState.profileId = profileId;
     db.run('UPDATE players SET playerStateJson = ? WHERE id = ? AND gameId = ?', [JSON.stringify(playerState), playerId, gameId], err2 => {
-      if (err2) return res.status(500).json({ error: 'Failed to update profile picture' });
+      if (err2) return res.status(500).json({ error: 'Failed to update character profile' });
       res.json({ success: true });
     });
   });

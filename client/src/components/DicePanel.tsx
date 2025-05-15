@@ -16,17 +16,11 @@ const DicePanel: React.FC = observer(() => {
         await state.service.rollDice();
     };
 
-    if (gameState.players[gameState.currentTurn]?.id === playerId && !gameState.currentDiceRoll) {
-        return (
-            <div className='dice-panel'>
-                <button className='roll-btn' onClick={handleRoll}>Roll</button>
-            </div>
-        );
-    }
-    else {
-        return null;
-    }
-
+    return (
+        <div className='dice-panel'>
+            {gameState.players[gameState.currentTurn]?.id === playerId && !gameState.currentDiceRoll && <button className='roll-button' onClick={handleRoll}>Roll Dice</button>}
+        </div>
+    );
 });
 
 export default DicePanel;

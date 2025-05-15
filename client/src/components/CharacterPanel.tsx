@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../stores/AppState';
-import ProfilePicModal from './ProfilePicModal';
+import CharacterModal from './CharacterModal';
 import WeaponModal from './WeaponModal';
 import ArmorModal from './ArmorModal';
 
@@ -18,11 +18,18 @@ const CharacterPanel: React.FC = observer(() => {
 
     if (!player || !player.inventory) return null;
 
-
-
-    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showCharacterModal, setShowCharacterModal] = useState(false);
     const [showWeaponModal, setShowWeaponModal] = useState(false);
     const [showArmorModal, setShowArmorModal] = useState(false);
+    const [characterProfiles, setCharacterProfiles] = useState<Record<string, { description: string }>>({});
+
+    useEffect(() => {
+        state.service.fetchCharacters().then((profiles) => {
+            const map: Record<string, { description: string }> = {};
+            profiles.forEach((p: any) => { map[p.id] = { description: p.description}; });
+            setCharacterProfiles(map);
+        });
+    }, [state]);
 
     const eqWeapon = gameState.itemMeta?.[player.inventory.equippedWeaponId || 'fist'];
     const eqArmor = gameState.itemMeta?.[player.inventory.equippedArmorId || 'nothing'];
@@ -40,6 +47,8 @@ const CharacterPanel: React.FC = observer(() => {
             className="heart-icon"
         />
     ));
+
+    const playerProfile = player.profileId && characterProfiles[player.profileId];
 
     return (
         <>
@@ -62,14 +71,15 @@ const CharacterPanel: React.FC = observer(() => {
                         <div className="card-name">{eqWeapon?.name || 'Fist'}</div>
                     </div>
                 </button>
-                <button className="profile-panel card" onClick={() => setShowProfileModal(true)}>
+                <button className="profile-panel card" onClick={() => setShowCharacterModal(true)}>
                     <img
-                        src={player.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'}
+                        src={player.profileId ? `/profile-pictures/${player.profileId}.png` : '/items/nothing.png'}
                         alt={player.name}
                         className="profile-pic"
                     />
                     <div className="card-overlay">
                         <div className="card-name">{player.name}</div>
+                        {playerProfile && <div className="card-desc">{playerProfile.description}</div>}
                     </div>
                 </button>
                 <button className="armor-panel card" onClick={() => setShowArmorModal(true)} >
@@ -88,7 +98,7 @@ const CharacterPanel: React.FC = observer(() => {
                     </div>
                 </button>
             </div>
-            {showProfileModal && (<ProfilePicModal onClose={() => { setShowProfileModal(false) }} />)}
+            {showCharacterModal && (<CharacterModal onClose={() => { setShowCharacterModal(false) }} />)}
             {showWeaponModal && (<WeaponModal onClose={() => { setShowWeaponModal(false) }} />)}
             {showArmorModal && (<ArmorModal onClose={() => { setShowArmorModal(false) }} />)}
         </>

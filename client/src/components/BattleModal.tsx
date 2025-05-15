@@ -13,12 +13,12 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
   const isMe = playerId === battle.playerId;
   const monster = battle.monster;
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000a', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, minWidth: 400, maxWidth: 600 }}>
+    <div className="modal">
+      <div className="modal-window">
         <h2>Battle!</h2>
         <div style={{ display: 'flex', gap: 32, alignItems: 'center', marginBottom: 16 }}>
           <div style={{ textAlign: 'center' }}>
-            <img src={player?.profilePic ? `/profile-pictures/${player.profilePic}` : '/items/nothing.png'} alt={player?.name} style={{ width: 256, height: 256, borderRadius: 12, border: '2px solid #fff' }} />
+            <img src={player?.profileId ? `/profile-pictures/${player.profileId}.png` : '/items/nothing.png'} alt={player?.name} style={{ width: 256, height: 256, borderRadius: 12, border: '2px solid #fff' }} />
             <div>{player?.name}</div>
             {Array.from({ length: player?.maxHearts || 0 }, (_, i) => (
                 <img

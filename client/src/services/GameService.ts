@@ -62,14 +62,6 @@ class GameService {
     return null;
   }
 
-  async fetchProfilePics() {
-    const res = await fetch('/api/profile-pictures');
-    if (res.ok) {
-      return await res.json();
-    }
-    return [];
-  }
-  
   async rollDice() {
     if (!this.store.gameId || !this.store.playerId) return;
     const response = await fetch(`/api/games/${this.store.gameId}/roll`, {
@@ -181,6 +173,26 @@ class GameService {
     });
     if (!response.ok) {
       console.error('Failed to return to town');
+    }
+  }
+
+  async fetchCharacters() {
+    const res = await fetch('/api/characters');
+    if (res.ok) {
+      return await res.json();
+    }
+    return [];
+  }
+
+  async updateCharacter(profileId: string) {
+    if (!this.store.gameId || !this.store.playerId) return;
+    const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/character`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId }),
+    });
+    if (!response.ok) {
+      console.error('Failed to update character profile');
     }
   }
 }
