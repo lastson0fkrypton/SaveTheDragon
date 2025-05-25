@@ -35,13 +35,24 @@ const biomeFiles = {
   castle: '/biomes/castle.png',
 };
 
+const characterFiles = {
+  brave_knight: '/characters/brave_knight.png',
+  clever_rogue: '/characters/clever_rogue.png',
+  firey_princess: '/characters/firey_princess.png',
+  intelligent_wizard: '/characters/intelligent_wizard.png',
+  unicorn_knight: '/characters/unicorn_knight.png',
+  unicorn_warrior: '/characters/unicorn_warrior.png',
+  war_shark: '/characters/war_shark.png',
+};
+
+
 const GameBoard: React.FC = observer(() => {
   const state = getAppState();
   const gameState = state.gameState;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const panZoom = useRef({ panX: 0, panY: 0, zoom: 1, dragging: false, lastX: 0, lastY: 0 });
   const biomeImages = useRef<Record<string, HTMLImageElement>>({});
-  const playerImages = useRef<Record<string, HTMLImageElement>>({});
+  const characterImages = useRef<Record<string, HTMLImageElement>>({});
 
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
@@ -52,9 +63,9 @@ const GameBoard: React.FC = observer(() => {
     let toLoad = 0;
     const biomeKeys = Object.keys(biomeFiles);
     toLoad += biomeKeys.length;
-    const playerPics = gameState.players.map(p => p.profileId).filter(Boolean);
-    toLoad += playerPics.length;
-    const loadedImages: Record<string, HTMLImageElement> = {};
+    const characterKeys = Object.keys(characterFiles);
+    toLoad += characterKeys.length;
+
     // Biome images
     biomeKeys.forEach((biome) => {
       const src = biomeFiles[biome as keyof typeof biomeFiles];
@@ -70,14 +81,14 @@ const GameBoard: React.FC = observer(() => {
       };
       biomeImages.current[biome] = img;
     });
-    // Player images
-    if (playerPics.length === 0) setImagesLoaded(true);
-    playerPics.forEach((pic) => {
-      if (!pic) return;
+
+    // Character images
+    if (characterKeys.length === 0) setImagesLoaded(true);
+    characterKeys.forEach((character) => {
+      const src = characterFiles[character as keyof typeof characterFiles];
       const img = new window.Image();
-      img.src = `/profile-pictures/${pic}.png`;
+      img.src = src;
       img.onload = () => {
-        loadedImages[pic] = img;
         loaded++;
         if (loaded === toLoad) setImagesLoaded(true);
       };
@@ -85,11 +96,10 @@ const GameBoard: React.FC = observer(() => {
         loaded++;
         if (loaded === toLoad) setImagesLoaded(true);
       };
-      
-      playerImages.current[pic] = img;
+      characterImages.current[character] = img;
     });
     // eslint-disable-next-line
-  }, [gameState && gameState.players.map(p => p.profileId).join(',')]);
+  }, [gameState]);
 
   // --- Buffer canvas for main rendering, then draw to visible canvas for pan/zoom ---
   const bufferCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -149,7 +159,7 @@ const GameBoard: React.FC = observer(() => {
 
       }
     }
-    // Draw players (main.ts style: with profile pic, border, etc)
+    // Draw players (main.ts style: with character pic, border, etc)
     for (const player of gameState.players) {
       const px = player.positionX * CELL_SIZE + CELL_SIZE / 2;
       const py = player.positionY * CELL_SIZE + CELL_SIZE / 2;
@@ -164,10 +174,10 @@ const GameBoard: React.FC = observer(() => {
       // ctx.lineWidth = 4;
       // ctx.strokeStyle = '#646cff';
       // ctx.stroke();
-      // Draw profile picture if available and preloaded
+      // Draw character picture if available and preloaded
       
-      if (player.profileId && playerImages.current[player.profileId]) {
-        const img = playerImages.current[player.profileId];
+      if (player.characterId && characterImages.current[player.characterId]) {
+        const img = characterImages.current[player.characterId];
         ctx.save();
         ctx.beginPath();
         ctx.arc(px, py, CELL_SIZE * 0.28, 0, 2 * Math.PI);

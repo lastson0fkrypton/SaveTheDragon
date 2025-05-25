@@ -22,7 +22,7 @@ const PlayerPanel: React.FC = observer(() => {
           const hearts = Math.max(1, (p.maxHearts || 5) - (p.damage || 0));
           return (
             <li className={['player-list-item', idx === gameState.currentTurn ? 'current-turn' : ''].join(' ')} key={p.id}>
-              <img className="player-profile-pic" src={player.profileId ? `/profile-pictures/${player.profileId}.png` : '/items/nothing.png'} alt="profile" />
+              <img className="player-character-pic" src={player.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'} alt="character" />
               <span className="player-name">{p.name}</span>
               <span className="player-hearts">
                 {Array.from({ length: p.maxHearts || 5 }, (_, i) => {

@@ -20,7 +20,7 @@ export interface Inventory {
   equippedArmorId?: string;
 }
 
-export interface CharacterProfile {
+export interface Character {
   id: string;
   description: string;
 }
@@ -28,7 +28,7 @@ export interface CharacterProfile {
 export interface Player {
   id: string;
   name: string;
-  profileId?: string; // new: character profile id
+  characterId?: string; // new: character id
   maxHearts?: number;
   damage?: number;
   positionX: number;

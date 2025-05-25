@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../stores/AppState';
-import type { CharacterProfile } from '../types';
+import type { Character } from '../types';
 
 const CharacterModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
   const state = getAppState();
@@ -13,7 +13,7 @@ const CharacterModal: React.FC<{ onClose: () => void }> = observer(({ onClose })
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) return null;
 
-  const [characters, setCharacters] = useState<CharacterProfile[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   useEffect(() => {
     service.fetchCharacters().then(setCharacters);
   }, []);
@@ -24,17 +24,17 @@ const CharacterModal: React.FC<{ onClose: () => void }> = observer(({ onClose })
         <div className="inventory">
           {characters.map(char => {
             return (
-              <button key={char.id} className={"card " + (char.id === player.profileId ? "equipped" : "")} onClick={() => {
-                if (char.id !== player.profileId) {
+              <button key={char.id} className={"card " + (char.id === player.characterId ? "equipped" : "")} onClick={() => {
+                if (char.id !== player.characterId) {
                   service.updateCharacter(char.id);
                 }
                 onClose();
               }
               }>
                 <img
-                    src={`/profile-pictures/${char.id}.png`}
+                    src={`/characters/${char.id}.png`}
                     alt={char.description}
-                    className="profile-pic"
+                    className="character-pic"
                 />
                 <div className="card-overlay">
                     <div className="card-name"></div>

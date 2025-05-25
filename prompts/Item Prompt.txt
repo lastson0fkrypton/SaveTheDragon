@@ -14,7 +14,7 @@ When a user is gifted a new item, they are shown a popup with the title "You fou
 
 other players joined the game on their screens also see the modal, however they do not have any buttons and it will say "Player X found a ____" with a 5 second timeout and a button to dismiss.
 
-each player will have a collection of weapons and armor which (similar to changing profile, they can change out by clicking the weapon slot, or armor slot)
+each player will have a collection of weapons and armor which (similar to changing character, they can change out by clicking the weapon slot, or armor slot)
 they will also need an Item slot which can exist bottom left of the screen under a button called "Use Item"
 
 Each item will have a item id (which can be used to render the item picture on the clients), and item type "weapon", "armor", "item", a spawn biome, an attack value, and a percentage to hit as a number between 1 to 6, where 1 means it only hits if the user rolls a 1, and 6 means it hits if the user rolls a 1, 2, 3, 4, 5 or 6

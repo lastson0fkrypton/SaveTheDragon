@@ -114,16 +114,16 @@ class GameService {
     }
   }
 
-  // Update profile picture
-  async updateProfilePic(profilePic: string) {
+  // Update character picture
+  async updateCharacter(characterId: string) {
     if (!this.store.gameId || !this.store.playerId) return;
-    const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/profile-pic`, {
+    const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/character`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId: this.store.playerId, profilePic }),
+      body: JSON.stringify({ playerId: this.store.playerId, characterId }),
     });
     if (!response.ok) {
-      console.error('Failed to update profile picture');
+      console.error('Failed to update character');
     }
   }
 
@@ -184,17 +184,6 @@ class GameService {
     return [];
   }
 
-  async updateCharacter(profileId: string) {
-    if (!this.store.gameId || !this.store.playerId) return;
-    const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/character`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profileId }),
-    });
-    if (!response.ok) {
-      console.error('Failed to update character profile');
-    }
-  }
 }
 
 export default GameService;

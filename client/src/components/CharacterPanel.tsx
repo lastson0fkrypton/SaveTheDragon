@@ -21,13 +21,13 @@ const CharacterPanel: React.FC = observer(() => {
     const [showCharacterModal, setShowCharacterModal] = useState(false);
     const [showWeaponModal, setShowWeaponModal] = useState(false);
     const [showArmorModal, setShowArmorModal] = useState(false);
-    const [characterProfiles, setCharacterProfiles] = useState<Record<string, { description: string }>>({});
+    const [characters, setCharacters] = useState<Record<string, { description: string }>>({});
 
     useEffect(() => {
-        state.service.fetchCharacters().then((profiles) => {
+        state.service.fetchCharacters().then((characters) => {
             const map: Record<string, { description: string }> = {};
-            profiles.forEach((p: any) => { map[p.id] = { description: p.description}; });
-            setCharacterProfiles(map);
+            characters.forEach((p: any) => { map[p.id] = { description: p.description}; });
+            setCharacters(map);
         });
     }, [state]);
 
@@ -48,7 +48,7 @@ const CharacterPanel: React.FC = observer(() => {
         />
     ));
 
-    const playerProfile = player.profileId && characterProfiles[player.profileId];
+    const playerCharacter = player.characterId && characters[player.characterId];
 
     return (
         <>
@@ -71,15 +71,15 @@ const CharacterPanel: React.FC = observer(() => {
                         <div className="card-name">{eqWeapon?.name || 'Fist'}</div>
                     </div>
                 </button>
-                <button className="profile-panel card" onClick={() => setShowCharacterModal(true)}>
+                <button className="player-character-panel card" onClick={() => setShowCharacterModal(true)}>
                     <img
-                        src={player.profileId ? `/profile-pictures/${player.profileId}.png` : '/items/nothing.png'}
+                        src={player.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'}
                         alt={player.name}
-                        className="profile-pic"
+                        className="character-pic"
                     />
                     <div className="card-overlay">
                         <div className="card-name">{player.name}</div>
-                        {playerProfile && <div className="card-desc">{playerProfile.description}</div>}
+                        {playerCharacter && <div className="card-desc">{playerCharacter.description}</div>}
                     </div>
                 </button>
                 <button className="armor-panel card" onClick={() => setShowArmorModal(true)} >

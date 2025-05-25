@@ -459,14 +459,14 @@ app.post('/api/games/:gameId/join', (req, res) => {
         return res.status(500).json({ error: 'DB error' });
       }
       // Remove already used pics
-      const usedPics = playerRows.map(p => JSON.parse(p.playerStateJson).profilePic);
+      const usedCharacters = playerRows.map(p => JSON.parse(p.playerStateJson).characterId);
       const usedPositions = playerRows.map(p => {
         const ps = JSON.parse(p.playerStateJson);
         return ps && typeof ps.positionX === 'number' && typeof ps.positionY === 'number' ? `${ps.positionX},${ps.positionY}` : null;
       }).filter(Boolean);
-      const availablePics = CHARACTERS.filter(pic => !usedPics.includes(pic.id));
+      const availableCharacters = CHARACTERS.filter(character => !usedCharacters.includes(character.id));
       // Pick a random available pic, or fallback to 'default.png'
-      const randomPic = availablePics.length > 0 ? availablePics[Math.floor(Math.random() * availablePics.length)].id : 'none';
+      const randomCharacterId = availableCharacters.length > 0 ? availableCharacters[Math.floor(Math.random() * availableCharacters.length)].id : 'none';
       db.get('SELECT * FROM players WHERE gameId = ? AND name = ?', [gameId, playerName], (err, playerRow) => {
         if (err) {
           console.error('DB error (players lookup):', err);
@@ -529,7 +529,7 @@ app.post('/api/games/:gameId/join', (req, res) => {
           positionX, positionY,
           maxHearts: 5,
           damage: 0,
-          profilePic: randomPic,
+          characterId: randomCharacterId,
           inventory: {
             weapons: ['fist'],
             armor: [],
@@ -965,21 +965,21 @@ app.delete('/api/admin/games/:gameId', (req, res) => {
   });
 });
 
-// Endpoint to list available character profiles
+// Endpoint to list available characters
 app.get('/api/characters', (req, res) => {
   res.json(CHARACTERS);
 });
 
-// Endpoint to update a player's character profile
+// Endpoint to update a player's character
 app.post('/api/games/:gameId/player/:playerId/character', (req, res) => {
   const { gameId, playerId } = req.params;
-  const { profileId } = req.body;
+  const { characterId } = req.body;
   db.get('SELECT * FROM players WHERE id = ? AND gameId = ?', [playerId, gameId], (err, playerRow) => {
     if (!playerRow) return res.status(404).json({ error: 'Player not found' });
     const playerState = playerRow.playerStateJson ? JSON.parse(playerRow.playerStateJson) : {};
-    playerState.profileId = profileId;
+    playerState.characterId = characterId;
     db.run('UPDATE players SET playerStateJson = ? WHERE id = ? AND gameId = ?', [JSON.stringify(playerState), playerId, gameId], err2 => {
-      if (err2) return res.status(500).json({ error: 'Failed to update character profile' });
+      if (err2) return res.status(500).json({ error: 'Failed to update character' });
       res.json({ success: true });
     });
   });
