@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../stores/AppState';
-import { useNavigate } from 'react-router-dom';
 
 const MenuPanel: React.FC = observer(() => {
     const state = getAppState();
-    const navigate = useNavigate();
 
     const gameState = state.gameState;
     const playerId = state.playerId;
@@ -17,7 +15,10 @@ const MenuPanel: React.FC = observer(() => {
 
     return (
         <div className='menu-panel'>
-            <button onClick={() => navigate('/')}>Quit Game</button>
+            <span className="game-log">Game Log</span>
+            <ul className="player-list">
+                <li className={['player-list-item'].join(' ')}></li>
+            </ul>
         </div>
     );
 

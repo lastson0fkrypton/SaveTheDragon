@@ -23,15 +23,15 @@ const PlayerPanel: React.FC = observer(() => {
           return (
             <li className={['player-list-item', idx === gameState.currentTurn ? 'current-turn' : ''].join(' ')} key={p.id}>
               <img className="player-character-pic" src={player.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'} alt="character" />
-              <span className="player-name">{p.name}</span>
-              <span className="player-hearts">
+              <div className="player-name" title={p.name}>{p.name}</div>
+              <div className="player-hearts">
                 {Array.from({ length: p.maxHearts || 5 }, (_, i) => {
                   const heartOpacity = i < hearts ? 1 : 0.2;
                   return (
                     <img src='/heart.svg'  key={p.id + "_" + i} style={{width:'16px',height:'16px',verticalAlign:'middle',marginLeft:'2px',opacity:heartOpacity}} alt='♥' />
                   )
                 })}
-              </span>
+              </div>
             </li>)
         })}
       </ul>

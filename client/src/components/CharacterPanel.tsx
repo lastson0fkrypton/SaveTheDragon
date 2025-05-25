@@ -9,15 +9,6 @@ import ArmorModal from './ArmorModal';
 const CharacterPanel: React.FC = observer(() => {
     const state = getAppState();
 
-    const gameState = state.gameState;
-    const playerId = state.playerId;
-
-    if (!gameState || !playerId) return null;
-
-    const player = gameState.players.find(p => p.id === playerId);
-
-    if (!player || !player.inventory) return null;
-
     const [showCharacterModal, setShowCharacterModal] = useState(false);
     const [showWeaponModal, setShowWeaponModal] = useState(false);
     const [showArmorModal, setShowArmorModal] = useState(false);
@@ -30,6 +21,16 @@ const CharacterPanel: React.FC = observer(() => {
             setCharacters(map);
         });
     }, [state]);
+
+    const gameState = state.gameState;
+    const playerId = state.playerId;
+
+    if (!gameState || !playerId) return null;
+
+    const player = gameState.players.find(p => p.id === playerId);
+
+    if (!player || !player.inventory) return null;
+
 
     const eqWeapon = gameState.itemMeta?.[player.inventory.equippedWeaponId || 'fist'];
     const eqArmor = gameState.itemMeta?.[player.inventory.equippedArmorId || 'nothing'];
