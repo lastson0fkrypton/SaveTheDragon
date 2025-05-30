@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../stores/AppState';
 
@@ -12,60 +12,77 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
   const player = gameState.players.find(p => p.id === battle.playerId);
   const isMe = playerId === battle.playerId;
   const monster = battle.monster;
+
   return (
     <div className="modal">
       <div className="modal-window">
         <h2>Battle!</h2>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ textAlign: 'center' }}>
-            <img src={player?.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'} alt={player?.name} style={{ width: 256, height: 256, borderRadius: 12, border: '2px solid #fff' }} />
+        <div className="battle-modal-flex">
+          <div className="battle-modal-side">
+              <div className="battle-panel card">
+                  <img
+                      src={player?.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'}
+                      alt={player?.name}
+                      className="profile-pic"
+                  />
+                  <div className="card-overlay">
+                      <div className="card-name">{player?.name}</div>
+                  </div>
+              </div>
+{/* 
+              
+            <img src={player?.profileId ? `/profile-pictures/${player.profileId}.png` : '/items/nothing.png'} alt={player?.name} className="battle-modal-avatar" />
             <div>{player?.name}</div>
+            <div className="battle-modal-hearts">
             {Array.from({ length: player?.maxHearts || 0 }, (_, i) => (
                 <img
                     key={i}
                     src="/heart.svg"
                     alt="heart"
-                    style={{ width:16, height:16, marginRight:5, opacity: i < ((player?.maxHearts || 0) - (player?.damage || 0)) ? 1 : 0.2 }}
-                    className="heart-icon"
+                    style={{ opacity: i < ((player?.maxHearts || 0) - (player?.damage || 0)) ? 1 : 0.2 }}
+                    className="battle-modal-heart"
                 />
             ))}
+            </div> */}
           </div>
-          <div style={{ fontSize: 32 }}>VS</div>
-          <div style={{ textAlign: 'center' }}>
-            <img src={`/monsters/${monster?.img || 'nothing.png'}`} alt={monster?.name} style={{ width: 256, height: 256, borderRadius: 12, border: '2px solid #fff' }} />
+          <div className="battle-modal-vs">VS</div>
+          <div className="battle-modal-side">
+            <img src={`/monsters/${monster?.img || 'nothing.png'}`} alt={monster?.name} className="battle-modal-avatar" />
             <div>{monster?.name}</div>
+            <div className="battle-modal-hearts">
             {Array.from({ length: (monster?.defense * 2) || 0 }, (_, i) => (
                 <img
                     key={i}
                     src="/heart.svg"
                     alt="heart"
-                    style={{ width:16, height:16, marginRight:5, opacity: (i < (monster?.defense * 2)-battle.monsterHealth) ? 1 : 0.2 }}
-                    className="heart-icon"
+                    style={{ opacity: (i < (monster?.defense * 2)-battle.monsterHealth) ? 1 : 0.2 }}
+                    className="battle-modal-heart"
                 />
             ))}
+            </div>
           </div>
         </div>
-        <div style={{ background: '#222', borderRadius: 8, padding: 12, minHeight: 80, marginBottom: 16 }}>
-          <div style={{ fontWeight: 'bold', marginBottom: 4 }}>Battle Log</div>
-          <div style={{ fontSize: 14, whiteSpace: 'pre-line', maxHeight: 120, overflowY: 'auto' }}>{(battle.battleLog || []).join('\n')}</div>
+        <div className="battle-modal-log">
+          <div className="battle-modal-log-title">Battle Log</div>
+          <div className="battle-modal-log-content">{(battle.battleLog || []).join('\n')}</div>
         </div>
         {isMe && battle.battleActive && (
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <button onClick={() => service.attack()} style={{ padding: '8px 24px' }}>Attack</button>
-            <button onClick={() => service.run()} style={{ padding: '8px 24px' }}>Run Away</button>
+          <div className="battle-modal-actions">
+            <button onClick={() => service.attack()} className="battle-modal-action-btn">Attack</button>
+            <button onClick={() => service.run()} className="battle-modal-action-btn">Run Away</button>
           </div>
         )}
         {isMe && !battle.battleActive && battle.monsterHealth <= 0 && (
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={() => { service.collectLoot(); onClose(); }} style={{ padding: '8px 24px' }}>Collect Loot</button>
+          <div className="battle-modal-center">
+            <button onClick={() => { service.collectLoot(); onClose(); }} className="battle-modal-action-btn">Collect Loot</button>
           </div>
         )}
         {isMe && !battle.battleActive && battle.playerHealth <= 0 && (
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={() => { service.returnToTown(); onClose(); }} style={{ padding: '8px 24px' }}>Return to Town</button>
+          <div className="battle-modal-center">
+            <button onClick={() => { service.returnToTown(); onClose(); }} className="battle-modal-action-btn">Return to Town</button>
           </div>
         )}
-        {!isMe && <div style={{ textAlign: 'center', marginTop: 16 }}><button onClick={onClose}>Close</button></div>}
+        {!isMe && <div className="battle-modal-center"><button onClick={onClose}>Close</button></div>}
       </div>
     </div>
   );
