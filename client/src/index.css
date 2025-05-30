@@ -87,14 +87,36 @@ button:focus-visible {
 }
 
 .modal .modal-window {
-	background-color: #23234a;
-	color: "#fff";
+	position: relative;
+
+	color: '#fff';
 	border-radius: 16px;
 	min-width: 40vw;
 	max-width: 40vw;
 	text-align: center;
 
+	border-radius: 16px;
 	padding: 16px;
+	overflow: hidden;
+}
+
+.modal-background-image {
+	background-color: #23234a;
+	position: absolute;
+	top: -20px;
+	left: -20px;
+	right: -20px;
+	bottom: -20px;
+	overflow: hidden;
+	border-radius: 16px;
+	z-index: -1;
+}
+
+.modal-background-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	filter: blur(20px) brightness(0.5);
 }
 
 .modal .modal-window .inventory {
@@ -269,8 +291,7 @@ button:focus-visible {
 	color: white;
 	font-weight: bold;
 	/* optional for emphasis */
-	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-		1px 1px 0 black;
+	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }
 
 .roll-btn:disabled {
@@ -322,8 +343,7 @@ button:focus-visible {
 	color: white;
 	font-weight: bold;
 	/* optional for emphasis */
-	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-		1px 1px 0 black;
+	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }
 
 .character-panel {
@@ -434,8 +454,7 @@ button:focus-visible {
 	color: white;
 	font-weight: bold;
 	/* optional for emphasis */
-	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-		1px 1px 0 black;
+	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }
 
 .card .card-desc {
@@ -458,11 +477,25 @@ button:focus-visible {
 	font-size: 24px;
 	color: white;
 	font-weight: bold;
-	/* optional for emphasis */
-	text-shadow: -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black,
-		2px 2px 0 black;
 
 	position: absolute;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.stat .stroke {
+	position: absolute;
+	-webkit-text-stroke: 4px black;
+	color: transparent; /* make fill transparent, just stroke visible */
+}
+
+.stat .fill {
+	position: absolute;
+	-webkit-text-stroke: 0;
+	color: white; /* normal fill */
 }
 
 .card .stat.health {
@@ -570,21 +603,6 @@ button:focus-visible {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-}
-
-.battle-modal-hearts {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-	gap: 0;
-	margin-top: 4px;
-}
-
-.battle-modal-heart {
-	width: 16px;
-	height: 16px;
-	margin-right: 5px;
 }
 
 .battle-modal-log {
