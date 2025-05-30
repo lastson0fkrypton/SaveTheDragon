@@ -34,7 +34,7 @@ const CharacterModal: React.FC<{ onClose: () => void }> = observer(({ onClose })
                 <img
                     src={`/characters/${char.id}.png`}
                     alt={char.description}
-                    className="character-pic"
+                    className="card-image"
                 />
                 <div className="card-overlay">
                     <div className="card-name"></div>

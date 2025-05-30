@@ -35,7 +35,7 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
                 <img
                   src={eqArmor ? `/items/${eqArmor.id}.png` : '/items/nothing.png'}
                   alt={eqArmor?.id}
-                  className="armor-icon item-icon"
+                  className="armor-icon card-image"
                 />
                 <div className="card-overlay">
                   <div className="stat defense">{eqArmor?.defense || 0}</div>

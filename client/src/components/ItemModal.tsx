@@ -46,7 +46,7 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
                 <img
                   src={eqItem ? `/items/${id}.png` : '/items/nothing.png'}
                   alt={eqItem?.id}
-                  className="item-icon"
+                  className="card-image"
                 />
                 <div className="card-overlay">
                   <div className="card-name">{eqItem?.name || 'None'}</div>
