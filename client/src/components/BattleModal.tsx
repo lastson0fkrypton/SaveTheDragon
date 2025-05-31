@@ -15,10 +15,18 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 	const monster = battle.monster;
 
 	if (!player || !monster) return null;
-	if (!player.inventory.equippedWeaponId || !player.inventory.equippedArmorId || !gameState.itemMeta) return null;
+	if (!gameState.itemMeta) return null;
 
-	const playerWeapon = gameState.itemMeta[player.inventory.equippedWeaponId];
-	const playerArmor = gameState.itemMeta[player.inventory.equippedArmorId];
+	const playerWeapon = player.inventory.equippedWeaponId
+		? gameState.itemMeta[player.inventory.equippedWeaponId]
+		: gameState.itemMeta['fist'];
+	const playerArmor = player.inventory.equippedArmorId
+		? gameState.itemMeta[player.inventory.equippedArmorId]
+		: undefined;
+
+	const percent = (val: number, max: number): string => {
+		return Math.round((val / max) * 100).toString();
+	};
 
 	return (
 		<div className="modal">
@@ -54,22 +62,30 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 							<div className="card-overlay">
 								<div className="card-name">{player?.name}</div>
 								<div className="stat attack">
-									<span className="stroke">{playerWeapon.attack}</span>
-									<span className="fill">{playerWeapon.attack}</span>
+									<span className="stroke">{playerWeapon?.attack}</span>
+									<span className="fill">{playerWeapon?.attack}</span>
 								</div>
 								<div className="stat defense">
-									<span className="stroke">{playerArmor.defense}</span>
-									<span className="fill">{playerArmor.defense}</span>
+									<span className="stroke">{playerArmor?.defense}</span>
+									<span className="fill">{playerArmor?.defense}</span>
 								</div>
 								<div className="stat health">
 									<span className="stroke">{player?.maxHearts}</span>
 									<span className="fill">{player?.maxHearts}</span>
 								</div>
-								<div className={'stat attackchance chance chance70'}>
+								<div
+									className={
+										'stat attackchance chance chance' + percent(playerWeapon?.attackChance || 0, 1)
+									}
+								>
 									<div>hit</div>
 									<div>miss</div>
 								</div>
-								<div className={'stat defensechance chance chance70'}>
+								<div
+									className={
+										'stat defensechance chance chance' + percent(playerArmor?.attackChance || 0, 1)
+									}
+								>
 									<div>block</div>
 									<div>hit</div>
 								</div>
@@ -111,11 +127,19 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 									<span className="stroke">{playerWeapon.attack}</span>
 									<span className="fill">{monster?.health}</span>
 								</div>
-								<div className={'stat attackchance chance chance70'}>
+								<div
+									className={
+										'stat attackchance chance chance' + percent(monster?.attackChance || 0, 1)
+									}
+								>
 									<div>hit</div>
 									<div>miss</div>
 								</div>
-								<div className={'stat defensechance chance chance70'}>
+								<div
+									className={
+										'stat defensechance chance chance' + percent(monster?.defenseChance || 0, 1)
+									}
+								>
 									<div>block</div>
 									<div>hit</div>
 								</div>
