@@ -288,8 +288,8 @@ export const ITEM_DEFS = [
 		name: 'Bubble Wrap Armor',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.5,
+		defense: 3,
+		defenseChance: 0.9,
 		img: 'bubble_wrap_armor.png',
 	},
 	{

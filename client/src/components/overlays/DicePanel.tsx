@@ -28,6 +28,17 @@ const DicePanel: React.FC = observer(() => {
 					Roll Dice
 				</button>
 			)}
+			{gameState.players[gameState.currentTurn]?.id !== playerId && !gameState.currentDiceRoll && (
+				<div className="dice-result">
+					<span>Waiting...</span>
+				</div>
+			)}
+			{gameState.currentDiceRoll && (
+				<div className="dice-result">
+					<span>Dice Roll: </span>
+					<span className="roll-value">{gameState.currentDiceRoll}</span>
+				</div>
+			)}
 		</div>
 	);
 });
