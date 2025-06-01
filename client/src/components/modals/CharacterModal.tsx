@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { getAppState } from '../stores/AppState';
-import type { Character } from '../types';
-import { CachedImage } from './CachedImage';
+import { getAppState } from '../../stores/AppState';
+import type { Character } from '../../types';
+import { CachedImage } from '../common/CachedImage';
 
 const CharacterModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const state = getAppState();

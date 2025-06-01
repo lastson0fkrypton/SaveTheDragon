@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { getAppState } from '../stores/AppState';
-import { CachedImage } from './CachedImage';
+import { getAppState } from '../../stores/AppState';
+import { CachedImage } from '../common/CachedImage';
 
 const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const state = getAppState();

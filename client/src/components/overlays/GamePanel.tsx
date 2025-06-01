@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { observer } from 'mobx-react-lite';
-import { getAppState } from '../stores/AppState';
-import { CachedImage } from './CachedImage';
+import { getAppState } from '../../stores/AppState';
+import { CachedImage } from '../common/CachedImage';
 
-const PlayerPanel: React.FC = observer(() => {
+const GamePanel: React.FC = observer(() => {
 	const state = getAppState();
 
 	const gameState = state.gameState;
@@ -16,7 +16,7 @@ const PlayerPanel: React.FC = observer(() => {
 	if (!player) return null;
 
 	return (
-		<div className="player-panel">
+		<div className="player-panel game-panel">
 			<span className="game-id">Game ID: {state.gameId}</span>
 			<ul className="player-list">
 				{gameState.players.map((p: any, idx: number) => {
@@ -65,4 +65,4 @@ const PlayerPanel: React.FC = observer(() => {
 	);
 });
 
-export default PlayerPanel;
+export default GamePanel;

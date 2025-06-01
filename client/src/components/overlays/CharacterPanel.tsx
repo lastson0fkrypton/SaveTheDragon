@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
 import { observer } from 'mobx-react-lite';
-import { getAppState } from '../stores/AppState';
-import CharacterModal from './CharacterModal';
-import WeaponModal from './WeaponModal';
-import ArmorModal from './ArmorModal';
-import { CachedImage } from './CachedImage';
+import { getAppState } from '../../stores/AppState';
+import CharacterModal from '../modals/CharacterModal';
+import WeaponModal from '../modals/WeaponModal';
+import ArmorModal from '../modals/ArmorModal';
+import { CachedImage } from '../common/CachedImage';
 
 const CharacterPanel: React.FC = observer(() => {
 	const state = getAppState();
