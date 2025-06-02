@@ -34,9 +34,7 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	return (
 		<div className="modal">
 			<div className="modal-window">
-				<div className="modal-background-image">
-					<CachedImage src={`/icons/Items.png`} />
-				</div>
+				<div className="modal-background-image"></div>
 				<h2>Use an Item</h2>
 				<div className="inventory">
 					{inventory.items.map(id => {

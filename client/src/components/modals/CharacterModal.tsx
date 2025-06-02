@@ -21,6 +21,7 @@ const CharacterModal: React.FC<{ onClose: () => void }> = observer(({ onClose })
 	return (
 		<div className="modal">
 			<div className="modal-window">
+				<div className="modal-background-image"></div>
 				<h2>Change your Character</h2>
 				<div className="inventory">
 					{characters.map(char => {

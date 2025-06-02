@@ -1,14 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
 import { CachedImage } from '../common/CachedImage';
 
 const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
+	const battleLogRef = useRef<HTMLDivElement>(null);
 	const state = getAppState();
 	const gameState = state.gameState;
 	const service = state.service;
 	const playerId = state.playerId;
 	const battle = gameState?.currentBattle;
+
+	useEffect(() => {
+		if (battleLogRef.current) {
+			battleLogRef.current.scrollTop = battleLogRef.current.scrollHeight;
+		}
+	}, [battle?.battleLog]);
+
 	if (!battle) return null;
 	const player = gameState.players.find(p => p.id === battle.playerId);
 	const isMe = playerId === battle.playerId;
@@ -31,10 +39,10 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 	return (
 		<div className="modal">
 			<div className="modal-window">
-				<div className="modal-background-image">
-					<CachedImage src={`/biomes/${battle.biome}.png`} alt={battle.biome} />
+				<div className="modal-background-image battle">
+					<div className="img" style={{ backgroundImage: `url(/biomes/${battle.biome}.png)` }}></div>
+					<CachedImage className="hiddenimg" src={`/biomes/${battle.biome}.png`} alt={battle.biome} />
 				</div>
-
 				<h2>Battle!</h2>
 				<div className="battle-modal-flex">
 					<div className="battle-modal-side">
@@ -83,7 +91,7 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 								</div>
 								<div
 									className={
-										'stat defensechance chance chance' + percent(playerArmor?.attackChance || 0, 1)
+										'stat defensechance chance chance' + percent(playerArmor?.defenseChance || 0, 1)
 									}
 								>
 									<div>block</div>
@@ -149,7 +157,9 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 				</div>
 				<div className="battle-modal-log">
 					<div className="battle-modal-log-title">Battle Log</div>
-					<div className="battle-modal-log-content">{(battle.battleLog || []).join('\n')}</div>
+					<div className="battle-modal-log-content" ref={battleLogRef}>
+						{(battle.battleLog || []).join('\n')}
+					</div>
 				</div>
 				{isMe && battle.battleActive && (
 					<div className="battle-modal-actions">

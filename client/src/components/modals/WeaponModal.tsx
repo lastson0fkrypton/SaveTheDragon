@@ -21,9 +21,7 @@ const WeaponModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 	return (
 		<div className="modal">
 			<div className="modal-window">
-				<div className="modal-background-image">
-					<CachedImage src={`/icons/sword.png`} />
-				</div>
+				<div className="modal-background-image"></div>
 				<h2>Select your Weapon</h2>
 				<div className="inventory">
 					{inventory.weapons.map(id => {

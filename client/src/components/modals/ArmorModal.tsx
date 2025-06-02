@@ -21,9 +21,7 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 	return (
 		<div className="modal">
 			<div className="modal-window">
-				<div className="modal-background-image">
-					<CachedImage src={`/icons/shield.png`} />
-				</div>
+				<div className="modal-background-image"></div>
 				<h2>Select your Armor</h2>
 				<div className="inventory">
 					{inventory.armor.map(id => {

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
 import { CachedImage } from '../common/CachedImage';
+import GameModal from '../modals/GameModal';
 
 const GamePanel: React.FC = observer(() => {
 	const state = getAppState();
@@ -15,9 +16,12 @@ const GamePanel: React.FC = observer(() => {
 
 	if (!player) return null;
 
+	const [showGameModal, setShowGameModal] = useState(false);
+
 	return (
 		<div className="player-panel game-panel">
-			<span className="game-id">Game ID: {state.gameId}</span>
+			<button onClick={() => setShowGameModal(true)}>Main Menu</button>
+			<h3>Players</h3>
 			<ul className="player-list">
 				{gameState.players.map((p: any, idx: number) => {
 					const hearts = Math.max(1, (p.maxHearts || 5) - (p.damage || 0));
@@ -61,6 +65,13 @@ const GamePanel: React.FC = observer(() => {
 					);
 				})}
 			</ul>
+			{showGameModal && (
+				<GameModal
+					onClose={() => {
+						setShowGameModal(false);
+					}}
+				/>
+			)}
 		</div>
 	);
 });

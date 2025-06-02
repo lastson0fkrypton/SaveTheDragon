@@ -1,18 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
+import type { RecentAction } from '../../types';
 
 const QuestPanel: React.FC = observer(() => {
 	const state = getAppState();
+	const [tab, setTab] = useState<'log' | 'quests'>('log');
+	const logListRef = useRef<HTMLUListElement>(null);
+
 	const gameState = state.gameState;
 	const playerId = state.playerId;
-	const [tab, setTab] = useState<'log' | 'quests'>('log');
+
+	// Game log (recentActions)
+	const gameLog = gameState?.recentActions || [];
+	const [lastGameLog, setLastGameLog] = useState<RecentAction[]>([]);
+
+	const gameLogOutOfDate = () => {
+		//check if game log is same as lastGameLog?
+		for (let i = 0; i < gameLog.length; i++) {
+			if (gameLog[i].id !== lastGameLog[i]?.id) {
+				return true;
+			}
+		}
+		return false;
+	};
+	useEffect(() => {
+		if (tab === 'log' && logListRef.current && gameLogOutOfDate()) {
+			logListRef.current.scrollTop = logListRef.current.scrollHeight;
+			setLastGameLog(gameLog);
+		}
+	}, [gameLog, tab]);
 
 	if (!gameState || !playerId) return null;
 
-	// Game log (recentActions)
-	const gameLog = (gameState.recentActions || []).slice().reverse();
-
+	const getActionMessage = (action: RecentAction): string => {
+		switch (action.type) {
+			case 'battle-end':
+				return action.playerName + ' ' + action.itemName + '.';
+			case 'equip':
+				return action.playerName + ' equipped ' + action.itemName + '.';
+			case 'use-item':
+				return action.playerName + ' used ' + action.itemName + '.';
+			default:
+				return action.playerName + ' ' + action.itemName + '.';
+		}
+	};
 	return (
 		<div className="quest-panel game-panel">
 			<div className="quest-tabs">
@@ -27,15 +59,10 @@ const QuestPanel: React.FC = observer(() => {
 				{tab === 'log' && (
 					<div className="quest-log">
 						<h3>Game Log</h3>
-						<ul className="game-log-list">
+						<ul className="game-log-list" ref={logListRef}>
 							{gameLog.length === 0 && <li>No recent actions yet.</li>}
 							{gameLog.map((action: any) => (
-								<li key={action.id}>
-									<span className="log-time">{new Date(action.ts).toLocaleTimeString()}</span>{' '}
-									<span className="log-player">{action.playerName}</span>{' '}
-									<span className="log-type">{action.type}</span>{' '}
-									<span className="log-item">{action.itemName}</span>
-								</li>
+								<li key={action.id}>{getActionMessage(action)}</li>
 							))}
 						</ul>
 					</div>

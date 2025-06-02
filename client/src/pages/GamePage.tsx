@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { getAppState } from '../stores/AppState';
 import GameBoard from '../components/GameBoard';
 import GamePanel from '../components/overlays/GamePanel';
-import Toasts from '../components/Toasts';
 import BattleModal from '../components/modals/BattleModal';
 import LootModal from '../components/modals/LootModal';
 import QuestPanel from '../components/overlays/QuestPanel';
@@ -24,6 +23,11 @@ const GamePage: React.FC = observer(() => {
 		watchGameStateInterval = setInterval(async () => {
 			if (!state.gameId) return;
 			const newState = await service.fetchGameState(state.gameId);
+			if (!newState) {
+				runInAction(() => {
+					state.setGameId(undefined);
+				});
+			}
 			runInAction(() => {
 				state.setGameState(newState);
 			});
@@ -44,7 +48,7 @@ const GamePage: React.FC = observer(() => {
 		else setShowLootModal(false);
 	}, [state.gameState]);
 
-	if (!state.gameId || !state.playerId) {
+	if (!state.gameId) {
 		return (
 			<div style={{ padding: 40, textAlign: 'center' }}>
 				<h1>Game not found</h1>
@@ -61,11 +65,13 @@ const GamePage: React.FC = observer(() => {
 			<GameBoard />
 			<GamePanel />
 			<QuestPanel />
-			<CharacterPanel />
-			<ItemPanel />
-			<DicePanel />
 
-			<Toasts />
+			<div className="character-bar">
+				<ItemPanel />
+				<CharacterPanel />
+				<DicePanel />
+			</div>
+
 			{showBattleModal && (
 				<BattleModal
 					onClose={() => {

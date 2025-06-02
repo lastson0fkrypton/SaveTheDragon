@@ -58,7 +58,7 @@ const CharacterPanel: React.FC = observer(() => {
 	return (
 		<>
 			<div className="character-panel">
-				<div className="floating-hearts">{hearts}</div>
+				<div className="floating-hearts"></div>
 				<button className="weapon-panel card" onClick={() => setShowWeaponModal(true)}>
 					<CachedImage
 						src={eqWeapon ? `/items/${eqWeapon.id}.png` : '/items/nothing.png'}
@@ -85,7 +85,12 @@ const CharacterPanel: React.FC = observer(() => {
 					/>
 					<div className="card-overlay">
 						<div className="card-name">{player.name}</div>
-						{playerCharacter && <div className="card-desc">{playerCharacter.description}</div>}
+						{playerCharacter && (
+							<div className="card-desc">
+								<div className="player-title">{playerCharacter.description}</div>
+								{hearts}
+							</div>
+						)}
 					</div>
 				</button>
 				<button className="armor-panel card" onClick={() => setShowArmorModal(true)}>
