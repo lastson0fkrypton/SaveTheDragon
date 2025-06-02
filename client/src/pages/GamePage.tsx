@@ -43,9 +43,7 @@ const GamePage: React.FC = observer(() => {
 	// Show modals based on game state
 	useEffect(() => {
 		if (state.gameState?.currentBattle) setShowBattleModal(true);
-		else setShowBattleModal(false);
 		if (state.gameState?.recentlyFoundItem) setShowLootModal(true);
-		else setShowLootModal(false);
 	}, [state.gameState]);
 
 	if (!state.gameId) {

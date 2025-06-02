@@ -21,17 +21,17 @@ const DicePanel: React.FC = observer(() => {
 	return (
 		<div className="dice-panel">
 			{isMyTurn && <span className="your-turn">Your Turn</span>}
-			{!isMyTurn && <span>{currentPlayer.name}'s Turn</span>}
+			{!isMyTurn && <span className="nacho-turn">{currentPlayer.name}'s Turn</span>}
 
 			{gameState.players[gameState.currentTurn]?.id === playerId && !gameState.currentDiceRoll && (
-				<button className="roll-button" onClick={handleRoll}>
+				<button className="roll-button disabled" onClick={handleRoll}>
 					Roll Dice
 				</button>
 			)}
 			{gameState.players[gameState.currentTurn]?.id !== playerId && !gameState.currentDiceRoll && (
-				<div className="dice-result">
+				<button className="roll-button" disabled>
 					<span>Waiting...</span>
-				</div>
+				</button>
 			)}
 			{gameState.currentDiceRoll && (
 				<div className="dice-result">

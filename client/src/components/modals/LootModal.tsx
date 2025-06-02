@@ -9,6 +9,7 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const playerId = state.playerId;
 	const loot = gameState?.recentlyFoundItem;
 	if (!loot || !loot.item) return null;
+
 	// Unique key for this loot event
 	const lootKey = `${loot.playerId}_${loot.item.id}_${loot.ts}`;
 	// Check if this loot was already dismissed
@@ -21,6 +22,7 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 		}
 		onClose();
 	};
+
 	const percent = (val: number, max: number): string => {
 		return Math.round((val / max) * 100).toString();
 	};
@@ -36,11 +38,13 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 		}
 	};
 
+	const playerName = gameState?.players?.find(p => p.id === loot.playerId)?.name || 'Unknown Player';
+
 	return (
 		<div className="modal">
 			<div className="modal-window">
 				<div className="modal-background-image"></div>
-				<h2>{loot.playerId === playerId ? 'You found an item!' : `Player found an item!`}</h2>
+				<h2>{loot.playerId === playerId ? 'You found an item!' : `${playerName} found an item!`}</h2>
 
 				<div className="inventory">
 					<div className={`card ${getCardType(loot.item.type)}`}>

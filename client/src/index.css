@@ -72,6 +72,11 @@ button:focus-visible {
 	outline: 4px auto -webkit-focus-ring-color;
 }
 
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 /* style for modals */
 .modal {
 	position: fixed;
@@ -281,6 +286,13 @@ button:focus-visible {
 	font-weight: bold;
 }
 
+.dice-panel .nacho-turn {
+	padding: 10px;
+	font-size: 20px;
+	color: #e0af4d;
+	font-weight: bold;
+}
+
 .roll-button {
 	width: 100px;
 	height: 100px;
@@ -319,7 +331,6 @@ button:focus-visible {
 	font-weight: 500;
 	font-family: inherit;
 	background-color: #1a1a1a;
-	cursor: pointer;
 	transition: border-color 0.25s;
 
 	width: 100px;

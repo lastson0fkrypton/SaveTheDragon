@@ -441,39 +441,41 @@ app.post('/api/games/:gameId/move', (req, res) => {
 				}
 				// --- Remove gifting item on every move ---
 				gameState.recentlyFoundItem = null;
+				gameState.currentBattle = null;
+
 				// --- Monster encounter logic ---
 				let encounter = false;
 				let encounteredMonster = null;
-				// Only start a new battle if there is not already a battle for this player
-				if (!gameState.currentBattle) {
-					if (BIOME_ENCOUNTER_RATES[biome] > 0 && Math.random() < BIOME_ENCOUNTER_RATES[biome]) {
-						// Find monsters for this biome
-						const biomeMonsters = MONSTER_DEFS.filter(m => m.biome.split(',').includes(biome));
-						if (biomeMonsters.length > 0) {
-							encounter = true;
-							encounteredMonster = biomeMonsters[Math.floor(Math.random() * biomeMonsters.length)];
-							// Set battle state in gameState
-							gameState.currentBattle = {
-								playerId,
-								monster: encounteredMonster,
-								playerHealth: (playerState.maxHearts || 5) - (playerState.damage || 0),
-								monsterHealth: encounteredMonster.health, // Monster health
-								battleLog: [
-									`A wild ${encounteredMonster.name} appeared!`,
-									`Player: ${playerRows.find(p => p.id === playerId)?.name || 'Player'} vs ${
-										encounteredMonster.name
-									}`,
-								],
-								battleActive: true,
-								biome: biome,
-								ts: Date.now(),
-							};
-							advanceTurn = false;
-						}
-					} else {
-						gameState.currentBattle = null;
+
+				// not sure how we get here, unless the battle is swapped from one player to another
+				if (BIOME_ENCOUNTER_RATES[biome] > 0 && Math.random() < BIOME_ENCOUNTER_RATES[biome]) {
+					// Find monsters for this biome
+					const biomeMonsters = MONSTER_DEFS.filter(m => m.biome.split(',').includes(biome));
+					if (biomeMonsters.length > 0) {
+						encounter = true;
+						encounteredMonster = biomeMonsters[Math.floor(Math.random() * biomeMonsters.length)];
+						// Set battle state in gameState
+						gameState.currentBattle = {
+							playerId,
+							monster: encounteredMonster,
+							playerHealth: (playerState.maxHearts || 5) - (playerState.damage || 0),
+							monsterHealth: encounteredMonster.health, // Monster health
+							battleLog: [
+								`A wild ${encounteredMonster.name} appeared!`,
+								`Player: ${playerRows.find(p => p.id === playerId)?.name || 'Player'} vs ${
+									encounteredMonster.name
+								}`,
+							],
+							battleActive: true,
+							biome: biome,
+							ts: Date.now(),
+						};
+						advanceTurn = false;
 					}
+				} else {
+					gameState.currentBattle = null;
 				}
+
 				// Only advance turn if no battle was started
 				if (advanceTurn) {
 					gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
@@ -624,7 +626,7 @@ app.post('/api/games/:gameId/battle/run', (req, res) => {
 			// Advance turn and clear battle
 			db.all('SELECT * FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
 				gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
-				gameState.currentBattle = null;
+				//gameState.currentBattle = null;
 				db.run('UPDATE games SET gameStateJson = ? WHERE id = ?', [JSON.stringify(gameState), gameId], () => {
 					res.json({ success: true, battleLog: battle.battleLog, ranAway: true });
 				});
@@ -734,7 +736,7 @@ app.post('/api/games/:gameId/battle/return-to-town', (req, res) => {
 			// Add notification for all players
 			addRecentAction(gameState, 'battle-end', playerRow.name, 'returned to town after fainting');
 			// Advance turn and clear battle
-			gameState.currentBattle = null;
+			//gameState.currentBattle = null;
 			db.all('SELECT * FROM players WHERE gameId = ?', [gameId], (err, playerRows) => {
 				gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
 				db.run(
@@ -930,28 +932,55 @@ app.post('/api/games/:gameId/player/:playerId/use-item', (req, res) => {
 			used = true;
 		} else if (item.effect === 'teleport') {
 			// Teleport to nearest town
-			const gameState = playerRow.gameStateJson ? JSON.parse(playerRow.gameStateJson) : {};
-			const biomeGrid = gameState.biomeGrid;
-			if (biomeGrid) {
-				let minDist = Infinity,
-					tx = 0,
-					ty = 0;
-				for (let y = 0; y < biomeGrid.length; y++) {
-					for (let x = 0; x < biomeGrid[0].length; x++) {
-						if (biomeGrid[y][x] === 'town') {
-							const dist = Math.abs(playerState.positionX - x) + Math.abs(playerState.positionY - y);
-							if (dist < minDist) {
-								minDist = dist;
-								tx = x;
-								ty = y;
+			db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, gameRow) => {
+				if (gameRow) {
+					const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+					const biomeGrid = gameState.biomeGrid;
+					if (biomeGrid) {
+						let minDist = Infinity,
+							tx = 0,
+							ty = 0;
+						for (let y = 0; y < biomeGrid.length; y++) {
+							for (let x = 0; x < biomeGrid[0].length; x++) {
+								if (biomeGrid[y][x] === 'town') {
+									const dist =
+										Math.abs(playerState.positionX - x) + Math.abs(playerState.positionY - y);
+									if (dist < minDist) {
+										minDist = dist;
+										tx = x;
+										ty = y;
+									}
+								}
 							}
 						}
+						playerState.positionX = tx;
+						playerState.positionY = ty;
+						used = true;
+					}
+					if (used) {
+						// Remove item from inventory
+						playerState.inventory.items = playerState.inventory.items.filter(i => i !== itemId);
+						addRecentAction(gameState, 'use-item', playerRow.name, item.name);
+						db.run(
+							'UPDATE games SET gameStateJson = ? WHERE id = ?',
+							[JSON.stringify(gameState), gameId],
+							() => {
+								db.run(
+									'UPDATE players SET playerStateJson = ? WHERE id = ?',
+									[JSON.stringify(playerState), playerId],
+									err2 => {
+										if (err2) return res.status(500).json({ error: 'Failed to use item' });
+										res.json({ success: true });
+									}
+								);
+							}
+						);
+					} else {
+						res.status(400).json({ error: 'Item cannot be used' });
 					}
 				}
-				playerState.positionX = tx;
-				playerState.positionY = ty;
-				used = true;
-			}
+			});
+			return;
 		}
 		if (used) {
 			// Remove item from inventory

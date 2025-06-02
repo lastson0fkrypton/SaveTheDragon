@@ -34,9 +34,7 @@ const GamePanel: React.FC = observer(() => {
 						>
 							<CachedImage
 								className="player-character-pic"
-								src={
-									player.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'
-								}
+								src={p.characterId ? `/characters/${p.characterId}.png` : '/items/nothing.png'}
 								alt="character"
 							/>
 							<div className="player-name" title={p.name}>

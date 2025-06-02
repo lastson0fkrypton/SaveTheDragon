@@ -32,6 +32,19 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 		? gameState.itemMeta[player.inventory.equippedArmorId]
 		: undefined;
 
+	// Unique key for this battle event
+	const battleKey = battle ? `${battle.playerId}_${battle.monster?.name || 'unknown'}_${battle.ts || ''}` : null;
+	// Check if this battle was already dismissed
+	const lastBattleKey = typeof window !== 'undefined' && battleKey ? localStorage.getItem('lastBattleKey') : null;
+	if (battleKey && lastBattleKey === battleKey) return null;
+	// On close, save the battleKey so it doesn't pop up again
+	const handleClose = () => {
+		if (typeof window !== 'undefined' && battleKey) {
+			localStorage.setItem('lastBattleKey', battleKey);
+		}
+		onClose();
+	};
+
 	const percent = (val: number, max: number): string => {
 		return Math.round((val / max) * 100).toString();
 	};
@@ -166,7 +179,13 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 						<button onClick={() => service.attack()} className="battle-modal-action-btn">
 							Attack
 						</button>
-						<button onClick={() => service.run()} className="battle-modal-action-btn">
+						<button
+							onClick={() => {
+								service.run();
+								handleClose();
+							}}
+							className="battle-modal-action-btn"
+						>
 							Run Away
 						</button>
 					</div>
@@ -176,7 +195,7 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 						<button
 							onClick={() => {
 								service.collectLoot();
-								onClose();
+								handleClose();
 							}}
 							className="battle-modal-action-btn"
 						>
@@ -189,7 +208,7 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 						<button
 							onClick={() => {
 								service.returnToTown();
-								onClose();
+								handleClose();
 							}}
 							className="battle-modal-action-btn"
 						>
@@ -197,9 +216,9 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 						</button>
 					</div>
 				)}
-				{!isMe && (
+				{!isMe && !battle.battleActive && (
 					<div className="battle-modal-center">
-						<button onClick={onClose}>Close</button>
+						<button onClick={handleClose}>Close</button>
 					</div>
 				)}
 			</div>
