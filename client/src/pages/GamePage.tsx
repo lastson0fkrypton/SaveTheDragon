@@ -23,11 +23,6 @@ const GamePage: React.FC = observer(() => {
 		watchGameStateInterval = setInterval(async () => {
 			if (!state.gameId) return;
 			const newState = await service.fetchGameState(state.gameId);
-			if (!newState) {
-				runInAction(() => {
-					state.setGameId(undefined);
-				});
-			}
 			runInAction(() => {
 				state.setGameState(newState);
 			});

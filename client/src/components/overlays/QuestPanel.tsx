@@ -41,6 +41,8 @@ const QuestPanel: React.FC = observer(() => {
 				return action.playerName + ' equipped ' + action.itemName + '.';
 			case 'use-item':
 				return action.playerName + ' used ' + action.itemName + '.';
+			case 'visit-town':
+				return action.playerName + ' rested at a town.';
 			default:
 				return action.playerName + ' ' + action.itemName + '.';
 		}
