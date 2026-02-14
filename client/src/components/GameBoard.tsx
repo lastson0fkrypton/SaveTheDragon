@@ -51,7 +51,7 @@ const GameBoard: React.FC = observer(() => {
 	const state = getAppState();
 	const gameState = state.gameState;
 	const turnGreen = '#7fff7f';
-	const questRed = '#F00';
+	const questRed = '#800';
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const panZoom = useRef({ panX: 0, panY: 0, zoom: 1, dragging: false, lastX: 0, lastY: 0 });
 	const panAnimRef = useRef<number | null>(null);
@@ -178,6 +178,48 @@ const GameBoard: React.FC = observer(() => {
 				}
 			}
 		}
+		if (isMyTurn && state.selectedMove) {
+			const me = gameState.players.find((p: any) => p.id === state.playerId);
+			if (me) {
+				const startX = me.positionX * CELL_SIZE + CELL_SIZE / 2;
+				const startY = me.positionY * CELL_SIZE + CELL_SIZE / 2;
+				const tipX = state.selectedMove.x * CELL_SIZE + CELL_SIZE / 2;
+				const tipY = state.selectedMove.y * CELL_SIZE + CELL_SIZE / 2;
+				const dx = tipX - startX;
+				const dy = tipY - startY;
+				const distance = Math.hypot(dx, dy) || 1;
+				const arrowSize = 22;
+				const shaftGap = arrowSize * 1.05;
+				const endX = tipX - (dx / distance) * shaftGap;
+				const endY = tipY - (dy / distance) * shaftGap;
+
+				ctx.save();
+				ctx.strokeStyle = questRed;
+				ctx.fillStyle = questRed;
+				ctx.lineWidth = 8;
+				ctx.lineCap = 'butt';
+				ctx.beginPath();
+				ctx.moveTo(startX, startY);
+				ctx.lineTo(endX, endY);
+				ctx.stroke();
+
+				const angle = Math.atan2(tipY - startY, tipX - startX);
+				ctx.beginPath();
+				ctx.moveTo(tipX, tipY);
+				ctx.lineTo(
+					tipX - arrowSize * Math.cos(angle - Math.PI / 6),
+					tipY - arrowSize * Math.sin(angle - Math.PI / 6)
+				);
+				ctx.lineTo(
+					tipX - arrowSize * Math.cos(angle + Math.PI / 6),
+					tipY - arrowSize * Math.sin(angle + Math.PI / 6)
+				);
+				ctx.closePath();
+				ctx.fill();
+				ctx.restore();
+			}
+		}
+
 		// Draw players (main.ts style: with character pic, border, etc)
 		for (const player of gameState.players) {
 			const px = player.positionX * CELL_SIZE + CELL_SIZE / 2;
@@ -188,17 +230,6 @@ const GameBoard: React.FC = observer(() => {
 				ctx.lineWidth = 5;
 				ctx.strokeRect(player.positionX * CELL_SIZE + 8, player.positionY * CELL_SIZE + 8, CELL_SIZE - 16, CELL_SIZE - 16);
 			}
-			// ctx.beginPath();
-			// ctx.arc(px, py, CELL_SIZE * 0.32, 0, 2 * Math.PI);
-			// ctx.closePath();
-			// ctx.fillStyle = '#fff';
-			// ctx.globalAlpha = 0.85;
-			// ctx.fill();
-			// ctx.globalAlpha = 1;
-			// ctx.lineWidth = 4;
-			// ctx.strokeStyle = '#646cff';
-			// ctx.stroke();
-			// Draw character picture if available and preloaded
 
 			if (player.characterId && characterImages.current[player.characterId]) {
 				const img = characterImages.current[player.characterId];
@@ -211,48 +242,6 @@ const GameBoard: React.FC = observer(() => {
 				ctx.restore();
 			}
 			ctx.restore();
-		}
-
-		if (isMyTurn && state.selectedMove) {
-			const me = gameState.players.find((p: any) => p.id === state.playerId);
-			if (me) {
-				const startX = me.positionX * CELL_SIZE + CELL_SIZE / 2;
-				const startY = me.positionY * CELL_SIZE + CELL_SIZE / 2;
-				const selectedCenterX = state.selectedMove.x * CELL_SIZE + CELL_SIZE / 2;
-				const selectedCenterY = state.selectedMove.y * CELL_SIZE + CELL_SIZE / 2;
-				const dx = selectedCenterX - startX;
-				const dy = selectedCenterY - startY;
-				const distance = Math.hypot(dx, dy) || 1;
-				const tipOffset = CELL_SIZE / 2 - 8;
-				const endX = selectedCenterX - (dx / distance) * tipOffset;
-				const endY = selectedCenterY - (dy / distance) * tipOffset;
-
-				ctx.save();
-				ctx.strokeStyle = questRed;
-				ctx.fillStyle = questRed;
-				ctx.lineWidth = 8;
-				ctx.lineCap = 'butt';
-				ctx.beginPath();
-				ctx.moveTo(startX, startY);
-				ctx.lineTo(endX, endY);
-				ctx.stroke();
-
-				const angle = Math.atan2(endY - startY, endX - startX);
-				const arrowSize = 22;
-				ctx.beginPath();
-				ctx.moveTo(endX, endY);
-				ctx.lineTo(
-					endX - arrowSize * Math.cos(angle - Math.PI / 6),
-					endY - arrowSize * Math.sin(angle - Math.PI / 6)
-				);
-				ctx.lineTo(
-					endX - arrowSize * Math.cos(angle + Math.PI / 6),
-					endY - arrowSize * Math.sin(angle + Math.PI / 6)
-				);
-				ctx.closePath();
-				ctx.fill();
-				ctx.restore();
-			}
 		}
 	};
 
@@ -400,7 +389,8 @@ const GameBoard: React.FC = observer(() => {
 		};
 	}, []);
 
-	// Use mouse down/up for click-to-select target square (movement is confirmed via End Turn).
+	// Use mouse down/up for click-to-select target square.
+	// Clicking the same selected square again confirms movement (ends turn).
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -412,7 +402,7 @@ const GameBoard: React.FC = observer(() => {
 			downX = e.clientX;
 			downY = e.clientY;
 		};
-		const onMouseUp = (e: MouseEvent) => {
+		const onMouseUp = async (e: MouseEvent) => {
 			if (!isDown) return;
 			isDown = false;
 			const upX = e.clientX;
@@ -428,6 +418,11 @@ const GameBoard: React.FC = observer(() => {
 			const x = Math.floor((upX - rect.left - panZoom.current.panX) / (CELL_SIZE * panZoom.current.zoom));
 			const y = Math.floor((upY - rect.top - panZoom.current.panY) / (CELL_SIZE * panZoom.current.zoom));
 			if (gameState.validMoves.some(m => m.x === x && m.y === y)) {
+				if (state.selectedMove?.x === x && state.selectedMove?.y === y) {
+					await state.service.movePlayer(x, y);
+					state.setSelectedMove(null);
+					return;
+				}
 				state.setSelectedMove({ x, y });
 			}
 		};
