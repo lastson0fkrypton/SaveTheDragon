@@ -36,7 +36,7 @@ const DicePanel: React.FC = observer(() => {
 			{gameState.currentDiceRoll && (
 				<div className="dice-result">
 					<div className={`roll-value value-${gameState.currentDiceRoll}`}>
-						{Array.from(Array(gameState.currentDiceRoll), (e, i) => {
+						{Array.from(Array(gameState.currentDiceRoll), (_, i) => {
 							return <div key={i} className="dot"></div>;
 						})}
 					</div>

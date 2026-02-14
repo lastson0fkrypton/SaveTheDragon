@@ -244,13 +244,14 @@ router.post('/games/:gameId/move', (req, res) => {
 				const playerState = player.playerStateJson ? JSON.parse(player.playerStateJson) : {};
 				playerState.positionX = targetX;
 				playerState.positionY = targetY;
-				// --- Reduce health by 1 if moving onto cave biome ---
+				// --- Heal player if entering the town biome ---
 				const biome = gameState.biomeGrid?.[targetY]?.[targetX] || 'plains';
 				if (biome === 'town') {
 					playerState.damage = 0;
 					addRecentAction(gameState, 'visit-town', player.name || 'Player');
 				}
-				// --- Remove gifting item on every move ---
+
+				// --- reset gamestate for new turn ---
 				gameState.recentlyFoundItem = null;
 				gameState.currentBattle = null;
 
