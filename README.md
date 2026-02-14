@@ -43,5 +43,17 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 - Game state and player data are stored in `server/database.sqlite`.
 - The server will automatically clean up inactive games after 60 seconds of inactivity.
 
+## Server Architecture
+- **Routes (`server/routes/`)**
+   - HTTP-focused controllers only: parse params/body, call services, return status + JSON.
+- **Services (`server/services/`)**
+   - Game/business rules live here (`gameService`, `battleService`, `playerService`, `adminService`).
+   - Services throw typed errors for route-level HTTP mapping.
+- **Repositories (`server/repositories/`)**
+   - SQLite data access is centralized here (`gameRepository`, `dbClient`).
+   - Raw SQL is isolated from route and game-rule modules.
+
+This separation keeps the API layer thin, game logic reusable/testable, and SQL concerns encapsulated.
+
 ## License
 This project is for educational and personal use.

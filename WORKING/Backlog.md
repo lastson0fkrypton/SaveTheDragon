@@ -20,9 +20,9 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Core game logic is moved into a dedicated game-logic layer (e.g., service/helper modules) and reused by routes.
   - Raw SQL calls are abstracted behind a repository/data-access layer.
   - Existing game behavior remains functionally equivalent after refactor.
-  - File/module boundaries are documented in this backlog item notes (or README update).
-- **Status:** TODO
-- **Notes:** Start with one feature flow (roll/move/battle) as a pattern, then migrate remaining flows.
+  - File/module boundaries are documented in as README updates.
+- **Status:** DONE
+- **Notes:** Completed refactor of game, battle, player, and admin flows to service + repository layers. Added `server/repositories/dbClient.js`, `server/repositories/gameRepository.js`, and service modules under `server/services/`. Routes are now thin controllers with centralized error mapping. Updated README with architecture boundaries. Server startup validated via `npm run start`.
 
 ## BACKLOG-002
 - **ID:** BACKLOG-002

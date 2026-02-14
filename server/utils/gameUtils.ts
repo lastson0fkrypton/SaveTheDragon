@@ -1,12 +1,23 @@
 import { ITEM_DEFS } from '../constants/items.js';
+import type {
+	BiomeGrid,
+	GameRow,
+	GameStateJson,
+	PlayerRow,
+	PlayerState,
+	RecentAction,
+	ValidMoveRow,
+} from '../types.js';
+
+type ItemDefFromConstants = (typeof ITEM_DEFS)[number];
 
 // Helper: serialize a game from DB rows
-function serializeGame(gameRow, playerRows, validMoveRows) {
+function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows: ValidMoveRow[]) {
 	// Parse game state JSON
-	const gameState = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+	const gameState = gameRow.gameStateJson ? (JSON.parse(gameRow.gameStateJson) as Partial<GameStateJson>) : {};
 	// Parse player state JSONs
-	const players = playerRows.map(p => {
-		const playerState = p.playerStateJson ? JSON.parse(p.playerStateJson) : {};
+	const players = playerRows.map((p): { id: string; name: string } & Partial<PlayerState> => {
+		const playerState = p.playerStateJson ? (JSON.parse(p.playerStateJson) as Partial<PlayerState>) : {};
 		return {
 			id: p.id,
 			name: p.name,
@@ -27,7 +38,7 @@ function serializeGame(gameRow, playerRows, validMoveRows) {
 	if (gameState.recentlyFoundItem && gameState.recentlyFoundItem.item?.id) {
 		allItemIds.add(gameState.recentlyFoundItem.item.id);
 	}
-	const itemMeta = {};
+	const itemMeta: Record<string, ItemDefFromConstants> = {};
 	ITEM_DEFS.forEach(def => {
 		if (allItemIds.has(def.id)) itemMeta[def.id] = def;
 	});
@@ -43,9 +54,9 @@ function serializeGame(gameRow, playerRows, validMoveRows) {
 }
 
 // Helper to add a recent action to the game state
-function addRecentAction(gameState, type, playerName, itemName) {
+function addRecentAction(gameState: Partial<GameStateJson>, type: string, playerName: string, itemName = ''): void {
 	if (!gameState.recentActions) gameState.recentActions = [];
-	const action = {
+	const action: RecentAction = {
 		id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
 		type, // 'use-item' or 'equip'
 		playerName,
@@ -57,7 +68,7 @@ function addRecentAction(gameState, type, playerName, itemName) {
 	if (gameState.recentActions.length > 10) gameState.recentActions = gameState.recentActions.slice(-10);
 }
 
-function getRandomItemForBiome(tilebiome) {
+function getRandomItemForBiome(tilebiome: string): ItemDefFromConstants | null {
 	// Only give biome-appropriate items (or biome:any), and not 'fist'
 	const pool = ITEM_DEFS.filter(
 		i => (i.biome === 'any' || (i.biome && i.biome.indexOf(tilebiome) !== -1)) && !i.noRandom
@@ -66,12 +77,12 @@ function getRandomItemForBiome(tilebiome) {
 }
 
 // --- Biome grid generation ---
-function generateBiomeGrid(width, height) {
+function generateBiomeGrid(width: number, height: number): BiomeGrid {
 	// Start with all plains
-	const grid = Array.from({ length: height }, () => Array.from({ length: width }, () => 'plains'));
+	const grid = Array.from({ length: height }, () => Array.from({ length: width }, () => 'plains')) as BiomeGrid;
 
 	// Helper to place a patch of a biome
-	function placePatch(biome, count, patchSize) {
+	function placePatch(biome: string, count: number, patchSize: number) {
 		for (let i = 0; i < count; i++) {
 			const cx = Math.floor(Math.random() * width);
 			const cy = Math.floor(Math.random() * height);
@@ -125,7 +136,7 @@ function generateBiomeGrid(width, height) {
 	// Place towns (single cells) at least 6 spaces from the castle
 	let townsToPlace = Math.max(2, Math.floor((width * height) / 80));
 	let attempts = 0;
-	const townCenters = [];
+	const townCenters: Array<{ x: number; y: number }> = [];
 	while (townsToPlace > 0 && attempts < 1000) {
 		let x = Math.floor(Math.random() * width);
 		let y = Math.floor(Math.random() * height);
