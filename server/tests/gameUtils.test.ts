@@ -54,7 +54,13 @@ describe('gameUtils', () => {
 				}),
 			},
 		];
-		const validMoveRows = [{ x: 2, y: 3 }];
+		const validMoveRows = [
+			{
+				gameId: 'g1',
+				x: 2,
+				y: 3,
+			},
+		];
 
 		const result: any = serializeGame(gameRow, playerRows, validMoveRows);
 
