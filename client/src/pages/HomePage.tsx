@@ -13,6 +13,12 @@ const HomePage: React.FC = observer(() => {
   const [gameId, setGameId] = useState('');
   const [playerNameJoin, setPlayerNameJoin] = useState('');
 
+  React.useEffect(() => {
+    if (state.gameId && state.playerName) {
+      navigate('/game');
+    }
+  }, [navigate, state.gameId, state.playerName]);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     await service.createGame(playerNameNew, gridSizeX, gridSizeY);
@@ -26,6 +32,7 @@ const HomePage: React.FC = observer(() => {
 
   return (
     <div style={{ maxWidth: 600, margin: '60px auto', background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 16px #0008' }}>
+      <img src="/ai-pictures/baby_dragon.png" alt="Baby Dragon" style={{ display: 'block', margin: '0 auto 24px', width: 120, height: 120 }} />
       <h1 style={{ textAlign: 'center', marginBottom: 32 }}>Save the Dragon</h1>
       <div style={{ display: 'flex', gap: 32, justifyContent: 'center' }}>
         <form onSubmit={handleCreate} style={{ flex: 1 }}>

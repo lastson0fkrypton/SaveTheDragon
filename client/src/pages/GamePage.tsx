@@ -16,9 +16,42 @@ const GamePage: React.FC = observer(() => {
 	const state = getAppState();
 	const service = state.service;
 	const navigate = useNavigate();
+	const [bootstrapped, setBootstrapped] = useState(false);
 
 	let watchGameStateInterval: any;
+
 	useEffect(() => {
+		let cancelled = false;
+		const bootstrapSession = async () => {
+			if (!state.gameId) {
+				if (!cancelled) setBootstrapped(true);
+				return;
+			}
+
+			if (!state.playerName) {
+				state.reset();
+				navigate('/');
+				if (!cancelled) setBootstrapped(true);
+				return;
+			}
+
+			const restored = await service.reconnectSavedSession(state.gameId, state.playerName);
+			if (!restored) {
+				state.reset();
+				navigate('/');
+			}
+
+			if (!cancelled) setBootstrapped(true);
+		};
+
+		bootstrapSession();
+		return () => {
+			cancelled = true;
+		};
+	}, [navigate, service, state]);
+
+	useEffect(() => {
+		if (!bootstrapped) return;
 		clearInterval(watchGameStateInterval);
 		watchGameStateInterval = setInterval(async () => {
 			if (!state.gameId) return;
@@ -30,7 +63,7 @@ const GamePage: React.FC = observer(() => {
 		return () => {
 			clearInterval(watchGameStateInterval);
 		};
-	}, []);
+	}, [bootstrapped]);
 
 	const [showLootModal, setShowLootModal] = useState(false);
 	const [showBattleModal, setShowBattleModal] = useState(false);
@@ -41,6 +74,9 @@ const GamePage: React.FC = observer(() => {
 		if (state.gameState?.recentlyFoundItem) setShowLootModal(true);
 	}, [state.gameState]);
 
+	if (!bootstrapped) {
+		return <div style={{ padding: 40, textAlign: 'center' }}>Restoring saved session...</div>;
+	}
 	if (!state.gameId) {
 		return (
 			<div style={{ padding: 40, textAlign: 'center' }}>

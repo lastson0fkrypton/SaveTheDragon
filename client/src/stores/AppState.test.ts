@@ -46,6 +46,7 @@ describe('AppState', () => {
 		storage.setItem('adminPassword', 'pw123');
 		storage.setItem('gameId', 'g-123');
 		storage.setItem('playerId', 'p-123');
+		storage.setItem('playerName', 'Alice');
 
 		const state = new AppState();
 
@@ -53,6 +54,7 @@ describe('AppState', () => {
 		expect(state.adminPassword).toBe('pw123');
 		expect(state.gameId).toBe('g-123');
 		expect(state.playerId).toBe('p-123');
+		expect(state.playerName).toBe('Alice');
 	});
 
 	it('setAdminLoggedIn persists and removes storage values', () => {
@@ -79,26 +81,32 @@ describe('AppState', () => {
 		const state = new AppState();
 
 		state.setPlayerId('p-abc');
+		state.setPlayerName('Bob');
 		state.setGameId('g-abc');
 
 		expect(state.playerId).toBe('p-abc');
+		expect(state.playerName).toBe('Bob');
 		expect(state.gameId).toBe('g-abc');
 		expect(storage.getItem('playerId')).toBe('p-abc');
+		expect(storage.getItem('playerName')).toBe('Bob');
 		expect(storage.getItem('gameId')).toBe('g-abc');
 	});
 
 	it('reset clears runtime state and storage keys', () => {
 		const state = new AppState();
 		state.setPlayerId('p-reset');
+		state.setPlayerName('Carol');
 		state.setGameId('g-reset');
 		state.setGameState({} as any);
 
 		state.reset();
 
 		expect(state.playerId).toBe('');
+		expect(state.playerName).toBe('');
 		expect(state.gameId).toBe('');
 		expect(state.gameState).toBeNull();
 		expect(storage.getItem('playerId')).toBeNull();
+		expect(storage.getItem('playerName')).toBeNull();
 		expect(storage.getItem('gameId')).toBeNull();
 	});
 });

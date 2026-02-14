@@ -16,8 +16,10 @@ class AppState {
 
 	//game state
 	playerId: string = '';
+	playerName: string = '';
 	gameId: string | undefined = '';
 	gameState: GameState | null = null;
+	selectedMove: { x: number; y: number } | null = null;
 
 	constructor() {
 		makeAutoObservable(this);
@@ -28,6 +30,7 @@ class AppState {
 
 		this.gameId = localStorage.getItem('gameId') || '';
 		this.playerId = localStorage.getItem('playerId') || '';
+		this.playerName = localStorage.getItem('playerName') || '';
 	}
 
 	//admin accessors
@@ -53,6 +56,11 @@ class AppState {
 		this.playerId = id;
 		localStorage.setItem('playerId', id);
 	}
+	setPlayerName(name: string) {
+		this.playerName = name;
+		if (name) localStorage.setItem('playerName', name);
+		else localStorage.removeItem('playerName');
+	}
 	setGameId(id: string | undefined) {
 		this.gameId = id;
 		localStorage.setItem('gameId', id || '');
@@ -60,11 +68,17 @@ class AppState {
 	setGameState(state: GameState | null) {
 		this.gameState = state;
 	}
+	setSelectedMove(move: { x: number; y: number } | null) {
+		this.selectedMove = move;
+	}
 	reset() {
 		this.playerId = '';
+		this.playerName = '';
 		this.gameId = '';
 		this.gameState = null;
+		this.selectedMove = null;
 		localStorage.removeItem('playerId');
+		localStorage.removeItem('playerName');
 		localStorage.removeItem('gameId');
 	}
 }

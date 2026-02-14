@@ -13,9 +13,16 @@ const DicePanel: React.FC = observer(() => {
 
 	const currentPlayer = gameState.players[gameState.currentTurn];
 	const isMyTurn = currentPlayer?.id === playerId;
+	const hasSelection = !!state.selectedMove;
 
 	const handleRoll = async () => {
 		await state.service.rollDice();
+	};
+
+	const handleEndTurn = async () => {
+		if (!state.selectedMove) return;
+		await state.service.movePlayer(state.selectedMove.x, state.selectedMove.y);
+		state.setSelectedMove(null);
 	};
 
 	return (
@@ -33,7 +40,12 @@ const DicePanel: React.FC = observer(() => {
 					<span>Waiting...</span>
 				</button>
 			)}
-			{gameState.currentDiceRoll && (
+			{isMyTurn && gameState.currentDiceRoll && (
+				<button className="roll-button end-turn" onClick={handleEndTurn} disabled={!hasSelection}>
+					End Turn
+				</button>
+			)}
+			{!isMyTurn && gameState.currentDiceRoll && (
 				<div className="dice-result">
 					<div className={`roll-value value-${gameState.currentDiceRoll}`}>
 						{Array.from(Array(gameState.currentDiceRoll), (_, i) => {

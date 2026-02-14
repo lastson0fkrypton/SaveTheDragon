@@ -170,6 +170,20 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
 - **Status:** TODO
 - **Notes:** Include safe fallbacks when browser audio/TTS APIs are unavailable.
 
+## BACKLOG-013
+- **ID:** BACKLOG-013
+- **Title:** Rework movement click flow with destination confirmation UX
+- **Why:** Current move flow requires precision clicking and immediate commit, which feels difficult and error-prone.
+- **Acceptance Criteria:**
+  - On roll, camera recenters on active player.
+  - Clicking a valid square selects it (does not immediately move).
+  - Selected square is visually highlighted with a red border.
+  - An arrow is drawn from player position to selected destination.
+  - During move selection phase, roll UI becomes an `End Turn` action with tick icon (`/icons/check.png`).
+  - Clicking `End Turn` commits movement to the selected square.
+- **Status:** DONE
+- **Notes:** Implemented click-to-select movement in `GameBoard` (no immediate move), red border highlight, player-to-target arrow render, and camera recenter when roll begins for active player. Added `selectedMove` state to `AppState` and `End Turn` confirmation flow in `DicePanel` with `/icons/check.png`. Validated via `npm run build` and `npm run test` in client.
+
 ---
 
 ## Working Rule

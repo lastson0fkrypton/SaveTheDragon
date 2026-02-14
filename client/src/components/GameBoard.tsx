@@ -5,14 +5,14 @@ import { getAppState } from '../stores/AppState';
 const CELL_SIZE = 128; // px per cell, as in main.ts
 
 // Helper to center the grid on a coordinate
-function centerGridOnCanvas(
+function getCenteredPan(
 	canvas: HTMLCanvasElement,
 	gridSizeX: number,
 	gridSizeY: number,
-	panZoom: any,
+	zoom: number,
 	centerCoord?: { x: number; y: number }
 ) {
-	if (!canvas) return;
+	if (!canvas) return { panX: 0, panY: 0 };
 	const width = canvas.width;
 	const height = canvas.height;
 	let centerX = gridSizeX / 2;
@@ -21,8 +21,10 @@ function centerGridOnCanvas(
 		centerX = centerCoord.x + 0.5;
 		centerY = centerCoord.y + 0.5;
 	}
-	panZoom.panX = width / 2 - centerX * CELL_SIZE * panZoom.zoom;
-	panZoom.panY = height / 2 - centerY * CELL_SIZE * panZoom.zoom;
+	return {
+		panX: width / 2 - centerX * CELL_SIZE * zoom,
+		panY: height / 2 - centerY * CELL_SIZE * zoom,
+	};
 }
 
 const biomeFiles = {
@@ -48,10 +50,14 @@ const characterFiles = {
 const GameBoard: React.FC = observer(() => {
 	const state = getAppState();
 	const gameState = state.gameState;
+	const turnGreen = '#7fff7f';
+	const questRed = '#F00';
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const panZoom = useRef({ panX: 0, panY: 0, zoom: 1, dragging: false, lastX: 0, lastY: 0 });
+	const panAnimRef = useRef<number | null>(null);
 	const biomeImages = useRef<Record<string, HTMLImageElement>>({});
 	const characterImages = useRef<Record<string, HTMLImageElement>>({});
+	const prevDiceRollRef = useRef<number | null>(null);
 
 	const [imagesLoaded, setImagesLoaded] = useState(false);
 
@@ -105,7 +111,6 @@ const GameBoard: React.FC = observer(() => {
 
 	// Track if we've centered on the player already
 	const hasCenteredRef = useRef(false);
-	const prevGameStateRef = useRef<any>(null);
 
 	// Main render logic from main.ts, but render to buffer first
 	const renderGameCanvas = () => {
@@ -124,6 +129,7 @@ const GameBoard: React.FC = observer(() => {
 		ctx.clearRect(0, 0, buffer.width, buffer.height);
 
 		const currentPlayer = gameState.players[gameState.currentTurn];
+		const isMyTurn = currentPlayer?.id === state.playerId;
 
 		// Draw biomes
 		for (let y = 0; y < gameState.gridSizeY; y++) {
@@ -136,14 +142,15 @@ const GameBoard: React.FC = observer(() => {
 					ctx.fillStyle = '#e0e6b8';
 					ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 				}
+				ctx.lineWidth = 1;
 				ctx.strokeStyle = '#444';
 				ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 				if (gameState.currentDiceRoll && gameState.validMoves) {
 					const isValid = gameState.validMoves.some((m: any) => m.x === x && m.y === y);
-					if (isValid && currentPlayer.id == state.playerId) {
+					if (isValid && isMyTurn) {
 						ctx.fillStyle = 'rgba(0,255,0,0.2)';
 						ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-						if (gameState.players[gameState.currentTurn].id === currentPlayer.id) {
+						if (isMyTurn) {
 							ctx.strokeStyle = 'rgb(0,128,0)';
 							ctx.lineWidth = 3;
 							ctx.strokeRect(x * CELL_SIZE + 2, y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
@@ -151,7 +158,7 @@ const GameBoard: React.FC = observer(() => {
 					} else if (isValid) {
 						ctx.fillStyle = 'rgba(128,128,0,0.2)';
 						ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-						if (gameState.players[gameState.currentTurn].id === currentPlayer.id) {
+						if (isMyTurn) {
 							ctx.strokeStyle = 'rgb(128,128,0)';
 							ctx.lineWidth = 3;
 							ctx.strokeRect(x * CELL_SIZE + 2, y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
@@ -160,6 +167,14 @@ const GameBoard: React.FC = observer(() => {
 						ctx.fillStyle = 'rgba(0,0,0,0.5)';
 						ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 					}
+
+					const isSelected = state.selectedMove?.x === x && state.selectedMove?.y === y;
+					if (isSelected && isMyTurn) {
+						ctx.strokeStyle = questRed;
+						ctx.lineWidth = 6;
+						ctx.strokeRect(x * CELL_SIZE + 3, y * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6);
+					}
+					ctx.lineWidth = 1;
 				}
 			}
 		}
@@ -168,6 +183,11 @@ const GameBoard: React.FC = observer(() => {
 			const px = player.positionX * CELL_SIZE + CELL_SIZE / 2;
 			const py = player.positionY * CELL_SIZE + CELL_SIZE / 2;
 			ctx.save();
+			if (player.id === currentPlayer?.id) {
+				ctx.strokeStyle = turnGreen;
+				ctx.lineWidth = 5;
+				ctx.strokeRect(player.positionX * CELL_SIZE + 8, player.positionY * CELL_SIZE + 8, CELL_SIZE - 16, CELL_SIZE - 16);
+			}
 			// ctx.beginPath();
 			// ctx.arc(px, py, CELL_SIZE * 0.32, 0, 2 * Math.PI);
 			// ctx.closePath();
@@ -192,6 +212,48 @@ const GameBoard: React.FC = observer(() => {
 			}
 			ctx.restore();
 		}
+
+		if (isMyTurn && state.selectedMove) {
+			const me = gameState.players.find((p: any) => p.id === state.playerId);
+			if (me) {
+				const startX = me.positionX * CELL_SIZE + CELL_SIZE / 2;
+				const startY = me.positionY * CELL_SIZE + CELL_SIZE / 2;
+				const selectedCenterX = state.selectedMove.x * CELL_SIZE + CELL_SIZE / 2;
+				const selectedCenterY = state.selectedMove.y * CELL_SIZE + CELL_SIZE / 2;
+				const dx = selectedCenterX - startX;
+				const dy = selectedCenterY - startY;
+				const distance = Math.hypot(dx, dy) || 1;
+				const tipOffset = CELL_SIZE / 2 - 8;
+				const endX = selectedCenterX - (dx / distance) * tipOffset;
+				const endY = selectedCenterY - (dy / distance) * tipOffset;
+
+				ctx.save();
+				ctx.strokeStyle = questRed;
+				ctx.fillStyle = questRed;
+				ctx.lineWidth = 8;
+				ctx.lineCap = 'butt';
+				ctx.beginPath();
+				ctx.moveTo(startX, startY);
+				ctx.lineTo(endX, endY);
+				ctx.stroke();
+
+				const angle = Math.atan2(endY - startY, endX - startX);
+				const arrowSize = 22;
+				ctx.beginPath();
+				ctx.moveTo(endX, endY);
+				ctx.lineTo(
+					endX - arrowSize * Math.cos(angle - Math.PI / 6),
+					endY - arrowSize * Math.sin(angle - Math.PI / 6)
+				);
+				ctx.lineTo(
+					endX - arrowSize * Math.cos(angle + Math.PI / 6),
+					endY - arrowSize * Math.sin(angle + Math.PI / 6)
+				);
+				ctx.closePath();
+				ctx.fill();
+				ctx.restore();
+			}
+		}
 	};
 
 	// Draw buffer to main canvas with pan/zoom
@@ -209,45 +271,90 @@ const GameBoard: React.FC = observer(() => {
 		ctx.restore();
 	};
 
-	// Redraw on gameState change, but only center on player the first time
+	const cancelPanAnimation = () => {
+		if (panAnimRef.current !== null) {
+			window.cancelAnimationFrame(panAnimRef.current);
+			panAnimRef.current = null;
+		}
+	};
+
+	const animatePanTo = (targetPanX: number, targetPanY: number, durationMs = 350) => {
+		cancelPanAnimation();
+		const startPanX = panZoom.current.panX;
+		const startPanY = panZoom.current.panY;
+		const startedAt = performance.now();
+
+		const step = (now: number) => {
+			const elapsed = now - startedAt;
+			const t = Math.min(1, elapsed / durationMs);
+			const eased = 1 - Math.pow(1 - t, 3); // cubic-out lerp easing
+			panZoom.current.panX = startPanX + (targetPanX - startPanX) * eased;
+			panZoom.current.panY = startPanY + (targetPanY - startPanY) * eased;
+			drawToMainCanvas();
+
+			if (t < 1) {
+				panAnimRef.current = window.requestAnimationFrame(step);
+			} else {
+				panAnimRef.current = null;
+			}
+		};
+
+		panAnimRef.current = window.requestAnimationFrame(step);
+	};
+
+	// Redraw on gameState/selection changes and center camera for key UX moments.
 	useEffect(() => {
 		if (!gameState) return;
 		if (!imagesLoaded) return;
 		const canvas = canvasRef.current;
 		if (!canvas) return;
+		const me = gameState.players.find((p: any) => p.id === state.playerId);
+		const isMyTurn = gameState.players[gameState.currentTurn]?.id === state.playerId;
 		// Only center on player the first time
 		if (!hasCenteredRef.current) {
-			const me = gameState.players.find((p: any) => p.id === state.playerId);
 			if (me) {
-				centerGridOnCanvas(canvas, gameState.gridSizeX, gameState.gridSizeY, panZoom.current, {
+				const centeredPan = getCenteredPan(canvas, gameState.gridSizeX, gameState.gridSizeY, panZoom.current.zoom, {
 					x: me.positionX,
 					y: me.positionY,
 				});
+				animatePanTo(centeredPan.panX, centeredPan.panY, 450);
 			}
 			hasCenteredRef.current = true;
 		}
-		// Only redraw if the game state has actually changed (deep compare)
-		const prev = prevGameStateRef.current;
-		if (
-			!prev ||
-			JSON.stringify(prev.players) !== JSON.stringify(gameState.players) ||
-			JSON.stringify(prev.validMoves) !== JSON.stringify(gameState.validMoves)
-		) {
-			renderGameCanvas();
-			drawToMainCanvas();
-			prevGameStateRef.current = {
-				players: JSON.parse(JSON.stringify(gameState.players)),
-				validMoves: JSON.parse(JSON.stringify(gameState.validMoves)),
-			};
+
+		const currentDiceRoll = gameState.currentDiceRoll || null;
+		if (isMyTurn && currentDiceRoll && !prevDiceRollRef.current && me) {
+			const centeredPan = getCenteredPan(canvas, gameState.gridSizeX, gameState.gridSizeY, panZoom.current.zoom, {
+				x: me.positionX,
+				y: me.positionY,
+			});
+			animatePanTo(centeredPan.panX, centeredPan.panY, 400);
 		}
+
+		if (!currentDiceRoll || !isMyTurn) {
+			if (state.selectedMove) {
+				state.setSelectedMove(null);
+			}
+		}
+
+		prevDiceRollRef.current = currentDiceRoll;
+		renderGameCanvas();
+		drawToMainCanvas();
 		// eslint-disable-next-line
-	}, [gameState, imagesLoaded]);
+	}, [gameState, imagesLoaded, state.selectedMove]);
+
+	useEffect(() => {
+		return () => {
+			cancelPanAnimation();
+		};
+	}, []);
 
 	// Pan/zoom mouse handlers
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 		const handleDown = (e: MouseEvent) => {
+			cancelPanAnimation();
 			panZoom.current.dragging = true;
 			panZoom.current.lastX = e.clientX;
 			panZoom.current.lastY = e.clientY;
@@ -267,6 +374,7 @@ const GameBoard: React.FC = observer(() => {
 			e.preventDefault();
 			const canvas = canvasRef.current;
 			if (!canvas) return;
+			cancelPanAnimation();
 			// Get mouse position relative to canvas
 			const rect = canvas.getBoundingClientRect();
 			const mouseX = (e.clientX - rect.left - panZoom.current.panX) / panZoom.current.zoom;
@@ -292,7 +400,7 @@ const GameBoard: React.FC = observer(() => {
 		};
 	}, []);
 
-	// Remove handleClick and onClick, use mouse down/up events for click-to-move with distance check
+	// Use mouse down/up for click-to-select target square (movement is confirmed via End Turn).
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
@@ -310,16 +418,17 @@ const GameBoard: React.FC = observer(() => {
 			const upX = e.clientX;
 			const upY = e.clientY;
 			const dist = Math.sqrt((upX - downX) ** 2 + (upY - downY) ** 2);
-			if (dist > 10) return; // Ignore if mouse moved more than 10px
+			const maxSelectionDrag = CELL_SIZE * panZoom.current.zoom;
+			if (dist > maxSelectionDrag) return; // Allow drag up to about one cell while selecting
 			if (!gameState?.validMoves) return;
-			// Only allow move if it's the current player's turn and they have rolled
+			// Only allow selection if it's the current player's turn and they have rolled.
 			if (!gameState.currentDiceRoll || gameState.players[gameState.currentTurn].id !== state.playerId) return;
 			const rect = canvas.getBoundingClientRect();
 			// Adjust for pan/zoom
 			const x = Math.floor((upX - rect.left - panZoom.current.panX) / (CELL_SIZE * panZoom.current.zoom));
 			const y = Math.floor((upY - rect.top - panZoom.current.panY) / (CELL_SIZE * panZoom.current.zoom));
 			if (gameState.validMoves.some(m => m.x === x && m.y === y)) {
-				state.service.movePlayer(x, y);
+				state.setSelectedMove({ x, y });
 			}
 		};
 		canvas.addEventListener('mousedown', onMouseDown);

@@ -39,6 +39,7 @@ class GameService {
 		});
 		const joinData = await joinRes.json();
 		this.store.setPlayerId(joinData.playerId);
+		this.store.setPlayerName(playerName);
 		this.store.setGameId(gid);
 	}
 
@@ -50,7 +51,25 @@ class GameService {
 		});
 		const joinData = await joinRes.json();
 		this.store.setPlayerId(joinData.playerId);
+		this.store.setPlayerName(playerName);
 		this.store.setGameId(gameId);
+	}
+
+	async reconnectSavedSession(gameId: string, playerName: string): Promise<GameState | null> {
+		if (!gameId || !playerName) return null;
+		const res = await fetch(`/api/games/${gameId}/reconnect`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ playerName }),
+		});
+		if (!res.ok) return null;
+		const data = await res.json();
+		if (!data?.playerId || !data?.gameState) return null;
+		this.store.setPlayerId(data.playerId);
+		this.store.setPlayerName(playerName);
+		this.store.setGameId(gameId);
+		this.store.setGameState(data.gameState);
+		return data.gameState;
 	}
 
 	//game API Methods

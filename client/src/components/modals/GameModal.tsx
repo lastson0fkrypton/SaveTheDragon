@@ -16,6 +16,7 @@ const GameModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 					<h2 className="game-id">Game ID: {state.gameId}</h2>
 					<button
 						onClick={() => {
+							state.reset();
 							navigate('/');
 						}}
 						style={{ padding: '8px 24px', backgroundColor: '#800' }}

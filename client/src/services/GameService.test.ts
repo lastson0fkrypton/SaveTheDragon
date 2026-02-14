@@ -7,7 +7,9 @@ type MockStore = {
 	setAdminPassword: ReturnType<typeof vi.fn>;
 	setAdminGames: ReturnType<typeof vi.fn>;
 	setPlayerId: ReturnType<typeof vi.fn>;
+	setPlayerName: ReturnType<typeof vi.fn>;
 	setGameId: ReturnType<typeof vi.fn>;
+	setGameState: ReturnType<typeof vi.fn>;
 	gameId: string;
 	playerId: string;
 };
@@ -19,7 +21,9 @@ function createStore(overrides: Partial<MockStore> = {}): MockStore {
 		setAdminPassword: vi.fn(),
 		setAdminGames: vi.fn(),
 		setPlayerId: vi.fn(),
+		setPlayerName: vi.fn(),
 		setGameId: vi.fn(),
+		setGameState: vi.fn(),
 		gameId: 'game-1',
 		playerId: 'player-1',
 		...overrides,
@@ -85,6 +89,7 @@ describe('GameService', () => {
 			expect.objectContaining({ method: 'POST' })
 		);
 		expect(store.setPlayerId).toHaveBeenCalledWith('p-200');
+		expect(store.setPlayerName).toHaveBeenCalledWith('Alice');
 		expect(store.setGameId).toHaveBeenCalledWith('g-100');
 	});
 
@@ -100,7 +105,40 @@ describe('GameService', () => {
 			expect.objectContaining({ method: 'POST' })
 		);
 		expect(store.setPlayerId).toHaveBeenCalledWith('p-join');
+		expect(store.setPlayerName).toHaveBeenCalledWith('Bob');
 		expect(store.setGameId).toHaveBeenCalledWith('g-join');
+	});
+
+	it('reconnectSavedSession restores player identity and game state', async () => {
+		const store = createStore();
+		const service = new GameService(store as any);
+		const restoredState = { id: 'state' } as any;
+		vi.mocked(fetch).mockResolvedValueOnce(
+			mockResponse(true, { playerId: 'p-reconnect', gameState: restoredState })
+		);
+
+		const result = await service.reconnectSavedSession('g-reconnect', 'Nina');
+
+		expect(fetch).toHaveBeenCalledWith(
+			'/api/games/g-reconnect/reconnect',
+			expect.objectContaining({ method: 'POST' })
+		);
+		expect(store.setPlayerId).toHaveBeenCalledWith('p-reconnect');
+		expect(store.setPlayerName).toHaveBeenCalledWith('Nina');
+		expect(store.setGameId).toHaveBeenCalledWith('g-reconnect');
+		expect(store.setGameState).toHaveBeenCalledWith(restoredState);
+		expect(result).toBe(restoredState);
+	});
+
+	it('reconnectSavedSession returns null when reconnect fails', async () => {
+		const store = createStore();
+		const service = new GameService(store as any);
+		vi.mocked(fetch).mockResolvedValueOnce(mockResponse(false));
+
+		const result = await service.reconnectSavedSession('g-reconnect', 'Nina');
+
+		expect(result).toBeNull();
+		expect(store.setPlayerId).not.toHaveBeenCalled();
 	});
 
 	it('fetchGameState returns null on non-ok response', async () => {

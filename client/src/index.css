@@ -312,6 +312,11 @@ button:disabled {
 	text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
 }
 
+.roll-button.end-turn {
+	background: url(/icons/check.png) no-repeat center center;
+	background-size: contain;
+}
+
 .roll-btn:disabled {
 	background: #444;
 	color: #aaa;
