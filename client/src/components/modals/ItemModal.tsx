@@ -51,7 +51,7 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 								}}
 							>
 								<CachedImage
-									src={eqItem ? `/items/${id}.png` : '/items/nothing.png'}
+									src={eqItem?.img ? `/items/${eqItem.img}` : '/items/nothing.png'}
 									alt={eqItem?.id}
 									className="card-image"
 								/>

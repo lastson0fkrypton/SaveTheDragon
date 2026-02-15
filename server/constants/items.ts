@@ -1,5 +1,22 @@
+import type { ItemDef, ItemType } from '../types.js';
+
+type ItemCatalogSourceEntry = {
+	id: string;
+	name: string;
+	type: ItemType;
+	biome: string;
+	img: string;
+	noRandom?: boolean | null;
+	effect?: string | null;
+	heal?: number | null;
+	attack?: number | null;
+	attackChance?: number | null;
+	defense?: number | null;
+	defenseChance?: number | null;
+};
+
 // --- Item definitions ---
-export const ITEM_DEFS = [
+const ITEM_CATALOG_SOURCE: ReadonlyArray<ItemCatalogSourceEntry> = [
 	// Fist (starter, not random)
 	{
 		id: 'fist',
@@ -17,8 +34,6 @@ export const ITEM_DEFS = [
 		name: 'Rusty Spoon',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.5,
 		img: 'rusty_spoon.png',
 	},
 	{
@@ -26,8 +41,6 @@ export const ITEM_DEFS = [
 		name: 'Foam Noodle',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.7,
 		img: 'foam_noodle.png',
 	},
 	{
@@ -35,8 +48,6 @@ export const ITEM_DEFS = [
 		name: 'Rubber Chicken',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.9,
 		img: 'rubber_chicken.png',
 	},
 	{
@@ -44,8 +55,6 @@ export const ITEM_DEFS = [
 		name: 'Feather Duster',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.7,
 		img: 'feather_duster.png',
 	},
 	{
@@ -53,8 +62,6 @@ export const ITEM_DEFS = [
 		name: 'Banana Boomerang',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.5,
 		img: 'banana_boomerang.png',
 	},
 	{
@@ -62,8 +69,6 @@ export const ITEM_DEFS = [
 		name: 'Bubble Wrap Sword',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.9,
 		img: 'bubble_wrap_sword.png',
 	},
 	{
@@ -71,8 +76,6 @@ export const ITEM_DEFS = [
 		name: 'Bubble Wand',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.5,
 		img: 'bubble_wand.png',
 	},
 	{
@@ -80,8 +83,6 @@ export const ITEM_DEFS = [
 		name: 'Squirt Gun Blaster',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.7,
 		img: 'squirt_gun_blaster.png',
 	},
 	{
@@ -89,8 +90,6 @@ export const ITEM_DEFS = [
 		name: 'Balloon Sword',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.9,
 		img: 'balloon_sword.png',
 	},
 	{
@@ -98,8 +97,6 @@ export const ITEM_DEFS = [
 		name: 'Spaghetti Whip',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.5,
 		img: 'spaghetti_whip.png',
 	},
 	{
@@ -107,8 +104,6 @@ export const ITEM_DEFS = [
 		name: 'Silly String Shooter',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.7,
 		img: 'silly_string_shooter.png',
 	},
 	{
@@ -116,8 +111,6 @@ export const ITEM_DEFS = [
 		name: 'Cucumber Sword',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.9,
 		img: 'cucumber_sword.png',
 	},
 	{
@@ -125,8 +118,6 @@ export const ITEM_DEFS = [
 		name: 'Clown Nose Launcher',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.5,
 		img: 'clown_nose_launcher.png',
 	},
 	{
@@ -134,8 +125,6 @@ export const ITEM_DEFS = [
 		name: 'Balloon Launcher',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.7,
 		img: 'balloon_launcher.png',
 	},
 	{
@@ -143,8 +132,6 @@ export const ITEM_DEFS = [
 		name: 'Sausage Nunchucks',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.9,
 		img: 'sausage_nunchucks.png',
 	},
 	{
@@ -152,8 +139,6 @@ export const ITEM_DEFS = [
 		name: 'Bouncy Ball Blaster',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.5,
 		img: 'bouncy_ball_blaster.png',
 	},
 	{
@@ -161,8 +146,6 @@ export const ITEM_DEFS = [
 		name: 'Sock with a Rock',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 2,
-		attackChance: 0.7,
 		img: 'sock_with_a_rock.png',
 	},
 	{
@@ -170,8 +153,6 @@ export const ITEM_DEFS = [
 		name: 'Pooper Scooper',
 		type: 'weapon',
 		biome: 'plains,forest',
-		attack: 1,
-		attackChance: 0.9,
 		img: 'pooper_scooper.png',
 	},
 	// Easy Armor (plains, forest)
@@ -180,8 +161,6 @@ export const ITEM_DEFS = [
 		name: 'Rubber Bracelet',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.5,
 		img: 'rubber_bracelet.png',
 	},
 	{
@@ -189,8 +168,6 @@ export const ITEM_DEFS = [
 		name: 'Popstick Shield',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.7,
 		img: 'popstick_shield.png',
 	},
 	{
@@ -198,8 +175,6 @@ export const ITEM_DEFS = [
 		name: 'Straw Hat',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.9,
 		img: 'straw_hat.png',
 	},
 	{
@@ -207,8 +182,6 @@ export const ITEM_DEFS = [
 		name: 'Dog Collar Armbands',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.5,
 		img: 'dog_collar_armbands.png',
 	},
 	{
@@ -216,8 +189,6 @@ export const ITEM_DEFS = [
 		name: 'Cardboard Gloves',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.7,
 		img: 'cardboard_gloves.png',
 	},
 	{
@@ -225,8 +196,6 @@ export const ITEM_DEFS = [
 		name: 'Steel Toeless Boots',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.9,
 		img: 'steel_toeless_boots.png',
 	},
 	{
@@ -234,8 +203,6 @@ export const ITEM_DEFS = [
 		name: 'Tin Foil Shield',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.5,
 		img: 'tin_foil_shield.png',
 	},
 	{
@@ -243,8 +210,6 @@ export const ITEM_DEFS = [
 		name: 'Fuzzy Slippers',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.7,
 		img: 'fuzzy_slippers.png',
 	},
 	{
@@ -252,8 +217,6 @@ export const ITEM_DEFS = [
 		name: 'Leather Undies',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.9,
 		img: 'leather_undies.png',
 	},
 	{
@@ -261,8 +224,6 @@ export const ITEM_DEFS = [
 		name: 'Pizza Boots',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.5,
 		img: 'pizza_boots.png',
 	},
 	{
@@ -270,8 +231,6 @@ export const ITEM_DEFS = [
 		name: 'Jello Helmet',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.7,
 		img: 'jello_helmet.png',
 	},
 	{
@@ -279,8 +238,6 @@ export const ITEM_DEFS = [
 		name: 'Cardboard Chestplate',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.9,
 		img: 'cardboard_chestplate.png',
 	},
 	{
@@ -288,8 +245,6 @@ export const ITEM_DEFS = [
 		name: 'Bubble Wrap Armor',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 3,
-		defenseChance: 0.9,
 		img: 'bubble_wrap_armor.png',
 	},
 	{
@@ -297,8 +252,6 @@ export const ITEM_DEFS = [
 		name: 'Booger Crown',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.7,
 		img: 'booger_crown.png',
 	},
 	{
@@ -306,8 +259,6 @@ export const ITEM_DEFS = [
 		name: 'Cloud Gloves',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.9,
 		img: 'cloud_gloves.png',
 	},
 	{
@@ -315,8 +266,6 @@ export const ITEM_DEFS = [
 		name: 'Toilet Seat Shield',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.5,
 		img: 'toilet_seat_shield.png',
 	},
 	{
@@ -324,8 +273,6 @@ export const ITEM_DEFS = [
 		name: 'Patchwork Poncho',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 1,
-		defenseChance: 0.7,
 		img: 'patchwork_poncho.png',
 	},
 	{
@@ -333,8 +280,6 @@ export const ITEM_DEFS = [
 		name: 'Caterpillar Helmet',
 		type: 'armor',
 		biome: 'plains,forest',
-		defense: 2,
-		defenseChance: 0.9,
 		img: 'caterpillar_helmet.png',
 	},
 	// Medium Weapons (desert)
@@ -343,8 +288,6 @@ export const ITEM_DEFS = [
 		name: 'Cola Bomb',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.5,
 		img: 'cola_bomb.png',
 	},
 	{
@@ -352,8 +295,6 @@ export const ITEM_DEFS = [
 		name: 'Feather Boomerang',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.7,
 		img: 'feather_boomerang.png',
 	},
 	{
@@ -361,8 +302,6 @@ export const ITEM_DEFS = [
 		name: 'Confetti Cannon',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.9,
 		img: 'confetti_cannon.png',
 	},
 	{
@@ -370,8 +309,6 @@ export const ITEM_DEFS = [
 		name: 'Spitwad Blowpipe',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.9,
 		img: 'spitwad_blowpipe.png',
 	},
 	{
@@ -379,8 +316,6 @@ export const ITEM_DEFS = [
 		name: 'Paper Fan',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.5,
 		img: 'paper_fan.png',
 	},
 	{
@@ -388,8 +323,6 @@ export const ITEM_DEFS = [
 		name: 'Banana Slingshot',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.7,
 		img: 'banana_slingshot.png',
 	},
 	{
@@ -397,8 +330,6 @@ export const ITEM_DEFS = [
 		name: 'Red Licorice Whip',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.9,
 		img: 'red_licorice_whip.png',
 	},
 	{
@@ -406,8 +337,6 @@ export const ITEM_DEFS = [
 		name: 'Mallow Catapult',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.5,
 		img: 'mallow_catapult.png',
 	},
 	{
@@ -415,8 +344,6 @@ export const ITEM_DEFS = [
 		name: 'Fart Bomb',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.7,
 		img: 'fart_bomb.png',
 	},
 	{
@@ -424,8 +351,6 @@ export const ITEM_DEFS = [
 		name: 'Pogo Stick Lance',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.9,
 		img: 'pogo_stick_lance.png',
 	},
 	{
@@ -433,8 +358,6 @@ export const ITEM_DEFS = [
 		name: "Jester's Scepter",
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.7,
 		img: 'jesters_scepter.png',
 	},
 	{
@@ -442,8 +365,6 @@ export const ITEM_DEFS = [
 		name: 'Jelly Bean Gun',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.5,
 		img: 'jelly_bean_gun.png',
 	},
 	{
@@ -451,8 +372,6 @@ export const ITEM_DEFS = [
 		name: 'Plunger Bow',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.9,
 		img: 'plunger_bow.png',
 	},
 	{
@@ -460,8 +379,6 @@ export const ITEM_DEFS = [
 		name: 'Sharp Candy Cane',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.7,
 		img: 'sharp_candy_cane.png',
 	},
 	{
@@ -469,8 +386,6 @@ export const ITEM_DEFS = [
 		name: 'Glue Shooter',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.5,
 		img: 'glue_shooter.png',
 	},
 	{
@@ -478,8 +393,6 @@ export const ITEM_DEFS = [
 		name: 'Baguette Sword',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.9,
 		img: 'baguette_sword.png',
 	},
 	{
@@ -487,8 +400,6 @@ export const ITEM_DEFS = [
 		name: 'Rolling Pin Hammer',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 3,
-		attackChance: 0.7,
 		img: 'rolling_pin_hammer.png',
 	},
 	{
@@ -496,8 +407,6 @@ export const ITEM_DEFS = [
 		name: 'Exploding Ice Cream',
 		type: 'weapon',
 		biome: 'desert',
-		attack: 4,
-		attackChance: 0.5,
 		img: 'exploding_ice_cream.png',
 	},
 	// Medium Armor (desert)
@@ -506,8 +415,6 @@ export const ITEM_DEFS = [
 		name: 'Ice Cream Armor',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.5,
 		img: 'ice_cream_armor.png',
 	},
 	{
@@ -515,8 +422,6 @@ export const ITEM_DEFS = [
 		name: 'Knittted Armor',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.7,
 		img: 'knittted_armor.png',
 	},
 	{
@@ -524,8 +429,6 @@ export const ITEM_DEFS = [
 		name: 'Kitty Crown',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.9,
 		img: 'kitty_crown.png',
 	},
 	{
@@ -533,8 +436,6 @@ export const ITEM_DEFS = [
 		name: 'Fuzzy Armguards',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.5,
 		img: 'fuzzy_armguards.png',
 	},
 	{
@@ -542,8 +443,6 @@ export const ITEM_DEFS = [
 		name: 'Cow Leather Jacket',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'cow_leather_jacket.png',
 	},
 	{
@@ -551,8 +450,6 @@ export const ITEM_DEFS = [
 		name: 'Honey Helmet',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.9,
 		img: 'honey_helmet.png',
 	},
 	{
@@ -560,8 +457,6 @@ export const ITEM_DEFS = [
 		name: 'Vacuum Armor',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'vacuum_armor.png',
 	},
 	{
@@ -569,8 +464,6 @@ export const ITEM_DEFS = [
 		name: 'Crystal Boots',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.5,
 		img: 'crystal_boots.png',
 	},
 	{
@@ -578,8 +471,6 @@ export const ITEM_DEFS = [
 		name: 'Stained Glass Shield',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.9,
 		img: 'stained_glass_shield.png',
 	},
 	{
@@ -587,8 +478,6 @@ export const ITEM_DEFS = [
 		name: "Jester's Cap",
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.7,
 		img: 'jesters_cap.png',
 	},
 	{
@@ -596,8 +485,6 @@ export const ITEM_DEFS = [
 		name: 'Colorful Quilted Tunic',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.5,
 		img: 'colorful_quilted_tunic.png',
 	},
 	{
@@ -605,8 +492,6 @@ export const ITEM_DEFS = [
 		name: 'Feathered Boots',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.9,
 		img: 'feathered_boots.png',
 	},
 	{
@@ -614,8 +499,6 @@ export const ITEM_DEFS = [
 		name: 'Bamboo Armor',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'bamboo_armor.png',
 	},
 	{
@@ -623,8 +506,6 @@ export const ITEM_DEFS = [
 		name: 'Colander Helm',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.5,
 		img: 'colander_helm.png',
 	},
 	{
@@ -632,8 +513,6 @@ export const ITEM_DEFS = [
 		name: 'Fox Helmet',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'fox_helmet.png',
 	},
 	{
@@ -641,8 +520,6 @@ export const ITEM_DEFS = [
 		name: 'Metal Mittens',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.9,
 		img: 'metal_mittens.png',
 	},
 	{
@@ -650,8 +527,6 @@ export const ITEM_DEFS = [
 		name: 'Snail Shell Helmet',
 		type: 'armor',
 		biome: 'desert',
-		defense: 3,
-		defenseChance: 0.5,
 		img: 'snail_shell_helmet.png',
 	},
 	{
@@ -659,8 +534,6 @@ export const ITEM_DEFS = [
 		name: 'Oven Armor',
 		type: 'armor',
 		biome: 'desert',
-		defense: 4,
-		defenseChance: 0.7,
 		img: 'oven_armor.png',
 	},
 	// Hard Weapons (volcano, cave)
@@ -669,8 +542,6 @@ export const ITEM_DEFS = [
 		name: 'Exploding Pie',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 3,
-		attackChance: 0.5,
 		img: 'exploding_pie.png',
 	},
 	{
@@ -678,8 +549,6 @@ export const ITEM_DEFS = [
 		name: 'Flaming Tuba',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 4,
-		attackChance: 0.7,
 		img: 'flaming_tuba.png',
 	},
 	{
@@ -687,8 +556,6 @@ export const ITEM_DEFS = [
 		name: 'Glass Hammer',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 5,
-		attackChance: 0.9,
 		img: 'glass_hammer.png',
 	},
 	{
@@ -696,8 +563,6 @@ export const ITEM_DEFS = [
 		name: 'Octopus Launcher',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 3,
-		attackChance: 0.7,
 		img: 'octopus_launcher.png',
 	},
 	{
@@ -705,8 +570,6 @@ export const ITEM_DEFS = [
 		name: 'Gummy Bear Mace',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 4,
-		attackChance: 0.9,
 		img: 'gummy_bear_mace.png',
 	},
 	{
@@ -714,8 +577,6 @@ export const ITEM_DEFS = [
 		name: 'Mud Shotgun',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 5,
-		attackChance: 0.5,
 		img: 'mud_shotgun.png',
 	},
 	{
@@ -723,8 +584,6 @@ export const ITEM_DEFS = [
 		name: 'Whacky Wizard Staff',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 3,
-		attackChance: 0.9,
 		img: 'whacky_wizard_staff.png',
 	},
 	{
@@ -732,8 +591,6 @@ export const ITEM_DEFS = [
 		name: 'Bagpipe Cannon',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 4,
-		attackChance: 0.7,
 		img: 'bagpipe_cannon.png',
 	},
 	{
@@ -741,8 +598,6 @@ export const ITEM_DEFS = [
 		name: 'Piranha on a Stick',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 5,
-		attackChance: 0.7,
 		img: 'piranha_on_a_stick.png',
 	},
 	{
@@ -750,8 +605,6 @@ export const ITEM_DEFS = [
 		name: 'Scorpion tail Spear',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 3,
-		attackChance: 0.9,
 		img: 'scorpion_tail_spear.png',
 	},
 	{
@@ -759,8 +612,6 @@ export const ITEM_DEFS = [
 		name: 'Box of Tiny Lion',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 4,
-		attackChance: 0.7,
 		img: 'box_of_tiny_lion.png',
 	},
 	{
@@ -768,8 +619,6 @@ export const ITEM_DEFS = [
 		name: 'Danger Noodle Whip',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 5,
-		attackChance: 0.9,
 		img: 'danger_noodle_whip.png',
 	},
 	{
@@ -777,8 +626,6 @@ export const ITEM_DEFS = [
 		name: 'Giggle Daggers',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 3,
-		attackChance: 0.7,
 		img: 'giggle_daggers.png',
 	},
 	{
@@ -786,8 +633,6 @@ export const ITEM_DEFS = [
 		name: 'Rubber Chicken Axe',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 4,
-		attackChance: 0.9,
 		img: 'rubber_chicken_axe.png',
 	},
 	{
@@ -795,8 +640,6 @@ export const ITEM_DEFS = [
 		name: 'Shark Head Hammer',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 5,
-		attackChance: 0.9,
 		img: 'shark_head_hammer.png',
 	},
 	{
@@ -804,8 +647,6 @@ export const ITEM_DEFS = [
 		name: 'Roaring Great Sword',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 3,
-		attackChance: 0.5,
 		img: 'roaring_great_sword.png',
 	},
 	{
@@ -813,8 +654,6 @@ export const ITEM_DEFS = [
 		name: 'Wild Whirl Scythe',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 4,
-		attackChance: 0.7,
 		img: 'wild_whirl_scythe.png',
 	},
 	{
@@ -822,8 +661,6 @@ export const ITEM_DEFS = [
 		name: 'Crazy Cat Launcher',
 		type: 'weapon',
 		biome: 'volcano,cave',
-		attack: 5,
-		attackChance: 0.9,
 		img: 'crazy_cat_launcher.png',
 	},
 	// Hard Armor (volcano, cave)
@@ -832,8 +669,6 @@ export const ITEM_DEFS = [
 		name: 'Wooden Buckler',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 3,
-		defenseChance: 0.5,
 		img: 'wooden_buckler.png',
 	},
 	{
@@ -841,8 +676,6 @@ export const ITEM_DEFS = [
 		name: 'Barrel Lid Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 4,
-		defenseChance: 0.7,
 		img: 'barrel_lid_shield.png',
 	},
 	{
@@ -850,8 +683,6 @@ export const ITEM_DEFS = [
 		name: 'Feather Helmet',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 5,
-		defenseChance: 0.9,
 		img: 'feather_helmet.png',
 	},
 	{
@@ -859,8 +690,6 @@ export const ITEM_DEFS = [
 		name: 'Plant Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'plant_shield.png',
 	},
 	{
@@ -868,8 +697,6 @@ export const ITEM_DEFS = [
 		name: 'Sturdy Fish Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 4,
-		defenseChance: 0.9,
 		img: 'sturdy_fish_shield.png',
 	},
 	{
@@ -877,8 +704,6 @@ export const ITEM_DEFS = [
 		name: 'Vortex Cape',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 5,
-		defenseChance: 0.5,
 		img: 'vortex_cape.png',
 	},
 	{
@@ -886,8 +711,6 @@ export const ITEM_DEFS = [
 		name: 'Clock Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 3,
-		defenseChance: 0.9,
 		img: 'clock_shield.png',
 	},
 	{
@@ -895,8 +718,6 @@ export const ITEM_DEFS = [
 		name: 'Spider Silk Gloves',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 4,
-		defenseChance: 0.7,
 		img: 'spider_silk_gloves.png',
 	},
 	{
@@ -904,8 +725,6 @@ export const ITEM_DEFS = [
 		name: 'Lightning Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 5,
-		defenseChance: 0.9,
 		img: 'lightning_shield.png',
 	},
 	{
@@ -913,8 +732,6 @@ export const ITEM_DEFS = [
 		name: 'Chicken Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 3,
-		defenseChance: 0.9,
 		img: 'chicken_shield.png',
 	},
 	{
@@ -922,8 +739,6 @@ export const ITEM_DEFS = [
 		name: 'Guardian Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 4,
-		defenseChance: 0.7,
 		img: 'guardian_shield.png',
 	},
 	{
@@ -931,8 +746,6 @@ export const ITEM_DEFS = [
 		name: 'Superhero Shield',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 5,
-		defenseChance: 0.9,
 		img: 'superhero_shield.png',
 	},
 	{
@@ -940,8 +753,6 @@ export const ITEM_DEFS = [
 		name: 'Boulder Armor',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'boulder_armor.png',
 	},
 	{
@@ -949,8 +760,6 @@ export const ITEM_DEFS = [
 		name: 'Phoenix Cloak',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 4,
-		defenseChance: 0.9,
 		img: 'phoenix_cloak.png',
 	},
 	{
@@ -958,8 +767,6 @@ export const ITEM_DEFS = [
 		name: 'Shark Armor',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 5,
-		defenseChance: 0.5,
 		img: 'shark_armor.png',
 	},
 	{
@@ -967,8 +774,6 @@ export const ITEM_DEFS = [
 		name: 'Serpent Scale',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 3,
-		defenseChance: 0.7,
 		img: 'serpent_scale.png',
 	},
 	{
@@ -976,8 +781,6 @@ export const ITEM_DEFS = [
 		name: 'Dragon Scale Armor',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 4,
-		defenseChance: 0.9,
 		img: 'dragon_scale_armor.png',
 	},
 	{
@@ -985,23 +788,20 @@ export const ITEM_DEFS = [
 		name: 'Astral Plate Armor',
 		type: 'armor',
 		biome: 'volcano,cave',
-		defense: 5,
-		defenseChance: 0.5,
 		img: 'astral_plate_armor.png',
 	},
 	// Items
 	{ id: 'teleport', name: 'Teleport', type: 'item', biome: 'any', effect: 'teleport', img: 'teleport.png' },
-	{ id: 'small_potion', name: 'Small Health Potion', type: 'item', biome: 'any', heal: 3, img: 'small_potion.png' },
+	{ id: 'small_potion', name: 'Small Health Potion', type: 'item', biome: 'any', img: 'small_potion.png' },
 	{
 		id: 'medium_potion',
 		name: 'Medium Health Potion',
 		type: 'item',
 		biome: 'any',
-		heal: 5,
 		img: 'medium_potion.png',
 	},
-	{ id: 'large_potion', name: 'Large Health Potion', type: 'item', biome: 'any', heal: 7, img: 'large_potion.png' },
-	{ id: 'full_potion', name: 'Full Health Potion', type: 'item', biome: 'any', heal: 999, img: 'full_potion.png' },
+	{ id: 'large_potion', name: 'Large Health Potion', type: 'item', biome: 'any', img: 'large_potion.png' },
+	{ id: 'full_potion', name: 'Full Health Potion', type: 'item', biome: 'any', img: 'full_potion.png' },
 	{
 		id: 'extra_heart',
 		name: 'Additional Heart',
@@ -1011,3 +811,148 @@ export const ITEM_DEFS = [
 		img: 'extra_heart.png',
 	},
 ];
+
+const BASE_ITEM_DEFS: ReadonlyArray<ItemDef> = ITEM_CATALOG_SOURCE.map(item => {
+	const { id, name, type, biome, img, noRandom, effect, heal, attack, attackChance, defense, defenseChance } = item;
+	const baseDef: ItemDef = {
+		id,
+		name,
+		type,
+		biome,
+		img,
+	};
+
+	if (noRandom) {
+		baseDef.noRandom = true;
+		if (typeof attack === 'number') baseDef.attack = attack;
+		if (typeof attackChance === 'number') baseDef.attackChance = attackChance;
+		if (typeof defense === 'number') baseDef.defense = defense;
+		if (typeof defenseChance === 'number') baseDef.defenseChance = defenseChance;
+	}
+
+	if (effect) baseDef.effect = effect;
+	if (typeof heal === 'number') baseDef.heal = heal;
+
+	return baseDef;
+});
+
+const ITEM_TIER_RANK = {
+	plains: 1,
+	forest: 1,
+	desert: 2,
+	cave: 3,
+	volcano: 3,
+};
+
+const ITEM_TIER_BASE = {
+	weapon: {
+		1: { attack: 2, attackChance: 0.62 },
+		2: { attack: 4, attackChance: 0.74 },
+		3: { attack: 6, attackChance: 0.84 },
+	},
+	armor: {
+		1: { defense: 2, defenseChance: 0.62 },
+		2: { defense: 4, defenseChance: 0.74 },
+		3: { defense: 6, defenseChance: 0.84 },
+	},
+};
+
+const ITEM_VARIANT_MODIFIERS = {
+	cracked: { valueDelta: -1, chanceDelta: -0.08 },
+	normal: { valueDelta: 0, chanceDelta: 0 },
+	enchanted: { valueDelta: 1, chanceDelta: 0.08 },
+};
+
+const ITEM_VARIANTS: ReadonlyArray<'cracked' | 'normal' | 'enchanted'> = ['cracked', 'normal', 'enchanted'];
+
+function clampChance(value: number) {
+	return Math.max(0.15, Math.min(0.95, Number(value.toFixed(2))));
+}
+
+function resolveItemTier(itemBiome: string): number {
+	const biomes = (itemBiome || '')
+		.split(',')
+		.map(part => part.trim())
+		.filter(Boolean);
+	let tier = 1;
+	for (const biome of biomes) {
+		const rank = ITEM_TIER_RANK[biome] || 0;
+		if (rank > tier) tier = rank;
+	}
+	return tier;
+}
+
+function toVariantId(baseId: string, variant: 'cracked' | 'normal' | 'enchanted') {
+	if (variant === 'cracked') return `cracked_${baseId}`;
+	if (variant === 'enchanted') return `enchanted_${baseId}`;
+	return baseId;
+}
+
+function toVariantName(baseName: string, variant: 'cracked' | 'normal' | 'enchanted') {
+	if (variant === 'cracked') return `Cracked ${baseName}`;
+	if (variant === 'enchanted') return `Enchanted ${baseName}`;
+	return baseName;
+}
+
+function rebalanceConsumable(itemDef: ItemDef): ItemDef {
+	if (itemDef.id === 'small_potion') {
+		return { ...itemDef, heal: 4 };
+	}
+	if (itemDef.id === 'medium_potion') {
+		return { ...itemDef, heal: 7 };
+	}
+	if (itemDef.id === 'large_potion') {
+		return { ...itemDef, heal: 11 };
+	}
+	if (itemDef.id === 'full_potion') {
+		return { ...itemDef, heal: 999 };
+	}
+	return itemDef;
+}
+
+function applyItemBalance(
+	itemDef: ItemDef,
+	variant: 'cracked' | 'normal' | 'enchanted' = 'normal'
+): ItemDef {
+	if (itemDef.noRandom) {
+		return itemDef;
+	}
+
+	if (itemDef.type === 'weapon') {
+		const tier = resolveItemTier(itemDef.biome);
+		const base = ITEM_TIER_BASE.weapon[tier] || ITEM_TIER_BASE.weapon[1];
+		const mods = ITEM_VARIANT_MODIFIERS[variant] || ITEM_VARIANT_MODIFIERS.normal;
+		return {
+			...itemDef,
+			id: toVariantId(itemDef.id, variant),
+			name: toVariantName(itemDef.name, variant),
+			attack: Math.max(1, base.attack + mods.valueDelta),
+			attackChance: clampChance(base.attackChance + mods.chanceDelta),
+		};
+	}
+
+	if (itemDef.type === 'armor') {
+		const tier = resolveItemTier(itemDef.biome);
+		const base = ITEM_TIER_BASE.armor[tier] || ITEM_TIER_BASE.armor[1];
+		const mods = ITEM_VARIANT_MODIFIERS[variant] || ITEM_VARIANT_MODIFIERS.normal;
+		return {
+			...itemDef,
+			id: toVariantId(itemDef.id, variant),
+			name: toVariantName(itemDef.name, variant),
+			defense: Math.max(1, base.defense + mods.valueDelta),
+			defenseChance: clampChance(base.defenseChance + mods.chanceDelta),
+		};
+	}
+
+	if (itemDef.type === 'item') {
+		return rebalanceConsumable(itemDef);
+	}
+
+	return itemDef;
+}
+
+export const ITEM_DEFS = BASE_ITEM_DEFS.flatMap(itemDef => {
+	if (itemDef.noRandom) return [itemDef];
+	if (itemDef.type === 'item') return [rebalanceConsumable(itemDef)];
+	return ITEM_VARIANTS.map(variant => applyItemBalance(itemDef, variant));
+});

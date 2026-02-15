@@ -55,5 +55,18 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 
 This separation keeps the API layer thin, game logic reusable/testable, and SQL concerns encapsulated.
 
+## Completed Backlog Highlights
+- **BACKLOG-001:** Server architecture refactor completed (routes/controllers + service layer + repository layer boundaries).
+- **BACKLOG-002:** Loot flow supports immediate `Equip Now` / `Use Now` with server-authoritative updates reflected in UI without refresh.
+- **BACKLOG-003:** Inventory-heavy modals are scroll-safe with persistent action controls.
+- **BACKLOG-004:** Castle danger zone expanded and volcano encounter rate set to 100%.
+- **BACKLOG-005:** Curved biome-tier balancing implemented for monsters and gear progression:
+   - Early game: plains/forest tuned for starter survivability.
+   - Mid game: desert tuned as a meaningful progression step.
+   - Late game: cave/volcano tuned as high-threat zones.
+   - Item/monster stats remain tied to existing IDs, names, images, and biome assignments.
+   - Chance bar UI now supports dynamic percentages (not limited to fixed 50/70/90 buckets).
+- **BACKLOG-013:** Movement now uses click-to-select destination and `End Turn` confirmation with visual destination highlight and path arrow.
+
 ## License
 This project is for educational and personal use.

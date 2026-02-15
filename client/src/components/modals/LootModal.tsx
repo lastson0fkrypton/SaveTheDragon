@@ -2,6 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
 import { CachedImage } from '../common/CachedImage';
+import { getChanceStyle } from '../../utils/chanceStyle';
 
 const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const state = getAppState();
@@ -23,10 +24,6 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 			localStorage.setItem('lastLootKey', lootKey);
 		}
 		onClose();
-	};
-
-	const percent = (val: number, max: number): string => {
-		return Math.round((val / max) * 100).toString();
 	};
 
 	const getCardType = (itemType: string): string => {
@@ -78,12 +75,7 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 							{loot.item.type === 'armor' && (
 								<>
 									<div className="stat defense">{loot.item?.defense || 0}</div>
-									<div
-										className={
-											'stat defensechance chance chance' +
-											percent(loot.item?.defenseChance || 0, 1)
-										}
-									>
+									<div className="stat defensechance chance" style={getChanceStyle(loot.item?.defenseChance || 0)}>
 										<div>block</div>
 										<div>hit</div>
 									</div>
@@ -92,11 +84,7 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 							{loot.item.type === 'weapon' && (
 								<>
 									<div className="stat attack">{loot.item?.attack || 0}</div>
-									<div
-										className={
-											'stat attackchance chance chance' + percent(loot.item?.attackChance || 0, 1)
-										}
-									>
+									<div className="stat attackchance chance" style={getChanceStyle(loot.item?.attackChance || 0)}>
 										<div>hit</div>
 										<div>miss</div>
 									</div>

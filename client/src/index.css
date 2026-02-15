@@ -660,6 +660,7 @@ button:disabled {
 	justify-content: space-between;
 	padding-left: 4px;
 	padding-right: 4px;
+	background: linear-gradient(90deg, #5b9a00 var(--chance-fill, 50%), #c94317 var(--chance-fill, 50%));
 }
 
 .card .stat.attackchance {
@@ -674,18 +675,6 @@ button:disabled {
 
 	bottom: 25px;
 	right: 50px;
-}
-
-.card .stat.chance50 {
-	background: linear-gradient(90deg, #5b9a00 50%, #c94317 50%);
-}
-
-.card .stat.chance70 {
-	background: linear-gradient(90deg, #5b9a00 70%, #c94317 70%);
-}
-
-.card .stat.chance90 {
-	background: linear-gradient(90deg, #5b9a00 90%, #c94317 90%);
 }
 
 .card .card-image {

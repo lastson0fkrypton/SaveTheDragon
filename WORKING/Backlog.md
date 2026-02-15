@@ -71,8 +71,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Desert monsters are meaningfully harder and reward progression.
   - Cave/volcano monsters are strongest and unsuitable for early players.
   - Balance pass documented with rationale (short notes on stat ranges/tiering).
-- **Status:** TODO
-- **Notes:** Consider pairing monster rebalance with item stat tiers if needed.
+- **Status:** DONE
+- **Notes:** Reworked balancing to a curved progression model. Monsters now scale by biome tier with larger non-linear jumps (plains/forest early, desert mid, cave/volcano late) and deterministic weak/normal/strong variant deltas in `server/constants/monsters.ts`, while preserving IDs/names/biomes/images. Items were rebalanced in `server/constants/items.ts` using tier baselines for weapon/armor attack/defense and chance values, plus tuned consumables (`small/medium/large_potion` heal `4/7/11`), while preserving IDs/names/biomes/images. Removed legacy stat dependence from active catalogs so exported stats are model-driven by tier config rather than embedded per-entry legacy values. Added test coverage in `server/tests/monsterBalance.test.ts` and `server/tests/itemBalance.test.ts`. Updated client chance bars to support dynamic percentages via CSS variable fill (no more hard-coded 50/70/90-only rendering) in `client/src/index.css` and modal/panel components. Validated with `npm run test` and `npm run build` in both `server/` and `client/`.
 
 ## BACKLOG-006
 - **ID:** BACKLOG-006

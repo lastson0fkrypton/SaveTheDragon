@@ -2,6 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
 import { CachedImage } from '../common/CachedImage';
+import { getChanceStyle } from '../../utils/chanceStyle';
 
 const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const state = getAppState();
@@ -13,10 +14,6 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 	const player = gameState.players.find(p => p.id === playerId);
 	if (!player) return null;
 	const { inventory } = player;
-
-	const percent = (val: number, max: number): string => {
-		return Math.round((val / max) * 100).toString();
-	};
 
 	return (
 		<div className="modal">
@@ -38,7 +35,7 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 								}}
 							>
 								<CachedImage
-									src={eqArmor ? `/items/${eqArmor.id}.png` : '/items/nothing.png'}
+									src={eqArmor?.img ? `/items/${eqArmor.img}` : '/items/nothing.png'}
 									alt={eqArmor?.id}
 									className="armor-icon card-image"
 								/>
@@ -47,11 +44,7 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 										<span className="stroke">{eqArmor?.defense || 0}</span>
 										<span className="fill">{eqArmor?.defense || 0}</span>
 									</div>
-									<div
-										className={
-											'stat defensechance chance chance' + percent(eqArmor?.defenseChance || 0, 1)
-										}
-									>
+									<div className="stat defensechance chance" style={getChanceStyle(eqArmor?.defenseChance || 0)}>
 										<div>block</div>
 										<div>hit</div>
 									</div>

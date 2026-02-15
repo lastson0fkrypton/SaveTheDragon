@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
 import { CachedImage } from '../common/CachedImage';
+import { getChanceStyle } from '../../utils/chanceStyle';
 
 const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const battleLogRef = useRef<HTMLDivElement>(null);
@@ -43,10 +44,6 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 			localStorage.setItem('lastBattleKey', battleKey);
 		}
 		onClose();
-	};
-
-	const percent = (val: number, max: number): string => {
-		return Math.round((val / max) * 100).toString();
 	};
 
 	return (
@@ -94,19 +91,11 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 									<span className="stroke">{player?.maxHearts}</span>
 									<span className="fill">{player?.maxHearts}</span>
 								</div>
-								<div
-									className={
-										'stat attackchance chance chance' + percent(playerWeapon?.attackChance || 0, 1)
-									}
-								>
+								<div className="stat attackchance chance" style={getChanceStyle(playerWeapon?.attackChance || 0)}>
 									<div>hit</div>
 									<div>miss</div>
 								</div>
-								<div
-									className={
-										'stat defensechance chance chance' + percent(playerArmor?.defenseChance || 0, 1)
-									}
-								>
+								<div className="stat defensechance chance" style={getChanceStyle(playerArmor?.defenseChance || 0)}>
 									<div>block</div>
 									<div>hit</div>
 								</div>
@@ -148,19 +137,11 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 									<span className="stroke">{playerWeapon.attack}</span>
 									<span className="fill">{monster?.health}</span>
 								</div>
-								<div
-									className={
-										'stat attackchance chance chance' + percent(monster?.attackChance || 0, 1)
-									}
-								>
+								<div className="stat attackchance chance" style={getChanceStyle(monster?.attackChance || 0)}>
 									<div>hit</div>
 									<div>miss</div>
 								</div>
-								<div
-									className={
-										'stat defensechance chance chance' + percent(monster?.defenseChance || 0, 1)
-									}
-								>
+								<div className="stat defensechance chance" style={getChanceStyle(monster?.defenseChance || 0)}>
 									<div>block</div>
 									<div>hit</div>
 								</div>

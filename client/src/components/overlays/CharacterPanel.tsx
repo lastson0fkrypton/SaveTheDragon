@@ -6,6 +6,7 @@ import CharacterModal from '../modals/CharacterModal';
 import WeaponModal from '../modals/WeaponModal';
 import ArmorModal from '../modals/ArmorModal';
 import { CachedImage } from '../common/CachedImage';
+import { getChanceStyle } from '../../utils/chanceStyle';
 
 const CharacterPanel: React.FC = observer(() => {
 	const state = getAppState();
@@ -37,10 +38,6 @@ const CharacterPanel: React.FC = observer(() => {
 	const eqWeapon = gameState.itemMeta?.[player.inventory.equippedWeaponId || 'fist'];
 	const eqArmor = gameState.itemMeta?.[player.inventory.equippedArmorId || 'nothing'];
 
-	const percent = (val: number, max: number): string => {
-		return Math.round((val / max) * 100).toString();
-	};
-
 	const hearts = Array.from({ length: player.maxHearts || 0 }, (_, i) => (
 		<CachedImage
 			key={i}
@@ -61,7 +58,7 @@ const CharacterPanel: React.FC = observer(() => {
 				<div className="floating-hearts"></div>
 				<button className="weapon-panel card" onClick={() => setShowWeaponModal(true)}>
 					<CachedImage
-						src={eqWeapon ? `/items/${eqWeapon.id}.png` : '/items/nothing.png'}
+						src={eqWeapon?.img ? `/items/${eqWeapon.img}` : '/items/nothing.png'}
 						alt={player.name}
 						className="weapon-icon card-image"
 					/>
@@ -70,7 +67,7 @@ const CharacterPanel: React.FC = observer(() => {
 							<span className="stroke">{eqWeapon?.attack}</span>
 							<span className="fill">{eqWeapon?.attack}</span>
 						</div>
-						<div className={'stat attackchance chance chance' + percent(eqWeapon?.attackChance || 0, 1)}>
+						<div className="stat attackchance chance" style={getChanceStyle(eqWeapon?.attackChance || 0)}>
 							<div>hit</div>
 							<div>miss</div>
 						</div>
@@ -95,7 +92,7 @@ const CharacterPanel: React.FC = observer(() => {
 				</button>
 				<button className="armor-panel card" onClick={() => setShowArmorModal(true)}>
 					<CachedImage
-						src={eqArmor ? `/items/${eqArmor.id}.png` : '/items/nothing.png'}
+						src={eqArmor?.img ? `/items/${eqArmor.img}` : '/items/nothing.png'}
 						alt={player.name}
 						className="armor-icon card-image"
 					/>
@@ -104,7 +101,7 @@ const CharacterPanel: React.FC = observer(() => {
 							<span className="stroke">{eqArmor?.defense || 0}</span>
 							<span className="fill">{eqArmor?.defense || 0}</span>
 						</div>
-						<div className={'stat defensechance chance chance' + percent(eqArmor?.defenseChance || 0, 1)}>
+						<div className="stat defensechance chance" style={getChanceStyle(eqArmor?.defenseChance || 0)}>
 							<div>block</div>
 							<div>hit</div>
 						</div>

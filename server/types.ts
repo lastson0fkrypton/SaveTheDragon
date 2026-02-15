@@ -5,14 +5,14 @@ export interface ItemDef {
 	name: string;
 	type: ItemType;
 	biome?: string;
-	attack?: number;
-	attackChance?: number;
-	defense?: number;
-	defenseChance?: number;
-	heal?: number;
-	effect?: string;
-	img?: string;
-	noRandom?: boolean;
+	attack?: number | null;
+	attackChance?: number | null;
+	defense?: number | null;
+	defenseChance?: number | null;
+	heal?: number | null;
+	effect?: string | null;
+	img?: string | null;
+	noRandom?: boolean | null;
 }
 
 export interface MonsterDef {
