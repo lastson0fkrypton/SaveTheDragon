@@ -13,19 +13,39 @@ describe('gameUtils', () => {
 		expect(gameState.recentActions[9].playerName).toBe('Player11');
 	});
 
-	it('generateBiomeGrid places one castle and at least one town', () => {
+	it('generateBiomeGrid places one castle, circular expanded volcano danger zone, and at least one town', () => {
 		const grid = generateBiomeGrid(20, 20) as any;
 		let castleCount = 0;
 		let townCount = 0;
+		let castleX = -1;
+		let castleY = -1;
+		let volcanoAtDistanceTwo = 0;
 		for (let y = 0; y < grid.length; y++) {
 			for (let x = 0; x < grid[0].length; x++) {
-				if (grid[y][x] === 'castle') castleCount++;
+				if (grid[y][x] === 'castle') {
+					castleCount++;
+					castleX = x;
+					castleY = y;
+				}
 				if (grid[y][x] === 'town') townCount++;
 			}
 		}
 
 		expect(castleCount).toBe(1);
 		expect(townCount).toBeGreaterThan(0);
+
+		for (let y = 0; y < grid.length; y++) {
+			for (let x = 0; x < grid[0].length; x++) {
+				if (grid[y][x] !== 'volcano') continue;
+				const dx = x - castleX;
+				const dy = y - castleY;
+				const distSq = dx * dx + dy * dy;
+				expect(distSq).toBeLessThanOrEqual(4);
+				if (distSq === 4) volcanoAtDistanceTwo++;
+			}
+		}
+
+		expect(volcanoAtDistanceTwo).toBeGreaterThan(0);
 	});
 
 	it('serializeGame includes players, valid moves and item metadata', () => {

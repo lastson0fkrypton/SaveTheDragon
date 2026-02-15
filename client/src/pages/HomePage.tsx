@@ -21,8 +21,9 @@ const HomePage: React.FC = observer(() => {
     const sessionExpired = !!(location.state as { sessionExpired?: boolean } | null)?.sessionExpired;
     if (sessionExpired) {
       setShowExpiredMessage(true);
+      navigate('/', { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, navigate]);
 
   React.useEffect(() => {
     if (state.gameId && state.playerName) {
@@ -45,16 +46,7 @@ const HomePage: React.FC = observer(() => {
     <div style={{ maxWidth: 600, margin: '60px auto', background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 16px #0008' }}>
       {showExpiredMessage && (
         <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: '#3d2b2b', border: '1px solid #8a4a4a' }}>
-          <div style={{ marginBottom: 8 }}>Your game expired or no longer exists.</div>
-          <button
-            onClick={() => {
-              setShowExpiredMessage(false);
-              navigate('/', { replace: true, state: {} });
-            }}
-            style={{ width: '100%' }}
-          >
-            Return Home
-          </button>
+          <div>Your game expired or no longer exists.</div>
         </div>
       )}
       <img src="/ai-pictures/baby_dragon.png" alt="Baby Dragon" style={{ display: 'block', margin: '0 auto 24px', width: 120, height: 120 }} />

@@ -121,10 +121,12 @@ function generateBiomeGrid(width: number, height: number): BiomeGrid {
 	];
 	const [castleX, castleY] = corners[Math.floor(Math.random() * corners.length)];
 	grid[castleY][castleX] = 'castle';
-	// Surround castle with volcanoes
-	for (let dx = -1; dx <= 1; dx++) {
-		for (let dy = -1; dy <= 1; dy++) {
+	// Surround castle with an expanded volcano danger zone
+	const castleDangerRadius = 2;
+	for (let dx = -castleDangerRadius; dx <= castleDangerRadius; dx++) {
+		for (let dy = -castleDangerRadius; dy <= castleDangerRadius; dy++) {
 			if (dx === 0 && dy === 0) continue;
+			if (dx * dx + dy * dy > castleDangerRadius * castleDangerRadius) continue;
 			const x = castleX + dx;
 			const y = castleY + dy;
 			if (x >= 0 && x < width && y >= 0 && y < height) {

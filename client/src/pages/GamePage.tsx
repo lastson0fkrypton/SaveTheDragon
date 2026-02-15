@@ -17,6 +17,7 @@ const GamePage: React.FC = observer(() => {
 	const service = state.service;
 	const navigate = useNavigate();
 	const [bootstrapped, setBootstrapped] = useState(false);
+	const [sessionExpired, setSessionExpired] = useState(false);
 
 	let watchGameStateInterval: any;
 
@@ -25,23 +26,29 @@ const GamePage: React.FC = observer(() => {
 		const bootstrapSession = async () => {
 			if (!state.gameId) {
 				state.reset();
-				navigate('/', { replace: true });
-				if (!cancelled) setBootstrapped(true);
+				if (!cancelled) {
+					setSessionExpired(true);
+					setBootstrapped(true);
+				}
 				return;
 			}
 
 			if (!state.playerName) {
 				state.reset();
-				navigate('/', { replace: true });
-				if (!cancelled) setBootstrapped(true);
+				if (!cancelled) {
+					setSessionExpired(true);
+					setBootstrapped(true);
+				}
 				return;
 			}
 
 			const restored = await service.reconnectSavedSession(state.gameId, state.playerName);
 			if (!restored) {
 				state.reset();
-				navigate('/', { replace: true, state: { sessionExpired: true } });
-				if (!cancelled) setBootstrapped(true);
+				if (!cancelled) {
+					setSessionExpired(true);
+					setBootstrapped(true);
+				}
 				return;
 			}
 
@@ -52,7 +59,7 @@ const GamePage: React.FC = observer(() => {
 		return () => {
 			cancelled = true;
 		};
-	}, [navigate, service, state]);
+	}, [service, state]);
 
 	useEffect(() => {
 		if (!bootstrapped) return;
@@ -60,12 +67,12 @@ const GamePage: React.FC = observer(() => {
 		watchGameStateInterval = setInterval(async () => {
 			if (!state.gameId) return;
 			const newState = await service.fetchGameState(state.gameId);
-				if (!newState) {
-					clearInterval(watchGameStateInterval);
-					state.reset();
-					navigate('/', { replace: true, state: { sessionExpired: true } });
-					return;
-				}
+			if (!newState) {
+				clearInterval(watchGameStateInterval);
+				state.reset();
+				setSessionExpired(true);
+				return;
+			}
 			runInAction(() => {
 				state.setGameState(newState);
 			});
@@ -73,7 +80,7 @@ const GamePage: React.FC = observer(() => {
 		return () => {
 			clearInterval(watchGameStateInterval);
 		};
-	}, [bootstrapped, navigate, service, state]);
+	}, [bootstrapped, service, state]);
 
 	const [showLootModal, setShowLootModal] = useState(false);
 	const [showBattleModal, setShowBattleModal] = useState(false);
@@ -86,6 +93,17 @@ const GamePage: React.FC = observer(() => {
 
 	if (!bootstrapped) {
 		return <div style={{ padding: 40, textAlign: 'center' }}>Restoring saved session...</div>;
+	}
+	if (sessionExpired) {
+		return (
+			<div style={{ padding: 40, textAlign: 'center' }}>
+				<h1>Game expired</h1>
+				<p>This game no longer exists or your session has expired.</p>
+				<button onClick={() => navigate('/', { replace: true })}>
+					Return Home
+				</button>
+			</div>
+		);
 	}
 	if (!state.gameId) {
 		return (

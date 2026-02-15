@@ -58,8 +58,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Volcano biome area around castle is increased (distance/radius larger than current).
   - Volcano encounter rate is set to 1.0 (100%).
   - Generation remains valid within map bounds and produces stable maps.
-- **Status:** TODO
-- **Notes:** Confirm impact on spawn fairness and pathing from towns.
+- **Status:** DONE
+- **Notes:** Increased castle-adjacent volcano danger zone from radius 1 to radius 2 in biome generation as a true circular radius (bounds-checked), and set `volcano` encounter chance to `1.0` (100%). Added/updated biome generation test coverage to assert circular radius constraints and expanded distance-2 volcano presence around castle. Validated with `npm run test` and `npm run build` in `server/`.
 
 ## BACKLOG-005
 - **ID:** BACKLOG-005
