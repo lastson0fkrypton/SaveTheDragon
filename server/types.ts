@@ -55,6 +55,30 @@ export interface BattleState {
 	ts: number;
 }
 
+export interface RaidBossState {
+	id: string;
+	name: string;
+	maxHealth: number;
+	currentHealth: number;
+	attack: number;
+	attackChance: number;
+	defense: number;
+	defenseChance: number;
+	img: string;
+	defeated: boolean;
+	defeatedByPlayerId?: string;
+	defeatedByPlayerName?: string;
+	defeatedAtTs?: number;
+}
+
+export interface GameCompletionState {
+	completed: boolean;
+	reason?: string;
+	completedByPlayerId?: string;
+	completedByPlayerName?: string;
+	completedAtTs?: number;
+}
+
 export interface RecentAction {
 	id: string;
 	type: string;
@@ -81,10 +105,13 @@ export interface GameStateJson {
 	currentDiceRoll: number | null;
 	gridSizeX: number;
 	gridSizeY: number;
+	preventExpiry?: boolean;
 	biomeGrid: BiomeGrid;
 	recentlyFoundItem?: RecentlyFoundItem | null;
 	currentBattle?: BattleState | null;
 	recentActions?: RecentAction[];
+	raidBoss?: RaidBossState;
+	gameCompletion?: GameCompletionState;
 }
 
 export interface GameRow {

@@ -55,6 +55,30 @@ export interface CurrentBattle {
 	ts: number;
 }
 
+export interface RaidBossState {
+	id: string;
+	name: string;
+	maxHealth: number;
+	currentHealth: number;
+	attack: number;
+	attackChance: number;
+	defense: number;
+	defenseChance: number;
+	img: string;
+	defeated: boolean;
+	defeatedByPlayerId?: string;
+	defeatedByPlayerName?: string;
+	defeatedAtTs?: number;
+}
+
+export interface GameCompletionState {
+	completed: boolean;
+	reason?: string;
+	completedByPlayerId?: string;
+	completedByPlayerName?: string;
+	completedAtTs?: number;
+}
+
 export interface MonsterMeta {
 	id: string;
 	name: string;
@@ -86,6 +110,8 @@ export interface GameState {
 	recentlyFoundItem?: RecentlyFoundItem;
 	currentBattle?: CurrentBattle;
 	recentActions?: RecentAction[];
+	raidBoss?: RaidBossState;
+	gameCompletion?: GameCompletionState;
 }
 
 export interface AdminGame {
@@ -93,4 +119,12 @@ export interface AdminGame {
 	players: { id: string; name: string }[];
 	currentTurn: string | null;
 	currentDiceRoll: number | null;
+	preventExpiry: boolean;
+}
+
+export interface AdminItem {
+	id: string;
+	name: string;
+	type: 'weapon' | 'armor' | 'item';
+	biome: string;
 }

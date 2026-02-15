@@ -1,5 +1,12 @@
 import express from 'express';
-import { deleteAdminGame, listAdminGames } from '../services/adminService.js';
+import {
+	deleteAdminGame,
+	giveAdminPlayerItem,
+	kickAdminPlayer,
+	listAdminGames,
+	listAdminItems,
+	setAdminGamePreventExpiry,
+} from '../services/adminService.js';
 
 const router = express.Router();
 
@@ -26,6 +33,47 @@ router.delete('/admin/games/:gameId', async (req, res) => {
 	try {
 		const { gameId } = req.params;
 		const result = await deleteAdminGame(gameId, req.query.password);
+		return res.json(result);
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.get('/admin/items', async (req, res) => {
+	try {
+		const result = await listAdminItems(req.query.password);
+		return res.json(result);
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.post('/admin/games/:gameId/players/:playerId/kick', async (req, res) => {
+	try {
+		const { gameId, playerId } = req.params;
+		const result = await kickAdminPlayer(gameId, playerId, req.query.password);
+		return res.json(result);
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.post('/admin/games/:gameId/players/:playerId/give-item', async (req, res) => {
+	try {
+		const { gameId, playerId } = req.params;
+		const { itemId } = req.body;
+		const result = await giveAdminPlayerItem(gameId, playerId, req.query.password, itemId);
+		return res.json(result);
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.patch('/admin/games/:gameId/prevent-expiry', async (req, res) => {
+	try {
+		const { gameId } = req.params;
+		const { preventExpiry } = req.body;
+		const result = await setAdminGamePreventExpiry(gameId, req.query.password, preventExpiry);
 		return res.json(result);
 	} catch (error) {
 		return handleError(res, error);

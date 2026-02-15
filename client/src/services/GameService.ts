@@ -1,10 +1,22 @@
 import AppStore from '../stores/AppState';
-import type { GameState } from '../types';
+import type { AdminItem, GameState } from '../types';
 
 class GameService {
 	store: AppStore;
 	constructor(store: AppStore) {
 		this.store = store;
+	}
+
+	private async readErrorMessage(response: Response, fallbackMessage: string): Promise<string> {
+		try {
+			const payload = await response.json();
+			if (payload && typeof payload.error === 'string' && payload.error.trim().length > 0) {
+				return payload.error;
+			}
+		} catch (_error) {
+			// Ignore parse failures and use fallback
+		}
+		return fallbackMessage;
 	}
 
 	private async refreshCurrentGameState() {
@@ -27,8 +39,48 @@ class GameService {
 		this.store.setAdminPassword(pw);
 		this.store.setAdminGames(await res.json());
 	}
+	async fetchAdminItems(password: string): Promise<AdminItem[]> {
+		const res = await fetch(`/api/admin/items?password=${encodeURIComponent(password)}`);
+		if (!res.ok) {
+			return [];
+		}
+		const items = await res.json();
+		this.store.setAdminItems(items);
+		return items;
+	}
 	async deleteAdminGame(gameId: string, password: string) {
-		await fetch(`/api/admin/games/${gameId}?password=${encodeURIComponent(password)}`, { method: 'DELETE' });
+		const res = await fetch(`/api/admin/games/${gameId}?password=${encodeURIComponent(password)}`, { method: 'DELETE' });
+		if (!res.ok) {
+			throw new Error(await this.readErrorMessage(res, 'Failed to delete game'));
+		}
+	}
+	async kickAdminPlayer(gameId: string, playerId: string, password: string) {
+		const res = await fetch(`/api/admin/games/${gameId}/players/${playerId}/kick?password=${encodeURIComponent(password)}`, {
+			method: 'POST',
+		});
+		if (!res.ok) {
+			throw new Error(await this.readErrorMessage(res, 'Failed to kick player'));
+		}
+	}
+	async giveAdminPlayerItem(gameId: string, playerId: string, itemId: string, password: string) {
+		const res = await fetch(`/api/admin/games/${gameId}/players/${playerId}/give-item?password=${encodeURIComponent(password)}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ itemId }),
+		});
+		if (!res.ok) {
+			throw new Error(await this.readErrorMessage(res, 'Failed to give item'));
+		}
+	}
+	async setAdminGamePreventExpiry(gameId: string, preventExpiry: boolean, password: string) {
+		const res = await fetch(`/api/admin/games/${gameId}/prevent-expiry?password=${encodeURIComponent(password)}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ preventExpiry }),
+		});
+		if (!res.ok) {
+			throw new Error(await this.readErrorMessage(res, 'Failed to update expiry setting'));
+		}
 	}
 
 	//game management API methods

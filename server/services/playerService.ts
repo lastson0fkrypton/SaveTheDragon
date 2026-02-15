@@ -118,7 +118,9 @@ async function useItem(gameId, playerId, itemId) {
 
 	if (!used) throw serviceError(400, 'Item cannot be used');
 
-	playerState.inventory.items = playerState.inventory.items.filter(i => i !== itemId);
+	const usedItemIndex = playerState.inventory.items.indexOf(itemId);
+	if (usedItemIndex < 0) throw serviceError(400, 'Item not in inventory');
+	playerState.inventory.items.splice(usedItemIndex, 1);
 	addRecentAction(gameState, 'use-item', playerRow.name, item.name);
 
 	await updateGameStateJson(gameId, JSON.stringify(gameState));

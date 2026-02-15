@@ -7,6 +7,7 @@ import GameBoard from '../components/GameBoard';
 import GamePanel from '../components/overlays/GamePanel';
 import BattleModal from '../components/modals/BattleModal';
 import LootModal from '../components/modals/LootModal';
+import WinModal from '../components/modals/WinModal';
 import QuestPanel from '../components/overlays/QuestPanel';
 import ItemPanel from '../components/overlays/ItemPanel';
 import CharacterPanel from '../components/overlays/CharacterPanel';
@@ -87,6 +88,11 @@ const GamePage: React.FC = observer(() => {
 
 	// Show modals based on game state
 	useEffect(() => {
+		if (state.gameState?.gameCompletion?.completed) {
+			setShowBattleModal(false);
+			setShowLootModal(false);
+			return;
+		}
 		if (state.gameState?.currentBattle) setShowBattleModal(true);
 		if (state.gameState?.recentlyFoundItem) setShowLootModal(true);
 	}, [state.gameState]);
@@ -143,6 +149,7 @@ const GamePage: React.FC = observer(() => {
 					}}
 				/>
 			)}
+			{state.gameState?.gameCompletion?.completed && <WinModal />}
 		</div>
 	);
 });

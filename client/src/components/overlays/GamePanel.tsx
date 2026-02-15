@@ -21,10 +21,24 @@ const GamePanel: React.FC = observer(() => {
 	return (
 		<div className="player-panel game-panel">
 			<button onClick={() => setShowGameModal(true)}>Main Menu</button>
+			{gameState.raidBoss && !gameState.raidBoss.defeated && (
+				<div style={{ marginTop: 8, marginBottom: 8, fontSize: 12, color: '#ffb3b3' }}>
+					Boss: {gameState.raidBoss.name} {gameState.raidBoss.currentHealth}/{gameState.raidBoss.maxHealth} HP
+				</div>
+			)}
+			{gameState.gameCompletion?.completed && (
+				<div style={{ marginTop: 8, marginBottom: 8, fontSize: 12, color: '#7fff7f', fontWeight: 700 }}>
+					Victory! {gameState.gameCompletion.completedByPlayerName || 'Players'} defeated the Evil Princess.
+				</div>
+			)}
 			<h3>Players</h3>
 			<ul className="player-list">
 				{gameState.players.map((p: any, idx: number) => {
-					const hearts = Math.max(1, (p.maxHearts || 5) - (p.damage || 0));
+					const hearts = Math.max(0, (p.maxHearts || 5) - (p.damage || 0));
+					const equippedWeaponId = p.inventory?.equippedWeaponId || 'fist';
+					const equippedArmorId = p.inventory?.equippedArmorId || '';
+					const attack = gameState.itemMeta?.[equippedWeaponId]?.attack || 1;
+					const defense = gameState.itemMeta?.[equippedArmorId]?.defense || 0;
 					return (
 						<li
 							className={['player-list-item', idx === gameState.currentTurn ? 'current-turn' : ''].join(
@@ -40,24 +54,19 @@ const GamePanel: React.FC = observer(() => {
 							<div className="player-name" title={p.name}>
 								{p.name}
 							</div>
-							<div className="player-hearts">
-								{Array.from({ length: p.maxHearts || 5 }, (_, i) => {
-									const heartOpacity = i < hearts ? 1 : 0.2;
-									return (
-										<CachedImage
-											src="/icons/Heart.png"
-											key={p.id + '_' + i}
-											style={{
-												width: '16px',
-												height: '16px',
-												verticalAlign: 'middle',
-												marginLeft: '2px',
-												opacity: heartOpacity,
-											}}
-											alt="♥"
-										/>
-									);
-								})}
+							<div className="player-stats">
+								<div className="stat-icon-badge player-list-health-badge">
+									<CachedImage src="/icons/health.png" alt="Health" className="stat-icon" />
+									<span className="stat-icon-value">{hearts}</span>
+								</div>
+								<div className="stat-icon-badge player-list-attack-badge">
+									<CachedImage src="/icons/sword.png" alt="Attack" className="stat-icon" />
+									<span className="stat-icon-value">{attack}</span>
+								</div>
+								<div className="stat-icon-badge player-list-defense-badge">
+									<CachedImage src="/icons/shield.png" alt="Defense" className="stat-icon" />
+									<span className="stat-icon-value">{defense}</span>
+								</div>
 							</div>
 						</li>
 					);

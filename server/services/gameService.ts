@@ -1,6 +1,6 @@
 import { BIOME_ENCOUNTER_RATES } from '../constants/biomes.js';
 import { CHARACTERS } from '../constants/characters.js';
-import { MONSTER_DEFS } from '../constants/monsters.js';
+import { EVIL_PRINCESS_MONSTER, MONSTER_DEFS } from '../constants/monsters.js';
 import {
 	createGame,
 	createPlayer,
@@ -26,11 +26,18 @@ async function loadSerializedGame(gameId) {
 	if (!gameRow) {
 		throw serviceError(404, 'Game not found');
 	}
+	const gameState = getGameState(gameRow);
+	const raidBossBefore = gameState.raidBoss;
+	const completionBefore = gameState.gameCompletion;
+	ensureRaidBossState(gameState);
+	if (!raidBossBefore || !completionBefore) {
+		await updateGameStateJson(gameId, JSON.stringify(gameState));
+	}
 	const [playerRows, validMoveRows] = await Promise.all([
 		getPlayersByGameId(gameId),
 		getValidMovesByGameId(gameId),
 	]);
-	return buildGameState(gameRow, playerRows, validMoveRows);
+	return buildGameState({ ...gameRow, gameStateJson: JSON.stringify(gameState) }, playerRows, validMoveRows);
 }
 
 function randomId() {
@@ -52,6 +59,27 @@ function getPlayerState(playerRow) {
 
 function getGameState(gameRow) {
 	return parseJson(gameRow?.gameStateJson, {});
+}
+
+function ensureRaidBossState(gameState) {
+	if (!gameState.raidBoss) {
+		gameState.raidBoss = {
+			...EVIL_PRINCESS_MONSTER,
+			maxHealth: EVIL_PRINCESS_MONSTER.health,
+			currentHealth: EVIL_PRINCESS_MONSTER.health,
+			defeated: false,
+		};
+	}
+	if (!gameState.gameCompletion) {
+		gameState.gameCompletion = { completed: false };
+	}
+	return gameState.raidBoss;
+}
+
+function ensureGameNotCompleted(gameState) {
+	if (gameState?.gameCompletion?.completed) {
+		throw serviceError(400, 'Game is complete. Start a new game to continue playing.');
+	}
 }
 
 function pickPlayerSpawn(gameState, usedPositions) {
@@ -140,7 +168,20 @@ async function createNewGame(gridSizeX, gridSizeY) {
 	const safeY = Math.max(10, Math.min(100, parseInt(gridSizeY, 10) || 10));
 	const gameId = randomId();
 	const biomeGrid = generateBiomeGrid(safeX, safeY);
-	const gameState = { currentTurn: 0, currentDiceRoll: null, gridSizeX: safeX, gridSizeY: safeY, biomeGrid };
+	const gameState = {
+		currentTurn: 0,
+		currentDiceRoll: null,
+		gridSizeX: safeX,
+		gridSizeY: safeY,
+		biomeGrid,
+		raidBoss: {
+			...EVIL_PRINCESS_MONSTER,
+			maxHealth: EVIL_PRINCESS_MONSTER.health,
+			currentHealth: EVIL_PRINCESS_MONSTER.health,
+			defeated: false,
+		},
+		gameCompletion: { completed: false },
+	};
 	await createGame(gameId, JSON.stringify(gameState));
 	return { gameId };
 }
@@ -201,6 +242,8 @@ async function rollDiceForPlayer(gameId, playerId) {
 	if (!gameRow) throw serviceError(404, 'Game not found');
 
 	const gameState = getGameState(gameRow);
+	ensureRaidBossState(gameState);
+	ensureGameNotCompleted(gameState);
 	const playerRows = await getPlayersByGameId(gameId);
 	const player = playerRows.find(p => p.id === playerId);
 	if (!player) throw serviceError(404, 'Player not found');
@@ -222,6 +265,38 @@ async function rollDiceForPlayer(gameId, playerId) {
 }
 
 function startEncounterIfNeeded(gameState, playerRows, playerId, playerState, biome) {
+	const raidBoss = ensureRaidBossState(gameState);
+	const isCastleBossEncounter = biome === 'castle' && !raidBoss.defeated && raidBoss.currentHealth > 0;
+
+	if (isCastleBossEncounter) {
+		const bossMonster = {
+			id: raidBoss.id,
+			name: raidBoss.name,
+			biome: 'castle',
+			health: raidBoss.maxHealth,
+			attack: raidBoss.attack,
+			attackChance: raidBoss.attackChance,
+			defense: raidBoss.defense,
+			defenseChance: raidBoss.defenseChance,
+			img: raidBoss.img,
+		};
+
+		gameState.currentBattle = {
+			playerId,
+			monster: bossMonster,
+			playerHealth: (playerState.maxHearts || 5) - (playerState.damage || 0),
+			monsterHealth: raidBoss.currentHealth,
+			battleLog: [
+				`A terrifying ${raidBoss.name} stands before the castle gates!`,
+				`${playerRows.find(p => p.id === playerId)?.name || 'Player'} vs ${raidBoss.name}`,
+			],
+			battleActive: true,
+			biome,
+			ts: Date.now(),
+		};
+		return true;
+	}
+
 	if (!(BIOME_ENCOUNTER_RATES[biome] > 0 && Math.random() < BIOME_ENCOUNTER_RATES[biome])) {
 		gameState.currentBattle = null;
 		return false;
@@ -255,6 +330,8 @@ async function movePlayerToTarget(gameId, playerId, targetX, targetY) {
 	if (!gameRow) throw serviceError(404, 'Game not found');
 
 	const gameState = getGameState(gameRow);
+	ensureRaidBossState(gameState);
+	ensureGameNotCompleted(gameState);
 	const playerRows = await getPlayersByGameId(gameId);
 	const player = playerRows.find(p => p.id === playerId);
 	if (!player) throw serviceError(404, 'Player not found');
@@ -297,6 +374,9 @@ async function reconnectPlayer(gameId, playerName) {
 	if (!gameRow) throw serviceError(404, 'Game not found');
 	const playerRow = await getPlayerByGameIdAndName(gameId, playerName);
 	if (!playerRow) throw serviceError(404, 'Player not found');
+	const gameState = getGameState(gameRow);
+	ensureRaidBossState(gameState);
+	await updateGameStateJson(gameId, JSON.stringify(gameState));
 
 	const [playerRows, validMoveRows] = await Promise.all([
 		getPlayersByGameId(gameId),
@@ -305,7 +385,7 @@ async function reconnectPlayer(gameId, playerName) {
 
 	return {
 		playerId: playerRow.id,
-		gameState: buildGameState(gameRow, playerRows, validMoveRows),
+		gameState: buildGameState({ ...gameRow, gameStateJson: JSON.stringify(gameState) }, playerRows, validMoveRows),
 	};
 }
 

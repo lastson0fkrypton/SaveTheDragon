@@ -5,7 +5,7 @@ import gameRoutes from './routes/gameRoutes.js';
 import battleRoutes from './routes/battleRoutes.js';
 import playerRoutes from './routes/playerRoutes.js';
 import lastPoll from './lastPoll.js';
-import { clearGameDataById, getAllGameIds } from './repositories/gameRepository.js';
+import { clearGameDataById, getAllGames } from './repositories/gameRepository.js';
 
 const app = express();
 const PORT = 3000;
@@ -24,9 +24,22 @@ app.use('/api', playerRoutes);
 // Periodically clean up inactive games (no poll in 60s)
 setInterval(() => {
 	const now = Date.now();
-	getAllGameIds()
-		.then(async gameIds => {
-			for (const gameId of gameIds) {
+	getAllGames()
+		.then(async gameRows => {
+			for (const gameRow of gameRows) {
+				const gameId = gameRow.id;
+				let preventExpiry = false;
+				try {
+					const parsed = gameRow.gameStateJson ? JSON.parse(gameRow.gameStateJson) : {};
+					preventExpiry = Boolean(parsed.preventExpiry);
+				} catch (_error) {
+					preventExpiry = false;
+				}
+
+				if (preventExpiry) {
+					continue;
+				}
+
 				if (!lastPoll[gameId] || now - lastPoll[gameId] > 60000) {
 					await clearGameDataById(gameId);
 					delete lastPoll[gameId];

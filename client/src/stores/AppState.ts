@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { makeAutoObservable } from 'mobx';
 import { MobXProviderContext } from 'mobx-react';
 
-import type { AdminGame, GameState } from '../types';
+import type { AdminGame, AdminItem, GameState } from '../types';
 import GameService from '../services/GameService';
 
 class AppState {
@@ -13,6 +13,7 @@ class AppState {
 	adminPassword: string = '';
 	adminError: string = '';
 	adminGames: AdminGame[] = [];
+	adminItems: AdminItem[] = [];
 
 	//game state
 	playerId: string = '';
@@ -47,8 +48,11 @@ class AppState {
 	setAdminError(error: string) {
 		this.adminError = error;
 	}
-	setAdminGames(games: any[]) {
+	setAdminGames(games: AdminGame[]) {
 		this.adminGames = games;
+	}
+	setAdminItems(items: AdminItem[]) {
+		this.adminItems = items;
 	}
 
 	//game accessors

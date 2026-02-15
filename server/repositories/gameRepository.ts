@@ -63,6 +63,10 @@ async function updatePlayerStateByIdAndGameId(playerId: string, gameId: string, 
 	]);
 }
 
+async function deletePlayerByIdAndGameId(playerId: string, gameId: string): Promise<void> {
+	await runAsync('DELETE FROM players WHERE id = ? AND gameId = ?', [playerId, gameId]);
+}
+
 async function getValidMovesByGameId(gameId: string): Promise<ValidMoveRow[]> {
 	return allAsync<ValidMoveRow>('SELECT * FROM valid_moves WHERE gameId = ?', [gameId]);
 }
@@ -106,6 +110,7 @@ export {
 	createPlayer,
 	updatePlayerStateById,
 	updatePlayerStateByIdAndGameId,
+	deletePlayerByIdAndGameId,
 	getValidMovesByGameId,
 	clearValidMovesByGameId,
 	setValidMovesByGameId,

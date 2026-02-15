@@ -25,6 +25,8 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 
 	if (!player || !monster) return null;
 	if (!gameState.itemMeta) return null;
+	const playerCurrentHealth = Math.max(0, battle.playerHealth);
+	const monsterCurrentHealth = Math.max(0, battle.monsterHealth);
 
 	const playerWeapon = player.inventory.equippedWeaponId
 		? gameState.itemMeta[player.inventory.equippedWeaponId]
@@ -57,19 +59,6 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 				<div className="battle-modal-flex">
 					<div className="battle-modal-side">
 						<div className="battle-panel card">
-							<div className="floating-hearts">
-								{Array.from({ length: player?.maxHearts || 0 }, (_, i) => (
-									<CachedImage
-										key={i}
-										src="/icons/Heart.png"
-										alt="heart"
-										style={{
-											opacity: i < battle.playerHealth ? 1 : 0.2,
-										}}
-										className="heart-icon"
-									/>
-								))}
-							</div>
 							<CachedImage
 								src={
 									player?.characterId ? `/characters/${player.characterId}.png` : '/items/nothing.png'
@@ -88,8 +77,8 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 									<span className="fill">{playerArmor?.defense}</span>
 								</div>
 								<div className="stat health">
-									<span className="stroke">{player?.maxHearts}</span>
-									<span className="fill">{player?.maxHearts}</span>
+									<span className="stroke">{playerCurrentHealth}</span>
+									<span className="fill">{playerCurrentHealth}</span>
 								</div>
 								<div className="stat attackchance chance" style={getChanceStyle(playerWeapon?.attackChance || 0)}>
 									<div>hit</div>
@@ -105,19 +94,6 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 					<div className="battle-modal-vs">VS</div>
 					<div className="battle-modal-side">
 						<div className="battle-panel card">
-							<div className="floating-hearts">
-								{Array.from({ length: monster?.health || 0 }, (_, i) => (
-									<CachedImage
-										key={i}
-										src="/icons/Heart.png"
-										alt="heart"
-										style={{
-											opacity: i < battle.monsterHealth ? 1 : 0.2,
-										}}
-										className="heart-icon"
-									/>
-								))}
-							</div>
 							<CachedImage
 								src={`/monsters/${monster?.img || 'nothing.png'}`}
 								alt={monster?.name}
@@ -134,8 +110,8 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 									<span className="fill">{monster?.defense}</span>
 								</div>
 								<div className="stat health">
-									<span className="stroke">{monster?.health}</span>
-									<span className="fill">{monster?.health}</span>
+									<span className="stroke">{monsterCurrentHealth}</span>
+									<span className="fill">{monsterCurrentHealth}</span>
 								</div>
 								<div className="stat attackchance chance" style={getChanceStyle(monster?.attackChance || 0)}>
 									<div>hit</div>

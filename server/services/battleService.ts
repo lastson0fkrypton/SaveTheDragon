@@ -26,6 +26,40 @@ function getPlayerState(playerRow) {
 	return parseJson(playerRow?.playerStateJson, {});
 }
 
+function ensureGameNotCompleted(gameState) {
+	if (gameState?.gameCompletion?.completed) {
+		throw serviceError(400, 'Game is complete. Start a new game to continue playing.');
+	}
+}
+
+function isRaidBossBattle(battle) {
+	return battle?.monster?.id === 'evil_princess';
+}
+
+function movePlayerToNearestTown(gameState, playerState) {
+	const biomeGrid = gameState?.biomeGrid;
+	if (!biomeGrid) return;
+
+	let minDist = Infinity;
+	let tx = playerState.positionX || 0;
+	let ty = playerState.positionY || 0;
+
+	for (let y = 0; y < biomeGrid.length; y++) {
+		for (let x = 0; x < biomeGrid[0].length; x++) {
+			if (biomeGrid[y][x] !== 'town') continue;
+			const dist = Math.abs((playerState.positionX || 0) - x) + Math.abs((playerState.positionY || 0) - y);
+			if (dist < minDist) {
+				minDist = dist;
+				tx = x;
+				ty = y;
+			}
+		}
+	}
+
+	playerState.positionX = tx;
+	playerState.positionY = ty;
+}
+
 function findItem(itemId) {
 	return ITEM_DEFS.find(i => i.id === itemId);
 }
@@ -35,6 +69,7 @@ async function attackBattle(gameId, playerId) {
 	if (!gameRow) throw serviceError(404, 'Game not found');
 
 	const gameState = getGameState(gameRow);
+	ensureGameNotCompleted(gameState);
 	const battle = gameState.currentBattle;
 	if (!battle || !battle.battleActive) throw serviceError(400, 'No active battle');
 	if (battle.playerId !== playerId) throw serviceError(403, 'Not your battle');
@@ -58,6 +93,9 @@ async function attackBattle(gameId, playerId) {
 			log.push('Monster blocks! Damage reduced.');
 		}
 		battle.monsterHealth -= playerDamage;
+		if (isRaidBossBattle(battle) && gameState.raidBoss) {
+			gameState.raidBoss.currentHealth = Math.max(0, battle.monsterHealth);
+		}
 		log.push(
 			`${playerRow.name} attacks with ${weapon?.name || 'Fist'}: Hit${
 				playerDamage > 0 ? ` for ${playerDamage} damage!` : ''
@@ -70,6 +108,22 @@ async function attackBattle(gameId, playerId) {
 	if (battle.monsterHealth <= 0) {
 		log.push(`Monster ${battle.monster.name} defeated!`);
 		battle.battleActive = false;
+		if (isRaidBossBattle(battle) && gameState.raidBoss) {
+			gameState.raidBoss.currentHealth = 0;
+			gameState.raidBoss.defeated = true;
+			gameState.raidBoss.defeatedByPlayerId = playerId;
+			gameState.raidBoss.defeatedByPlayerName = playerRow.name;
+			gameState.raidBoss.defeatedAtTs = Date.now();
+			gameState.gameCompletion = {
+				completed: true,
+				reason: 'evil_princess_defeated',
+				completedByPlayerId: playerId,
+				completedByPlayerName: playerRow.name,
+				completedAtTs: Date.now(),
+			};
+			addRecentAction(gameState, 'game-complete', playerRow.name, 'defeated the Evil Princess');
+			log.push('The Evil Princess has fallen! The realm is saved.');
+		}
 	} else {
 		const armorId = playerState.inventory?.equippedArmorId;
 		const armor = armorId ? findItem(armorId) : null;
@@ -112,20 +166,28 @@ async function runFromBattle(gameId, playerId) {
 	const gameRow = await getGameById(gameId);
 	if (!gameRow) throw serviceError(404, 'Game not found');
 	const gameState = getGameState(gameRow);
+	ensureGameNotCompleted(gameState);
 	const battle = gameState.currentBattle;
 	if (!battle || !battle.battleActive) throw serviceError(400, 'No active battle');
 	if (battle.playerId !== playerId) throw serviceError(403, 'Not your battle');
 
 	const playerRow = await getPlayerById(playerId);
 	if (!playerRow) throw serviceError(404, 'Player not found');
+	const playerState = getPlayerState(playerRow);
 
 	battle.battleActive = false;
+	if (isRaidBossBattle(battle) && gameState.raidBoss) {
+		gameState.raidBoss.currentHealth = Math.max(0, battle.monsterHealth);
+		movePlayerToNearestTown(gameState, playerState);
+		battle.battleLog.push(`${playerRow.name || 'Player'} escaped the castle and retreated to the nearest town.`);
+	}
 	battle.battleLog.push(`${playerRow.name || 'Player'} ran away! The battle is over.`);
 	addRecentAction(gameState, 'battle-end', playerRow.name || 'Player', `ran away from ${battle.monster?.name || 'a monster'}`);
 
 	const playerRows = await getPlayersByGameId(gameId);
 	gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
 
+	await updatePlayerStateById(playerId, JSON.stringify(playerState));
 	await updateGameStateJson(gameId, JSON.stringify(gameState));
 	return { success: true, battleLog: battle.battleLog, ranAway: true };
 }
@@ -149,6 +211,15 @@ async function collectBattleLoot(gameId, playerId) {
 	const playerRow = await getPlayerById(playerId);
 	if (!playerRow) throw serviceError(404, 'Player not found');
 	const playerState = getPlayerState(playerRow);
+
+	if (isRaidBossBattle(battle)) {
+		if (gameState.raidBoss) {
+			gameState.raidBoss.currentHealth = 0;
+			gameState.raidBoss.defeated = true;
+		}
+		await updateGameStateJson(gameId, JSON.stringify(gameState));
+		return { success: true, reward: null };
+	}
 
 	const biome = battle.monster.biome.split(',')[0];
 	const reward = getRandomItemForBiome(biome);
@@ -182,32 +253,17 @@ async function returnPlayerToTown(gameId, playerId) {
 	const gameRow = await getGameById(gameId);
 	if (!gameRow) throw serviceError(404, 'Game not found');
 	const gameState = getGameState(gameRow);
+	ensureGameNotCompleted(gameState);
 	const battle = gameState.currentBattle;
 
 	if (!battle || battle.playerId !== playerId || battle.playerHealth > 0 || battle.battleActive !== false) {
 		throw serviceError(400, 'Cannot return to town unless you have lost the battle.');
 	}
-
-	const biomeGrid = gameState.biomeGrid;
-	if (biomeGrid) {
-		let minDist = Infinity;
-		let tx = 0;
-		let ty = 0;
-		for (let y = 0; y < biomeGrid.length; y++) {
-			for (let x = 0; x < biomeGrid[0].length; x++) {
-				if (biomeGrid[y][x] === 'town') {
-					const dist = Math.abs(playerState.positionX - x) + Math.abs(playerState.positionY - y);
-					if (dist < minDist) {
-						minDist = dist;
-						tx = x;
-						ty = y;
-					}
-				}
-			}
-		}
-		playerState.positionX = tx;
-		playerState.positionY = ty;
+	if (isRaidBossBattle(battle) && gameState.raidBoss) {
+		gameState.raidBoss.currentHealth = Math.max(0, battle.monsterHealth);
 	}
+
+	movePlayerToNearestTown(gameState, playerState);
 
 	playerState.damage = 0;
 	addRecentAction(gameState, 'battle-end', playerRow.name, 'returned to town after fainting');

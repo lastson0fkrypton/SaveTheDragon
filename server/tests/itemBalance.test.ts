@@ -51,4 +51,14 @@ describe('item biome tier balancing', () => {
 		expect(smallPotion?.heal).toBeLessThan(mediumPotion?.heal || 0);
 		expect(mediumPotion?.heal).toBeLessThan(largePotion?.heal || 0);
 	});
+
+	it('ensures random weapons are never weaker than fist baseline', () => {
+		const randomWeapons = ITEM_DEFS.filter(item => item.type === 'weapon' && !item.noRandom);
+		expect(randomWeapons.length).toBeGreaterThan(0);
+
+		for (const weapon of randomWeapons) {
+			expect(weapon.attack || 0).toBeGreaterThanOrEqual(2);
+			expect(weapon.attackChance || 0).toBeGreaterThanOrEqual(0.5);
+		}
+	});
 });

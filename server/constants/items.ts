@@ -926,8 +926,8 @@ function applyItemBalance(
 			...itemDef,
 			id: toVariantId(itemDef.id, variant),
 			name: toVariantName(itemDef.name, variant),
-			attack: Math.max(1, base.attack + mods.valueDelta),
-			attackChance: clampChance(base.attackChance + mods.chanceDelta),
+			attack: Math.max(2, base.attack + mods.valueDelta),
+			attackChance: clampChance(Math.max(0.5, base.attackChance + mods.chanceDelta)),
 		};
 	}
 

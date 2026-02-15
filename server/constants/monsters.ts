@@ -1,5 +1,17 @@
 import type { MonsterDef } from '../types.js';
 
+export const EVIL_PRINCESS_MONSTER: MonsterDef = {
+	id: 'evil_princess',
+	name: 'Evil Princess',
+	biome: 'castle',
+	health: 120,
+	attack: 8,
+	attackChance: 0.85,
+	defense: 5,
+	defenseChance: 0.65,
+	img: 'evil_princess.png',
+};
+
 type MonsterCatalogSourceEntry = {
 	id: string;
 	name: string;

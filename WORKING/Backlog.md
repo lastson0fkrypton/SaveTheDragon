@@ -105,8 +105,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Multiple players can engage in sequence over time and contribute to total damage.
   - Win condition triggers when boss health reaches 0, with game state updated and communicated to all players.
   - Post-win behavior is defined (e.g., game complete state and disabled further turns/battles or explicit restart flow).
-- **Status:** TODO
-- **Notes:** Implement boss state server-side as authoritative shared game data.
+- **Status:** DONE
+- **Notes:** Implemented server-authoritative shared raid boss state for `Evil Princess` with persistent health in game state (`raidBoss.currentHealth`) and completion state (`gameCompletion`) in `server/types.ts` + `server/services/gameService.ts` + `server/services/battleService.ts`. Castle tile now triggers boss encounters while undefeated; boss health persists across encounters/runs/losses and no full reset occurs between fights. Defeating the boss marks game complete with winner metadata and completion timestamp, emits completion battle log/recent action, and blocks further turn/battle progression server-side (`roll`, `move`, `attack`, `run`, `return-to-town`). Added client state typing and lightweight completion visibility in overlays (`GamePanel`, `DicePanel`) so all players receive completion state from API responses. Validated with `npm run test` and `npm run build` in both `server/` and `client/`.
 
 ## BACKLOG-008
 - **ID:** BACKLOG-008
@@ -183,6 +183,50 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Clicking `End Turn` commits movement to the selected square.
 - **Status:** DONE
 - **Notes:** Implemented click-to-select movement in `GameBoard` (no immediate move), red border highlight, player-to-target arrow render, and camera recenter when roll begins for active player. Added `selectedMove` state to `AppState` and `End Turn` confirmation flow in `DicePanel` with `/icons/check.png`. Validated via `npm run build` and `npm run test` in client.
+
+## BACKLOG-014
+- **ID:** BACKLOG-014
+- **Title:** Build AI-driven gameplay simulation harness for concurrency and balance feedback
+- **Why:** Automated, repeatable game runs are needed to stress multiplayer concurrency, collect large gameplay datasets, and create a feedback loop for balancing changes.
+- **Acceptance Criteria:**
+  - An **in-process server-side simulation runner** can execute full game loops quickly (create/join/roll/move/battle/loot/equip/use/turn progression), suitable for repeated AI-guided balancing runs.
+  - Runner supports parallel execution of many games/players to test concurrency and race-condition behavior.
+  - Runner outputs structured per-game logs and aggregate summaries and can return machine-readable results to AI agent workflows.
+  - Runner supports configurable player behavior profiles (e.g., risk-averse, aggressive, completionist) to emulate different player expectations.
+  - Runner tracks balancing metrics including at minimum: battles won/lost, turns between encounters, encounter count, win streaks, loss streaks, per-game outcome, and turns-to-win/lose.
+  - Runner can compare balance revisions by running baseline vs candidate batches and producing simple scorecards (survival rate, turn count, win/loss distribution, biome progression cadence).
+  - A max-turn cap is enforced per game so non-beatable/broken states are detected and reported explicitly.
+  - Assumes final-boss win condition from `BACKLOG-007` exists before full rollout; simulation reports beatable-rate against this condition.
+  - Target balancing guidance is measurable and reportable (initial target: approximate win/loss ratio near 2:1).
+  - Simulation config supports at minimum: `seed`, `runs`, `parallelism`, `playersPerGame`, `turnCap`, behavior profile weights, and output/artifact settings.
+  - Batch output includes machine-readable summary fields for AI workflows: `winRate`, `lossRate`, `timeoutRate`, `winLossRatio`, `beatableRate`, and profile-level breakdowns.
+  - Batch output includes pacing and quality signals: `encounters`, `avgTurnsBetweenEncounters`, `turnsToOutcome` percentiles, early-loss frequency, and timeout frequency.
+  - Runner produces explicit regression/fail signals when beatable rate drops, timeout rate exceeds threshold, or ratio moves outside target band.
+  - Tooling and usage are documented so future AI prompt sessions can run simulations after logic/constant changes.
+- **Status:** TODO
+- **Notes:** Agreed direction: in-process server-side test/harness (fast execution) with AI-consumable summary output for iterative auto-balancing. Include child-friendly difficulty validation heuristics for target demographic (10-year-olds), plus explicit fail signals when beatable condition regresses.
+
+  Planned implementation blueprint (for later):
+  - **Runner shape:** Add a server-side simulation entrypoint (test/tool) callable via npm script, deterministic by `seed`.
+  - **Execution model:** Run many games quickly in-process, with configurable parallelism and per-game `turnCap`.
+  - **Per-game metrics:** `battlesWon`, `battlesLost`, `encounterCount`, `avgTurnsBetweenEncounters`, `longestWinStreak`, `longestLoseStreak`, `turnsPlayed`, `outcome` (`win|loss|timeout|aborted`).
+  - **Batch scorecard:** Aggregate `win/loss/timeout` rates, `winLossRatio` (target near `2:1`), beatable rate, profile breakdowns, and outcome pacing percentiles.
+  - **Balancing loop:** Support baseline-vs-candidate runs and emit recommendation/regression payloads for AI-driven tuning iterations.
+
+## BACKLOG-015
+- **ID:** BACKLOG-015
+- **Title:** Handle player quit/idle absence with turn skip and auto-return on activity
+- **Why:** Multiplayer sessions should continue smoothly when a player leaves or becomes inactive, without permanently blocking turn progression.
+- **Acceptance Criteria:**
+  - A player can explicitly quit a game and is marked `absent` in server-authoritative game state.
+  - A player with no API activity for 30 seconds is automatically marked `absent`.
+  - Turn progression always advances to the next non-absent player.
+  - Absent players are skipped for roll/move/battle/turn prompts while absent.
+  - If all players are absent, server behavior is defined and safe (no infinite loops/crashes).
+  - Any subsequent valid API request from an absent player marks them active again and re-enables normal participation from their next eligible turn.
+  - Presence/absence state changes are reflected consistently in API responses used by the client.
+- **Status:** TODO
+- **Notes:** Implement as server-side authoritative presence tracking with last-activity timestamps and a shared helper used by turn-advance logic.
 
 ---
 

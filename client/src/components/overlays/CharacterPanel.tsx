@@ -37,18 +37,7 @@ const CharacterPanel: React.FC = observer(() => {
 
 	const eqWeapon = gameState.itemMeta?.[player.inventory.equippedWeaponId || 'fist'];
 	const eqArmor = gameState.itemMeta?.[player.inventory.equippedArmorId || 'nothing'];
-
-	const hearts = Array.from({ length: player.maxHearts || 0 }, (_, i) => (
-		<CachedImage
-			key={i}
-			src="/icons/Heart.png"
-			alt="heart"
-			style={{
-				opacity: i < (player.maxHearts || 0) - (player.damage || 0) ? 1 : 0.2,
-			}}
-			className="heart-icon"
-		/>
-	));
+	const hearts = Math.max(0, (player.maxHearts || 0) - (player.damage || 0));
 
 	const playerCharacter = player.characterId && characters[player.characterId];
 
@@ -82,10 +71,14 @@ const CharacterPanel: React.FC = observer(() => {
 					/>
 					<div className="card-overlay">
 						<div className="card-name">{player.name}</div>
+						<div className="stat health">
+							<span className="stroke">{hearts}</span>
+							<span className="fill">{hearts}</span>
+						</div>
 						{playerCharacter && (
 							<div className="card-desc">
 								<div className="player-title">{playerCharacter.description}</div>
-								{hearts}
+								
 							</div>
 						)}
 					</div>

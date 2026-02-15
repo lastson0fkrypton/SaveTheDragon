@@ -10,6 +10,13 @@ const DicePanel: React.FC = observer(() => {
 	const playerId = state.playerId;
 
 	if (!gameState || !playerId) return null;
+	if (gameState.gameCompletion?.completed) {
+		return (
+			<div className="dice-panel">
+				<span className="your-turn">Game Complete</span>
+			</div>
+		);
+	}
 
 	const currentPlayer = gameState.players[gameState.currentTurn];
 	const isMyTurn = currentPlayer?.id === playerId;
