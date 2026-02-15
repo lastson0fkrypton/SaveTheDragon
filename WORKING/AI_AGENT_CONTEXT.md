@@ -12,7 +12,9 @@ This file is a persistent handoff so any future Copilot session can quickly resu
 
 ## Current Architecture (High-Level)
 - **Server routes:** game, battle, player, admin route modules under `server/routes/`
-- **Persistence:** raw SQL directly in route handlers via `server/db.js`
+- **Services:** game/business rules in `server/services/` (`gameService`, `battleService`, `playerService`, `adminService`)
+- **Repositories:** SQLite access centralized in `server/repositories/` (`gameRepository`, `dbClient`)
+- **Persistence bootstrap:** DB schema init in `server/db.ts`
 - **Game data/constants:** items, monsters, characters, biome rates in `server/constants/`
 - **Client pages:** home, game, admin under `client/src/pages/`
 - **Client game UI:** board + overlays + modals under `client/src/components/`
@@ -20,14 +22,32 @@ This file is a persistent handoff so any future Copilot session can quickly resu
 
 ## Known Product State
 - Core loop exists: create/join game, roll, move, encounter, battle, loot, equip/use, turn progression.
-- Quest UI exists but is mostly placeholder (not fully implemented gameplay system yet).
-- Title/theme says “Save the Dragon”, but explicit win condition is not yet fully wired (planned in BACKLOG-007).
+- Shared raid-boss win condition is implemented: defeating `Evil Princess` sets global game completion and locks further progression actions.
+- Win-state UI is implemented client-side with a completion modal and game-complete overlays.
+- Boss run-away behavior sends player to nearest town.
+- Dynamic balancing exists for monsters/items by biome tier + variant model.
+- Admin live-ops tools exist for active games: kick player, give item, delete game, prevent expiry toggle.
+- Inactivity cleanup runs every 60s and skips games marked `preventExpiry`.
+- Quest system backlog remains unimplemented beyond placeholders.
 
 ## Backlog Status
 Backlog items are maintained in `WORKING/Backlog.md`.
-Latest known additions include:
-- BACKLOG-001 through BACKLOG-012
-- BACKLOG-002 includes immediate equip **and** immediate use request
+Completed major items include BACKLOG-001, 002, 003, 004, 005, 007, 013, and 016.
+Current forward-looking items remain centered around quests, mobile UX, animation polish, audio/TTS, simulation harness, and presence/absence handling.
+
+## Recent Delivered Changes (Post Initial Refactor)
+- Admin portal upgrades:
+	- Per-game control console in admin page.
+	- Player kick control and item grant control (all item tiers/variants).
+	- Per-game `Prevent expiry` checkbox persisted in game state.
+	- Success/error toasts for admin actions.
+- Battle/health UI improvements:
+	- Battle card health moved from heart strips to numeric current HP.
+	- Player list and player card shifted to icon+value health style.
+	- Player list now shows Health/Attack/Defense badges; alignment set to Attack+Defense left, Health right-emphasized.
+- Balance and bug fixes:
+	- Random weapons are never weaker than fist baseline (`>=2` attack, `>=0.5` chance).
+	- Stacked consumables now consume one item per use (not all matching copies).
 
 ## Working Conventions for Future AI Sessions
 1. Read `WORKING/Backlog.md` first.

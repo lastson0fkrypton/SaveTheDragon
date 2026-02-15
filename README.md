@@ -10,6 +10,8 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 - Dice rolling and valid move highlighting.
 - Player character selection.
 - Admin panel for managing games.
+- Shared raid-boss win condition (`Evil Princess`) with server-authoritative completion state.
+- Dynamic balance model for monsters/items by biome tier and variants.
 
 ## Prerequisites
 - Node.js (v16 or newer recommended)
@@ -43,11 +45,17 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 
 ## Admin Panel
 - Access the admin panel via the "Admin" link on the home screen.
-- The default admin password is `superman` (see `server/index.js`).
+- The default admin password is `superman` (see `server/services/adminService.ts`).
+- Admin console supports:
+   - Deleting games
+   - Kicking players from a game
+   - Granting any item (including generated tiers/variants)
+   - Marking a game as `Prevent expiry` so inactivity cleanup skips it
 
 ## Notes
 - Game state and player data are stored in `server/database.sqlite`.
-- The server will automatically clean up inactive games after 60 seconds of inactivity.
+- By default, the server cleans up inactive games after 60 seconds of inactivity.
+- Games flagged `Prevent expiry` in admin are excluded from inactivity cleanup.
 
 ## Server Architecture
 - **Routes (`server/routes/`)**
@@ -72,7 +80,22 @@ This separation keeps the API layer thin, game logic reusable/testable, and SQL 
    - Late game: cave/volcano tuned as high-threat zones.
    - Item/monster stats remain tied to existing IDs, names, images, and biome assignments.
    - Chance bar UI now supports dynamic percentages (not limited to fixed 50/70/90 buckets).
+- **BACKLOG-007:** Shared raid-boss win condition implemented with persistent boss HP and global game-complete state.
 - **BACKLOG-013:** Movement now uses click-to-select destination and `End Turn` confirmation with visual destination highlight and path arrow.
+
+## Recent Fixes & UX Updates
+- Admin quality-of-life updates:
+   - Per-action success/error toasts for admin controls.
+   - Kick button text style normalized (`Kick`) for alignment/readability.
+- Battle UI health scaling:
+   - Battle cards now display current HP numerically instead of rendering one heart per HP.
+- Item and consumable fixes:
+   - No random weapon variant can be weaker than starter baseline (`>=2` attack, `>=0.5` attack chance).
+   - Using stacked consumables now consumes one item per use instead of all matching copies.
+- Player list stat badges:
+   - Player row now shows `Health`, `Attack`, `Defense` icon+value badges.
+   - Alignment updated so Attack/Defense are left and Health is right-emphasized.
+   - Badge class naming refactored from health-specific to generic stat naming.
 
 ## License
 This project is for educational and personal use.

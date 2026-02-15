@@ -228,6 +228,23 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
 - **Status:** TODO
 - **Notes:** Implement as server-side authoritative presence tracking with last-activity timestamps and a shared helper used by turn-advance logic.
 
+## BACKLOG-016
+- **ID:** BACKLOG-016
+- **Title:** Expand admin live-ops controls and apply related gameplay/UI hotfixes
+- **Why:** Fast manual testing and balancing iterations need stronger admin controls and a few targeted quality fixes discovered during playtesting.
+- **Acceptance Criteria:**
+  - Admin portal provides per-active-game controls to:
+    - Kick individual players.
+    - Grant items to individual players from full item catalog (including generated tier/variant items).
+    - Mark games as `Prevent expiry` so inactivity cleanup does not delete them.
+  - Admin actions show success/error feedback in UI.
+  - Battle card health display scales for large HP values.
+  - Weapon balance floor ensures random weapons are never worse than starter fist baseline.
+  - Consumable use removes one instance when multiple copies of same item are held.
+  - Player list displays compact Health/Attack/Defense icon+value badges.
+- **Status:** DONE
+- **Notes:** Implemented server admin endpoints for kick, give-item, item-catalog fetch, and prevent-expiry toggle; cleanup loop now respects per-game prevent-expiry flag. Added admin UI consoles per game with player controls plus action toasts. Updated kick button label/layout to `Kick`. Battle modal health switched to numeric current HP display for both sides. Item rebalance updated to enforce random weapon minimums (`attack >= 2`, `attackChance >= 0.5`) and added regression coverage in `server/tests/itemBalance.test.ts`. Fixed stacked consumable bug in `server/services/playerService.ts` so one copy is consumed per use. Updated player list stats UI to show Health/Attack/Defense badges with final alignment of attack/defense left and health right-emphasized.
+
 ---
 
 ## Working Rule
