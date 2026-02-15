@@ -134,7 +134,7 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 									<span className="fill">{monster?.defense}</span>
 								</div>
 								<div className="stat health">
-									<span className="stroke">{playerWeapon.attack}</span>
+									<span className="stroke">{monster?.health}</span>
 									<span className="fill">{monster?.health}</span>
 								</div>
 								<div className="stat attackchance chance" style={getChanceStyle(monster?.attackChance || 0)}>

@@ -188,16 +188,29 @@ const BASE_MONSTER_DEFS: ReadonlyArray<MonsterCatalogBase> = MONSTER_CATALOG_SOU
 	};
 });
 
+const BIOME_EXPANDED_MONSTER_DEFS: ReadonlyArray<MonsterCatalogBase> = BASE_MONSTER_DEFS.flatMap(monster =>
+	monster.biome
+		.split(',')
+		.map(part => part.trim())
+		.filter(Boolean)
+		.map(biome => ({
+			id: monster.id,
+			name: monster.name,
+			biome,
+			img: monster.img,
+		}))
+);
+
 const BIOME_TIER_RANK = {
 	plains: 1,
-	forest: 1,
-	desert: 2,
-	cave: 3,
-	volcano: 3,
+	forest: 2,
+	desert: 3,
+	cave: 4,
+	volcano: 4,
 };
 
 const BIOME_TIER_BASE_STATS = {
-	plains: { health: 4, attack: 2, attackChance: 0.58, defense: 1, defenseChance: 0.28 },
+	plains: { health: 3, attack: 2, attackChance: 0.5, defense: 1, defenseChance: 0.2 },
 	forest: { health: 4, attack: 2, attackChance: 0.58, defense: 1, defenseChance: 0.28 },
 	desert: { health: 9, attack: 3, attackChance: 0.7, defense: 2, defenseChance: 0.42 },
 	cave: { health: 17, attack: 5, attackChance: 0.82, defense: 4, defenseChance: 0.58 },
@@ -266,6 +279,6 @@ function applyBiomeTierBalance(monsterDef: MonsterCatalogBase, variant: 'weak' |
 	};
 }
 
-export const MONSTER_DEFS = BASE_MONSTER_DEFS.flatMap(monsterDef =>
+export const MONSTER_DEFS = BIOME_EXPANDED_MONSTER_DEFS.flatMap(monsterDef =>
 	MONSTER_VARIANTS.map(variant => applyBiomeTierBalance(monsterDef, variant))
 );

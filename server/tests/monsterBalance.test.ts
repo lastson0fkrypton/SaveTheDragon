@@ -22,6 +22,7 @@ describe('monster biome tier balancing', () => {
 		const caveThreat = averageThreat(forBiome('cave'));
 		const volcanoThreat = averageThreat(forBiome('volcano'));
 
+		expect(plainsThreat).toBeLessThan(forestThreat);
 		expect(plainsThreat).toBeLessThan(desertThreat);
 		expect(forestThreat).toBeLessThan(desertThreat);
 		expect(desertThreat).toBeLessThan(caveThreat);
