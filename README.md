@@ -23,7 +23,13 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
    npm install
    npm run start
    ```
-   The server will start on http://localhost:3000
+   The server will start on http://localhost:3000 and auto-restart when server `.ts` files change.
+
+   For a production-style run (compiled output):
+   ```sh
+   npm run build
+   npm run start:prod
+   ```
 
 2. **Build and Run the client:**
    ```sh
