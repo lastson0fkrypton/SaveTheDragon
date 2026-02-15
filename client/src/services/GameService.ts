@@ -7,6 +7,14 @@ class GameService {
 		this.store = store;
 	}
 
+	private async refreshCurrentGameState() {
+		if (!this.store.gameId) return;
+		const latestState = await this.fetchGameState(this.store.gameId);
+		if (latestState) {
+			this.store.setGameState(latestState);
+		}
+	}
+
 	//admin API methods
 	async fetchAdminGames(pw: string) {
 		this.store.setAdminError('');
@@ -117,7 +125,9 @@ class GameService {
 		});
 		if (!response.ok) {
 			console.error('Failed to use item');
+			return;
 		}
+		await this.refreshCurrentGameState();
 	}
 
 	// Equip a weapon or armor
@@ -130,7 +140,9 @@ class GameService {
 		});
 		if (!response.ok) {
 			console.error('Failed to equip item');
+			return;
 		}
+		await this.refreshCurrentGameState();
 	}
 
 	// Update character picture

@@ -140,6 +140,25 @@ button:disabled {
 	justify-content: center;
 }
 
+.modal .modal-window.inventory-modal-window {
+	display: flex;
+	flex-direction: column;
+	max-height: 85vh;
+}
+
+.modal .modal-window .inventory.inventory-scroll-area {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding-right: 4px;
+	padding-bottom: 4px;
+}
+
+.inventory-modal-actions {
+	margin-top: 16px;
+	flex-shrink: 0;
+}
+
 /*style for game UI overlays*/
 .game-panel {
 	position: absolute;

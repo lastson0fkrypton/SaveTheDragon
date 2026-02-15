@@ -36,8 +36,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Choosing not to equip keeps current behavior (item remains in inventory).
   - Choosing not to use keeps current behavior (item remains in inventory).
   - Loot actions are type-safe (no equip for non-equippables, no use for non-consumables).
-- **Status:** TODO
-- **Notes:** Keep UX minimal and consistent with existing modal style.
+- **Status:** DONE
+- **Notes:** Added immediate action buttons in loot modal for owner-only eligible loot: `Equip Now` for weapon/armor and `Use Now` for consumables, plus `Keep for Later` fallback. Added immediate game-state refresh after successful `equip`/`use-item` calls in client service so updates reflect in UI without page refresh. Type-safe UI gating prevents invalid actions. Validated with `npm run test -- --run` and `npm run build` in `client/`.
 
 ## BACKLOG-003
 - **ID:** BACKLOG-003
@@ -47,8 +47,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Inventory lists in relevant modals become scrollable when content exceeds viewport/modal size.
   - Close/action controls remain accessible regardless of inventory length.
   - Works for item, weapon, and armor modals on common screen sizes.
-- **Status:** TODO
-- **Notes:** Verify in both desktop and smaller-height window scenarios.
+- **Status:** DONE
+- **Notes:** Updated `ItemModal`, `WeaponModal`, and `ArmorModal` to use a constrained modal layout with a dedicated scroll area for inventory cards and a persistent bottom action row for close controls. Added shared CSS (`inventory-modal-window`, `inventory-scroll-area`, `inventory-modal-actions`) so large inventories scroll within modal height and action controls remain accessible on shorter viewports. Validated with `npm run test -- --run` and `npm run build` in `client/`.
 
 ## BACKLOG-004
 - **ID:** BACKLOG-004

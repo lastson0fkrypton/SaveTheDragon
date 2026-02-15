@@ -33,10 +33,10 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 
 	return (
 		<div className="modal">
-			<div className="modal-window">
+			<div className="modal-window inventory-modal-window">
 				<div className="modal-background-image"></div>
 				<h2>Use an Item</h2>
-				<div className="inventory">
+				<div className="inventory inventory-scroll-area">
 					{inventory.items.map(id => {
 						const eqItem = gameState.itemMeta?.[id];
 						return (
@@ -67,9 +67,11 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 						<div style={{ color: '#aaa', fontSize: 12 }}>No items available</div>
 					)}
 				</div>
-				<button onClick={onClose} style={{ marginTop: 16, padding: '8px 24px' }}>
-					Close
-				</button>
+				<div className="inventory-modal-actions">
+					<button onClick={onClose} style={{ padding: '8px 24px' }}>
+						Close
+					</button>
+				</div>
 			</div>
 		</div>
 	);

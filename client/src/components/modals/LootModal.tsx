@@ -5,8 +5,10 @@ import { CachedImage } from '../common/CachedImage';
 
 const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const state = getAppState();
+	const service = state.service;
 	const gameState = state.gameState;
 	const playerId = state.playerId;
+	const [isSubmitting, setIsSubmitting] = React.useState(false);
 	const loot = gameState?.recentlyFoundItem;
 	if (!loot || !loot.item) return null;
 
@@ -39,6 +41,24 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	};
 
 	const playerName = gameState?.players?.find(p => p.id === loot.playerId)?.name || 'Unknown Player';
+	const isMyLoot = loot.playerId === playerId;
+	const canEquipNow = isMyLoot && (loot.item.type === 'weapon' || loot.item.type === 'armor');
+	const canUseNow = isMyLoot && loot.item.type === 'item';
+
+	const handleEquipNow = async () => {
+		if (!canEquipNow || isSubmitting) return;
+		if (loot.item.type !== 'weapon' && loot.item.type !== 'armor') return;
+		setIsSubmitting(true);
+		await service.equipItem(loot.item.id, loot.item.type);
+		handleClose();
+	};
+
+	const handleUseNow = async () => {
+		if (!canUseNow || isSubmitting) return;
+		setIsSubmitting(true);
+		await service.useItem(loot.item.id);
+		handleClose();
+	};
 
 	return (
 		<div className="modal">
@@ -98,9 +118,21 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 						</div>
 					</div>
 				</div>
-				<button onClick={handleClose} style={{ marginTop: 16, padding: '8px 24px' }}>
-					Close
-				</button>
+				<div className="battle-modal-actions" style={{ marginTop: 16 }}>
+					{canEquipNow && (
+						<button onClick={handleEquipNow} className="battle-modal-action-btn" disabled={isSubmitting}>
+							Equip Now
+						</button>
+					)}
+					{canUseNow && (
+						<button onClick={handleUseNow} className="battle-modal-action-btn" disabled={isSubmitting}>
+							Use Now
+						</button>
+					)}
+					<button onClick={handleClose} className="battle-modal-action-btn" disabled={isSubmitting}>
+						{canEquipNow || canUseNow ? 'Keep for Later' : 'Close'}
+					</button>
+				</div>
 			</div>
 		</div>
 	);

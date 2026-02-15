@@ -20,10 +20,10 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 
 	return (
 		<div className="modal">
-			<div className="modal-window">
+			<div className="modal-window inventory-modal-window">
 				<div className="modal-background-image"></div>
 				<h2>Select your Armor</h2>
-				<div className="inventory">
+				<div className="inventory inventory-scroll-area">
 					{inventory.armor.map(id => {
 						const eqArmor = gameState.itemMeta?.[id];
 						return (
@@ -61,9 +61,11 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 						);
 					})}
 				</div>
-				<button onClick={onClose} style={{ marginTop: 16, padding: '8px 24px' }}>
-					Close
-				</button>
+				<div className="inventory-modal-actions">
+					<button onClick={onClose} style={{ padding: '8px 24px' }}>
+						Close
+					</button>
+				</div>
 			</div>
 		</div>
 	);
