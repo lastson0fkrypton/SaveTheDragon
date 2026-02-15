@@ -141,6 +141,17 @@ describe('GameService', () => {
 		expect(store.setPlayerId).not.toHaveBeenCalled();
 	});
 
+	it('reconnectSavedSession returns null when fetch throws', async () => {
+		const store = createStore();
+		const service = new GameService(store as any);
+		vi.mocked(fetch).mockRejectedValueOnce(new Error('network error'));
+
+		const result = await service.reconnectSavedSession('g-reconnect', 'Nina');
+
+		expect(result).toBeNull();
+		expect(store.setPlayerId).not.toHaveBeenCalled();
+	});
+
 	it('fetchGameState returns null on non-ok response', async () => {
 		const store = createStore();
 		const service = new GameService(store as any);

@@ -150,8 +150,8 @@ button:disabled {
 	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
-	padding-right: 4px;
-	padding-bottom: 4px;
+	padding: 12px;
+	box-sizing: border-box;
 }
 
 .inventory-modal-actions {

@@ -24,13 +24,15 @@ const GamePage: React.FC = observer(() => {
 		let cancelled = false;
 		const bootstrapSession = async () => {
 			if (!state.gameId) {
+				state.reset();
+				navigate('/', { replace: true });
 				if (!cancelled) setBootstrapped(true);
 				return;
 			}
 
 			if (!state.playerName) {
 				state.reset();
-				navigate('/');
+				navigate('/', { replace: true });
 				if (!cancelled) setBootstrapped(true);
 				return;
 			}
@@ -38,7 +40,9 @@ const GamePage: React.FC = observer(() => {
 			const restored = await service.reconnectSavedSession(state.gameId, state.playerName);
 			if (!restored) {
 				state.reset();
-				navigate('/');
+				navigate('/', { replace: true, state: { sessionExpired: true } });
+				if (!cancelled) setBootstrapped(true);
+				return;
 			}
 
 			if (!cancelled) setBootstrapped(true);
@@ -56,6 +60,12 @@ const GamePage: React.FC = observer(() => {
 		watchGameStateInterval = setInterval(async () => {
 			if (!state.gameId) return;
 			const newState = await service.fetchGameState(state.gameId);
+				if (!newState) {
+					clearInterval(watchGameStateInterval);
+					state.reset();
+					navigate('/', { replace: true, state: { sessionExpired: true } });
+					return;
+				}
 			runInAction(() => {
 				state.setGameState(newState);
 			});
@@ -63,7 +73,7 @@ const GamePage: React.FC = observer(() => {
 		return () => {
 			clearInterval(watchGameStateInterval);
 		};
-	}, [bootstrapped]);
+	}, [bootstrapped, navigate, service, state]);
 
 	const [showLootModal, setShowLootModal] = useState(false);
 	const [showBattleModal, setShowBattleModal] = useState(false);

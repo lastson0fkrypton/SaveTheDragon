@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getAppState } from '../stores/AppState';
 
 const HomePage: React.FC = observer(() => {
   const state = getAppState();
   const service = state.service;
   const navigate = useNavigate();
+  const location = useLocation();
   const [playerNameNew, setPlayerNameNew] = useState('');
   const [gridSizeX, setGridSizeX] = useState(10);
   const [gridSizeY, setGridSizeY] = useState(10);
   const [gameId, setGameId] = useState('');
   const [playerNameJoin, setPlayerNameJoin] = useState('');
+  const [showExpiredMessage, setShowExpiredMessage] = useState(
+    !!(location.state as { sessionExpired?: boolean } | null)?.sessionExpired
+  );
+
+  React.useEffect(() => {
+    const sessionExpired = !!(location.state as { sessionExpired?: boolean } | null)?.sessionExpired;
+    if (sessionExpired) {
+      setShowExpiredMessage(true);
+    }
+  }, [location.state]);
 
   React.useEffect(() => {
     if (state.gameId && state.playerName) {
@@ -32,6 +43,20 @@ const HomePage: React.FC = observer(() => {
 
   return (
     <div style={{ maxWidth: 600, margin: '60px auto', background: '#23234a', color: '#fff', borderRadius: 16, padding: 32, boxShadow: '0 2px 16px #0008' }}>
+      {showExpiredMessage && (
+        <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: '#3d2b2b', border: '1px solid #8a4a4a' }}>
+          <div style={{ marginBottom: 8 }}>Your game expired or no longer exists.</div>
+          <button
+            onClick={() => {
+              setShowExpiredMessage(false);
+              navigate('/', { replace: true, state: {} });
+            }}
+            style={{ width: '100%' }}
+          >
+            Return Home
+          </button>
+        </div>
+      )}
       <img src="/ai-pictures/baby_dragon.png" alt="Baby Dragon" style={{ display: 'block', margin: '0 auto 24px', width: 120, height: 120 }} />
       <h1 style={{ textAlign: 'center', marginBottom: 32 }}>Save the Dragon</h1>
       <div style={{ display: 'flex', gap: 32, justifyContent: 'center' }}>
