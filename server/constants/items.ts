@@ -897,21 +897,21 @@ export type ItemBalanceProfileOverride = {
 
 const ITEM_TIER_BASE: ItemBalanceProfile['tierBase'] = {
 	weapon: {
-		1: { attack: 2, attackChance: 0.62 },
-		2: { attack: 4, attackChance: 0.74 },
-		3: { attack: 6, attackChance: 0.84 },
+		1: { attack: 2, attackChance: 0.5153 },
+		2: { attack: 5, attackChance: 0.6353 },
+		3: { attack: 7, attackChance: 0.7353 },
 	},
 	armor: {
-		1: { defense: 2, defenseChance: 0.62 },
-		2: { defense: 4, defenseChance: 0.74 },
-		3: { defense: 6, defenseChance: 0.84 },
+		1: { defense: 2, defenseChance: 0.5153 },
+		2: { defense: 5, defenseChance: 0.6353 },
+		3: { defense: 7, defenseChance: 0.7353 },
 	},
 };
 
 const ITEM_VARIANT_MODIFIERS: ItemBalanceProfile['variantModifiers'] = {
-	cracked: { valueDelta: -1, chanceDelta: -0.08 },
+	cracked: { valueDelta: -1, chanceDelta: -0.0596 },
 	normal: { valueDelta: 0, chanceDelta: 0 },
-	enchanted: { valueDelta: 1, chanceDelta: 0.08 },
+	enchanted: { valueDelta: 1, chanceDelta: 0.0596 },
 };
 
 const DEFAULT_CONSUMABLE_PROFILE: ItemBalanceProfile['consumables'] = {
@@ -928,7 +928,7 @@ const DEFAULT_DROP_RATE_PROFILE: ItemBalanceProfile['dropRates'] = {
 		item: 1,
 	},
 	healthItemMultiplier: 1,
-	extraHeartMultiplier: 1,
+	extraHeartMultiplier: 3,
 	itemWeightOverrides: {},
 };
 

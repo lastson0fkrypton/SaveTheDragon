@@ -63,6 +63,9 @@ Use this as your first message in a new chat:
 
 Replace `BACKLOG-XXX` with the item you want next.
 
+### Alternative Start Tomorrow Prompt (Balancing Focus)
+"Please read `WORKING/AI_AGENT_CONTEXT.md`, `WORKING/AI_BALANCING.md`, and the latest `server/simulation-output/autobalance-*/autobalance-*-result.json`, then continue balance tuning. Use profile-floor targets (minimum win-rate per behavior profile) and run iterative simulation/autobalance passes until each profile reaches at least 10% win-rate with timeout under 30%, then summarize exact constant changes and evidence."
+
 ## Optional Fast Resume Prompt (if unsure what to do next)
 "Please read `WORKING/AI_AGENT_CONTEXT.md` and `WORKING/Backlog.md`, then recommend the best next backlog item to tackle with lowest risk/highest value, and start it."
 

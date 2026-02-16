@@ -2,11 +2,11 @@ export type BiomeEncounterRates = Record<string, number>;
 
 // --- Biome encounter rates ---
 export const BIOME_ENCOUNTER_RATES: BiomeEncounterRates = {
-	plains: 0.2,
-	forest: 0.35,
-	desert: 0.5,
-	cave: 0.75,
-	volcano: 1.0,
+	plains: 0.5,
+	forest: 0.6,
+	desert: 0.7,
+	cave: 0.8,
+	volcano: 0.9,
 	castle: 0.0,
 	town: 0.0,
 };

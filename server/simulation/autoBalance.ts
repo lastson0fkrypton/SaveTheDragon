@@ -85,14 +85,14 @@ function buildProgressLogger(prefix: string, progressFilePath?: string) {
 
 function buildRandomGenome(rand: () => number): Genome {
 	return {
-		monsterBaseScale: 0.75 + rand() * 0.7,
-		monsterVariantScale: 0.7 + rand() * 0.8,
-		itemBaseScale: 0.75 + rand() * 0.7,
-		itemVariantScale: 0.7 + rand() * 0.8,
-		encounterRateScale: 0.75 + rand() * 0.6,
-		chanceDelta: -0.12 + rand() * 0.24,
-		healthItemDropScale: 0.75 + rand() * 1.5,
-		extraHeartDropScale: 0.75 + rand() * 1.75,
+		monsterBaseScale: 0.45 + rand() * 0.95,
+		monsterVariantScale: 0.45 + rand() * 1.15,
+		itemBaseScale: 0.9 + rand() * 1.5,
+		itemVariantScale: 0.8 + rand() * 1.4,
+		encounterRateScale: 0.65 + rand() * 0.6,
+		chanceDelta: -0.2 + rand() * 0.55,
+		healthItemDropScale: 0.8 + rand() * 2.7,
+		extraHeartDropScale: 0.8 + rand() * 3,
 	};
 }
 
@@ -117,14 +117,14 @@ function mutate(genome: Genome, mutationRate: number, rand: () => number): Genom
 		return clamp(value + delta, min, max);
 	};
 	return {
-		monsterBaseScale: maybeMutate(genome.monsterBaseScale, 0.2, 0.4, 1.8),
-		monsterVariantScale: maybeMutate(genome.monsterVariantScale, 0.25, 0.3, 2),
-		itemBaseScale: maybeMutate(genome.itemBaseScale, 0.2, 0.4, 1.8),
-		itemVariantScale: maybeMutate(genome.itemVariantScale, 0.25, 0.3, 2),
-		encounterRateScale: maybeMutate(genome.encounterRateScale, 0.15, 0.5, 1.5),
-		chanceDelta: maybeMutate(genome.chanceDelta, 0.05, -0.25, 0.25),
-		healthItemDropScale: maybeMutate(genome.healthItemDropScale, 0.25, 0.4, 3),
-		extraHeartDropScale: maybeMutate(genome.extraHeartDropScale, 0.3, 0.4, 3.5),
+		monsterBaseScale: maybeMutate(genome.monsterBaseScale, 0.3, 0.3, 1.8),
+		monsterVariantScale: maybeMutate(genome.monsterVariantScale, 0.35, 0.3, 2.2),
+		itemBaseScale: maybeMutate(genome.itemBaseScale, 0.3, 0.6, 2.6),
+		itemVariantScale: maybeMutate(genome.itemVariantScale, 0.35, 0.5, 2.4),
+		encounterRateScale: maybeMutate(genome.encounterRateScale, 0.18, 0.45, 1.5),
+		chanceDelta: maybeMutate(genome.chanceDelta, 0.08, -0.3, 0.4),
+		healthItemDropScale: maybeMutate(genome.healthItemDropScale, 0.35, 0.4, 4),
+		extraHeartDropScale: maybeMutate(genome.extraHeartDropScale, 0.4, 0.4, 4.5),
 	};
 }
 

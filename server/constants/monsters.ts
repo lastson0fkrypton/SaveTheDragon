@@ -257,7 +257,7 @@ const BIOME_TIER_BASE_STATS: MonsterBalanceProfile['biomeTierBaseStats'] = {
 const VARIANT_MODIFIERS: MonsterBalanceProfile['variantModifiers'] = {
 	weak: { health: -1, attack: -1, attackChance: -0.08, defense: -1, defenseChance: -0.08 },
 	normal: { health: 0, attack: 0, attackChance: 0, defense: 0, defenseChance: 0 },
-	strong: { health: 2, attack: 1, attackChance: 0.08, defense: 1, defenseChance: 0.08 },
+	strong: { health: 1, attack: 1, attackChance: 0.08, defense: 1, defenseChance: 0.08 },
 };
 
 const MONSTER_VARIANTS: ReadonlyArray<MonsterVariant> = ['weak', 'normal', 'strong'];
