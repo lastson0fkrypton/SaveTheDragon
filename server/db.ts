@@ -1,7 +1,11 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 
-const db = new sqlite3.Database('./database.sqlite');
+const dbFilePath = process.env.SAVE_THE_DRAGON_DB_PATH
+  ? path.resolve(process.env.SAVE_THE_DRAGON_DB_PATH)
+  : './database.sqlite';
+
+const db = new sqlite3.Database(dbFilePath);
 
 // Initialize tables if not already present
 function initDb() {

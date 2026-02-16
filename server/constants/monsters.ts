@@ -221,7 +221,32 @@ const BIOME_TIER_RANK = {
 	volcano: 4,
 };
 
-const BIOME_TIER_BASE_STATS = {
+type MonsterVariant = 'weak' | 'normal' | 'strong';
+type MonsterTierBiome = keyof typeof BIOME_TIER_RANK;
+
+export type MonsterBalanceProfile = {
+	biomeTierBaseStats: Record<MonsterTierBiome, {
+		health: number;
+		attack: number;
+		attackChance: number;
+		defense: number;
+		defenseChance: number;
+	}>;
+	variantModifiers: Record<MonsterVariant, {
+		health: number;
+		attack: number;
+		attackChance: number;
+		defense: number;
+		defenseChance: number;
+	}>;
+};
+
+export type MonsterBalanceProfileOverride = {
+	biomeTierBaseStats?: Partial<Record<MonsterTierBiome, Partial<MonsterBalanceProfile['biomeTierBaseStats'][MonsterTierBiome]>>>;
+	variantModifiers?: Partial<Record<MonsterVariant, Partial<MonsterBalanceProfile['variantModifiers'][MonsterVariant]>>>;
+};
+
+const BIOME_TIER_BASE_STATS: MonsterBalanceProfile['biomeTierBaseStats'] = {
 	plains: { health: 3, attack: 2, attackChance: 0.5, defense: 1, defenseChance: 0.2 },
 	forest: { health: 4, attack: 2, attackChance: 0.58, defense: 1, defenseChance: 0.28 },
 	desert: { health: 9, attack: 3, attackChance: 0.7, defense: 2, defenseChance: 0.42 },
@@ -229,13 +254,21 @@ const BIOME_TIER_BASE_STATS = {
 	volcano: { health: 17, attack: 5, attackChance: 0.82, defense: 4, defenseChance: 0.58 },
 };
 
-const VARIANT_MODIFIERS = {
+const VARIANT_MODIFIERS: MonsterBalanceProfile['variantModifiers'] = {
 	weak: { health: -1, attack: -1, attackChance: -0.08, defense: -1, defenseChance: -0.08 },
 	normal: { health: 0, attack: 0, attackChance: 0, defense: 0, defenseChance: 0 },
 	strong: { health: 2, attack: 1, attackChance: 0.08, defense: 1, defenseChance: 0.08 },
 };
 
-const MONSTER_VARIANTS: ReadonlyArray<'weak' | 'normal' | 'strong'> = ['weak', 'normal', 'strong'];
+const MONSTER_VARIANTS: ReadonlyArray<MonsterVariant> = ['weak', 'normal', 'strong'];
+
+export const DEFAULT_MONSTER_BALANCE_PROFILE: MonsterBalanceProfile = {
+	biomeTierBaseStats: BIOME_TIER_BASE_STATS,
+	variantModifiers: VARIANT_MODIFIERS,
+};
+
+let activeMonsterBalanceProfile: MonsterBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_MONSTER_BALANCE_PROFILE));
+let activeMonsterDefs: ReadonlyArray<MonsterDef> = [];
 
 function clampChance(value: number) {
 	return Math.max(0.05, Math.min(0.95, Number(value.toFixed(2))));
@@ -261,22 +294,26 @@ function resolveBiomeTier(monsterBiome: string): string {
 	return selectedBiome;
 }
 
-function toVariantId(baseId: string, variant: 'weak' | 'normal' | 'strong') {
+function toVariantId(baseId: string, variant: MonsterVariant) {
 	if (variant === 'weak') return `weak_${baseId}`;
 	if (variant === 'strong') return `strong_${baseId}`;
 	return baseId;
 }
 
-function toVariantName(baseName: string, variant: 'weak' | 'normal' | 'strong') {
+function toVariantName(baseName: string, variant: MonsterVariant) {
 	if (variant === 'weak') return `Weak ${baseName}`;
 	if (variant === 'strong') return `Strong ${baseName}`;
 	return baseName;
 }
 
-function applyBiomeTierBalance(monsterDef: MonsterCatalogBase, variant: 'weak' | 'normal' | 'strong'): MonsterDef {
+function applyBiomeTierBalance(
+	monsterDef: MonsterCatalogBase,
+	profile: MonsterBalanceProfile,
+	variant: MonsterVariant
+): MonsterDef {
 	const tierBiome = resolveBiomeTier(monsterDef.biome);
-	const baseStats = BIOME_TIER_BASE_STATS[tierBiome] || BIOME_TIER_BASE_STATS.plains;
-	const modifiers = VARIANT_MODIFIERS[variant] || VARIANT_MODIFIERS.normal;
+	const baseStats = profile.biomeTierBaseStats[tierBiome] || profile.biomeTierBaseStats.plains;
+	const modifiers = profile.variantModifiers[variant] || profile.variantModifiers.normal;
 
 	return {
 		id: toVariantId(monsterDef.id, variant),
@@ -291,6 +328,50 @@ function applyBiomeTierBalance(monsterDef: MonsterCatalogBase, variant: 'weak' |
 	};
 }
 
-export const MONSTER_DEFS = BIOME_EXPANDED_MONSTER_DEFS.flatMap(monsterDef =>
-	MONSTER_VARIANTS.map(variant => applyBiomeTierBalance(monsterDef, variant))
-);
+function buildMonsterDefs(profile: MonsterBalanceProfile): ReadonlyArray<MonsterDef> {
+	return BIOME_EXPANDED_MONSTER_DEFS.flatMap(monsterDef =>
+		MONSTER_VARIANTS.map(variant => applyBiomeTierBalance(monsterDef, profile, variant))
+	);
+}
+
+export function getMonsterDefs(): ReadonlyArray<MonsterDef> {
+	return activeMonsterDefs;
+}
+
+export function getMonsterBalanceProfile(): MonsterBalanceProfile {
+	return JSON.parse(JSON.stringify(activeMonsterBalanceProfile));
+}
+
+export function resetMonsterBalanceProfile(): void {
+	activeMonsterBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_MONSTER_BALANCE_PROFILE));
+	activeMonsterDefs = buildMonsterDefs(activeMonsterBalanceProfile);
+}
+
+export function applyMonsterBalanceProfile(overrides: MonsterBalanceProfileOverride): void {
+	const nextProfile: MonsterBalanceProfile = JSON.parse(JSON.stringify(activeMonsterBalanceProfile));
+
+	for (const biome of Object.keys(nextProfile.biomeTierBaseStats) as MonsterTierBiome[]) {
+		if (overrides.biomeTierBaseStats?.[biome]) {
+			nextProfile.biomeTierBaseStats[biome] = {
+				...nextProfile.biomeTierBaseStats[biome],
+				...overrides.biomeTierBaseStats[biome],
+			};
+		}
+	}
+
+	for (const variant of MONSTER_VARIANTS) {
+		if (overrides.variantModifiers?.[variant]) {
+			nextProfile.variantModifiers[variant] = {
+				...nextProfile.variantModifiers[variant],
+				...overrides.variantModifiers[variant],
+			};
+		}
+	}
+
+	activeMonsterBalanceProfile = nextProfile;
+	activeMonsterDefs = buildMonsterDefs(activeMonsterBalanceProfile);
+}
+
+resetMonsterBalanceProfile();
+
+export const MONSTER_DEFS = buildMonsterDefs(DEFAULT_MONSTER_BALANCE_PROFILE);

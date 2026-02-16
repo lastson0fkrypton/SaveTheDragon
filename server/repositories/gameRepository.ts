@@ -1,4 +1,4 @@
-import { allAsync, getAsync, runAsync, withTransaction } from './dbClient.js';
+import { allAsync, getAsync, runAsync } from './dbClient.js';
 import type { GameRow, PlayerRow, PlayerStateRow, ValidMoveRow } from '../types.js';
 
 async function createGame(id: string, gameStateJson: string): Promise<void> {
@@ -76,20 +76,16 @@ async function clearValidMovesByGameId(gameId: string): Promise<void> {
 }
 
 async function setValidMovesByGameId(gameId: string, moves: Array<{ x: number; y: number }>): Promise<void> {
-	await withTransaction(async () => {
-		await clearValidMovesByGameId(gameId);
-		for (const move of moves) {
-			await runAsync('INSERT INTO valid_moves (gameId, x, y) VALUES (?, ?, ?)', [gameId, move.x, move.y]);
-		}
-	});
+	await clearValidMovesByGameId(gameId);
+	for (const move of moves) {
+		await runAsync('INSERT INTO valid_moves (gameId, x, y) VALUES (?, ?, ?)', [gameId, move.x, move.y]);
+	}
 }
 
 async function clearGameDataById(gameId: string): Promise<void> {
-	await withTransaction(async () => {
-		await runAsync('DELETE FROM games WHERE id = ?', [gameId]);
-		await runAsync('DELETE FROM players WHERE gameId = ?', [gameId]);
-		await runAsync('DELETE FROM valid_moves WHERE gameId = ?', [gameId]);
-	});
+	await runAsync('DELETE FROM games WHERE id = ?', [gameId]);
+	await runAsync('DELETE FROM players WHERE gameId = ?', [gameId]);
+	await runAsync('DELETE FROM valid_moves WHERE gameId = ?', [gameId]);
 }
 
 async function getAllGames(): Promise<GameRow[]> {

@@ -1,6 +1,6 @@
-import { BIOME_ENCOUNTER_RATES } from '../constants/biomes.js';
+import { getBiomeEncounterRates } from '../constants/biomes.js';
 import { CHARACTERS } from '../constants/characters.js';
-import { EVIL_PRINCESS_MONSTER, MONSTER_DEFS } from '../constants/monsters.js';
+import { EVIL_PRINCESS_MONSTER, getMonsterDefs } from '../constants/monsters.js';
 import {
 	createGame,
 	createPlayer,
@@ -15,6 +15,7 @@ import {
 	clearValidMovesByGameId,
 } from '../repositories/gameRepository.js';
 import { addRecentAction, generateBiomeGrid, serializeGame } from '../utils/gameUtils.js';
+import { random, randomChoice, randomId, randomInt } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
 
 function buildGameState(gameRow, playerRows, validMoveRows) {
@@ -38,10 +39,6 @@ async function loadSerializedGame(gameId) {
 		getValidMovesByGameId(gameId),
 	]);
 	return buildGameState({ ...gameRow, gameStateJson: JSON.stringify(gameState) }, playerRows, validMoveRows);
-}
-
-function randomId() {
-	return Math.random().toString(36).substr(2, 9);
 }
 
 function parseJson(text, fallback = {}) {
@@ -133,7 +130,7 @@ function pickPlayerSpawn(gameState, usedPositions) {
 	if (possiblePositions.length === 0) {
 		return { x: 0, y: 0 };
 	}
-	return possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+	return randomChoice(possiblePositions);
 }
 
 function computeValidMoves(playerRow, playerRows, diceRoll, gridSizeX, gridSizeY) {
@@ -212,7 +209,7 @@ async function joinExistingGame(gameId, playerName) {
 	const availableCharacters = CHARACTERS.filter(character => !usedCharacters.includes(character.id));
 	const randomCharacterId =
 		availableCharacters.length > 0
-			? availableCharacters[Math.floor(Math.random() * availableCharacters.length)].id
+			? randomChoice(availableCharacters).id
 			: 'none';
 
 	const gameState = getGameState(gameRow);
@@ -252,7 +249,7 @@ async function rollDiceForPlayer(gameId, playerId) {
 	}
 	if (gameState.currentDiceRoll) throw serviceError(400, 'Dice already rolled for this turn');
 
-	const diceRoll = Math.floor(Math.random() * 6) + 1;
+	const diceRoll = randomInt(6) + 1;
 	const gridSizeX = gameState.gridSizeX || 10;
 	const gridSizeY = gameState.gridSizeY || 10;
 	const moves = computeValidMoves(player, playerRows, diceRoll, gridSizeX, gridSizeY);
@@ -297,18 +294,19 @@ function startEncounterIfNeeded(gameState, playerRows, playerId, playerState, bi
 		return true;
 	}
 
-	if (!(BIOME_ENCOUNTER_RATES[biome] > 0 && Math.random() < BIOME_ENCOUNTER_RATES[biome])) {
+	const biomeEncounterRates = getBiomeEncounterRates();
+	if (!(biomeEncounterRates[biome] > 0 && random() < biomeEncounterRates[biome])) {
 		gameState.currentBattle = null;
 		return false;
 	}
 
-	const biomeMonsters = MONSTER_DEFS.filter(monster => monster.biome.split(',').includes(biome));
+	const biomeMonsters = getMonsterDefs().filter(monster => monster.biome.split(',').includes(biome));
 	if (biomeMonsters.length === 0) {
 		gameState.currentBattle = null;
 		return false;
 	}
 
-	const encounteredMonster = biomeMonsters[Math.floor(Math.random() * biomeMonsters.length)];
+	const encounteredMonster = randomChoice(biomeMonsters);
 	gameState.currentBattle = {
 		playerId,
 		monster: encounteredMonster,

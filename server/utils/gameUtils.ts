@@ -1,4 +1,4 @@
-import { ITEM_DEFS } from '../constants/items.js';
+import { getItemDefs, getItemDropRateProfile } from '../constants/items.js';
 import type {
 	BiomeGrid,
 	GameRow,
@@ -8,8 +8,9 @@ import type {
 	RecentAction,
 	ValidMoveRow,
 } from '../types.js';
+import { random, randomChoice, randomInt } from './random.js';
 
-type ItemDefFromConstants = (typeof ITEM_DEFS)[number];
+type ItemDefFromConstants = ReturnType<typeof getItemDefs>[number];
 
 // Helper: serialize a game from DB rows
 function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows: ValidMoveRow[]) {
@@ -38,8 +39,9 @@ function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows:
 	if (gameState.recentlyFoundItem && gameState.recentlyFoundItem.item?.id) {
 		allItemIds.add(gameState.recentlyFoundItem.item.id);
 	}
+	const itemDefs = getItemDefs();
 	const itemMeta: Record<string, ItemDefFromConstants> = {};
-	ITEM_DEFS.forEach(def => {
+	itemDefs.forEach(def => {
 		if (allItemIds.has(def.id)) itemMeta[def.id] = def;
 	});
 	return {
@@ -57,7 +59,7 @@ function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows:
 function addRecentAction(gameState: Partial<GameStateJson>, type: string, playerName: string, itemName = ''): void {
 	if (!gameState.recentActions) gameState.recentActions = [];
 	const action: RecentAction = {
-		id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+		id: `${Date.now()}_${Math.floor(random() * 1_000_000).toString(36)}`,
 		type, // 'use-item' or 'equip'
 		playerName,
 		itemName,
@@ -69,11 +71,50 @@ function addRecentAction(gameState: Partial<GameStateJson>, type: string, player
 }
 
 function getRandomItemForBiome(tilebiome: string): ItemDefFromConstants | null {
+	const itemDefs = getItemDefs();
+	const dropRates = getItemDropRateProfile();
 	// Only give biome-appropriate items (or biome:any), and not 'fist'
-	const pool = ITEM_DEFS.filter(
+	const pool = itemDefs.filter(
 		i => (i.biome === 'any' || (i.biome && i.biome.indexOf(tilebiome) !== -1)) && !i.noRandom
 	);
-	return pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
+	if (pool.length === 0) {
+		return null;
+	}
+
+	const weightedPool = pool.map(item => {
+		let weight = dropRates.typeWeights[item.type] || 1;
+		const isHealthItem =
+			item.type === 'item' &&
+			((typeof item.heal === 'number' && item.heal > 0) || item.effect === 'full_heal' || item.effect === 'extra_heart');
+		if (isHealthItem) {
+			weight *= dropRates.healthItemMultiplier || 1;
+		}
+		if (item.id === 'extra_heart') {
+			weight *= dropRates.extraHeartMultiplier || 1;
+		}
+		if (typeof dropRates.itemWeightOverrides[item.id] === 'number') {
+			weight *= dropRates.itemWeightOverrides[item.id];
+		}
+		return {
+			item,
+			weight: Math.max(0, weight),
+		};
+	});
+
+	const totalWeight = weightedPool.reduce((sum, entry) => sum + entry.weight, 0);
+	if (totalWeight <= 0) {
+		return randomChoice(pool);
+	}
+
+	let roll = random() * totalWeight;
+	for (const entry of weightedPool) {
+		roll -= entry.weight;
+		if (roll <= 0) {
+			return entry.item;
+		}
+	}
+
+	return weightedPool[weightedPool.length - 1].item;
 }
 
 // --- Biome grid generation ---
@@ -84,13 +125,13 @@ function generateBiomeGrid(width: number, height: number): BiomeGrid {
 	// Helper to place a patch of a biome
 	function placePatch(biome: string, count: number, patchSize: number) {
 		for (let i = 0; i < count; i++) {
-			const cx = Math.floor(Math.random() * width);
-			const cy = Math.floor(Math.random() * height);
+			const cx = randomInt(width);
+			const cy = randomInt(height);
 			for (let dx = -patchSize; dx <= patchSize; dx++) {
 				for (let dy = -patchSize; dy <= patchSize; dy++) {
 					const x = cx + dx;
 					const y = cy + dy;
-					if (x >= 0 && x < width && y >= 0 && y < height && Math.random() < 0.7) {
+					if (x >= 0 && x < width && y >= 0 && y < height && random() < 0.7) {
 						grid[y][x] = biome;
 					}
 				}
@@ -106,8 +147,8 @@ function generateBiomeGrid(width: number, height: number): BiomeGrid {
 	for (let i = 0; i < Math.max(1, Math.floor((width * height) / 100)); i++) {
 		let x, y;
 		do {
-			x = Math.floor(Math.random() * width);
-			y = Math.floor(Math.random() * height);
+			x = randomInt(width);
+			y = randomInt(height);
 		} while (grid[y][x] !== 'plains');
 		grid[y][x] = 'cave';
 	}
@@ -119,7 +160,7 @@ function generateBiomeGrid(width: number, height: number): BiomeGrid {
 		[width - 1, 0],
 		[width - 1, height - 1],
 	];
-	const [castleX, castleY] = corners[Math.floor(Math.random() * corners.length)];
+	const [castleX, castleY] = randomChoice(corners);
 	grid[castleY][castleX] = 'castle';
 	// Surround castle with an expanded volcano danger zone
 	const castleDangerRadius = 2;
@@ -140,8 +181,8 @@ function generateBiomeGrid(width: number, height: number): BiomeGrid {
 	let attempts = 0;
 	const townCenters: Array<{ x: number; y: number }> = [];
 	while (townsToPlace > 0 && attempts < 1000) {
-		let x = Math.floor(Math.random() * width);
-		let y = Math.floor(Math.random() * height);
+		let x = randomInt(width);
+		let y = randomInt(height);
 		// Manhattan distance from castle
 		const dist = Math.abs(x - castleX) + Math.abs(y - castleY);
 		if (grid[y][x] === 'plains' && dist >= 6) {

@@ -1,5 +1,5 @@
 import { CHARACTERS } from '../constants/characters.js';
-import { ITEM_DEFS } from '../constants/items.js';
+import { getItemDefs } from '../constants/items.js';
 import {
 	getGameById,
 	getPlayerByIdAndGameId,
@@ -20,7 +20,7 @@ function parseJson(text, fallback = {}) {
 }
 
 function findItem(itemId) {
-	return ITEM_DEFS.find(item => item.id === itemId);
+	return getItemDefs().find(item => item.id === itemId);
 }
 
 function nearestTownPosition(biomeGrid, positionX, positionY) {

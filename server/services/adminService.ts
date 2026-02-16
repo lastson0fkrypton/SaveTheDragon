@@ -1,4 +1,4 @@
-import { ITEM_DEFS } from '../constants/items.js';
+import { getItemDefs } from '../constants/items.js';
 import {
 	clearGameDataById,
 	clearValidMovesByGameId,
@@ -32,7 +32,7 @@ function parseJson(text, fallback = {}) {
 }
 
 function findItemDef(itemId) {
-	return ITEM_DEFS.find(item => item.id === itemId) || null;
+	return getItemDefs().find(item => item.id === itemId) || null;
 }
 
 async function listAdminGames(password) {
@@ -61,7 +61,7 @@ async function deleteAdminGame(gameId, password) {
 
 async function listAdminItems(password) {
 	assertAdmin(password);
-	return ITEM_DEFS.map(item => ({
+	return getItemDefs().map(item => ({
 		id: item.id,
 		name: item.name,
 		type: item.type,

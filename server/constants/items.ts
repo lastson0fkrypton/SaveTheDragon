@@ -844,7 +844,58 @@ const ITEM_TIER_RANK = {
 	volcano: 3,
 };
 
-const ITEM_TIER_BASE = {
+export type ItemTier = 1 | 2 | 3;
+type ItemVariant = 'cracked' | 'normal' | 'enchanted';
+
+export type ItemBalanceProfile = {
+	tierBase: {
+		weapon: Record<ItemTier, { attack: number; attackChance: number }>;
+		armor: Record<ItemTier, { defense: number; defenseChance: number }>;
+	};
+	variantModifiers: Record<ItemVariant, { valueDelta: number; chanceDelta: number }>;
+	consumables: {
+		smallPotionHeal: number;
+		mediumPotionHeal: number;
+		largePotionHeal: number;
+		fullPotionHeal: number;
+	};
+	dropRates: {
+		typeWeights: {
+			weapon: number;
+			armor: number;
+			item: number;
+		};
+		healthItemMultiplier: number;
+		extraHeartMultiplier: number;
+		itemWeightOverrides: Record<string, number>;
+	};
+};
+
+export type ItemBalanceProfileOverride = {
+	tierBase?: {
+		weapon?: Partial<Record<ItemTier, Partial<{ attack: number; attackChance: number }>>>;
+		armor?: Partial<Record<ItemTier, Partial<{ defense: number; defenseChance: number }>>>;
+	};
+	variantModifiers?: Partial<Record<ItemVariant, Partial<{ valueDelta: number; chanceDelta: number }>>>;
+	consumables?: Partial<{
+		smallPotionHeal: number;
+		mediumPotionHeal: number;
+		largePotionHeal: number;
+		fullPotionHeal: number;
+	}>;
+	dropRates?: Partial<{
+		typeWeights: Partial<{
+			weapon: number;
+			armor: number;
+			item: number;
+		}>;
+		healthItemMultiplier: number;
+		extraHeartMultiplier: number;
+		itemWeightOverrides: Record<string, number>;
+	}>;
+};
+
+const ITEM_TIER_BASE: ItemBalanceProfile['tierBase'] = {
 	weapon: {
 		1: { attack: 2, attackChance: 0.62 },
 		2: { attack: 4, attackChance: 0.74 },
@@ -857,13 +908,41 @@ const ITEM_TIER_BASE = {
 	},
 };
 
-const ITEM_VARIANT_MODIFIERS = {
+const ITEM_VARIANT_MODIFIERS: ItemBalanceProfile['variantModifiers'] = {
 	cracked: { valueDelta: -1, chanceDelta: -0.08 },
 	normal: { valueDelta: 0, chanceDelta: 0 },
 	enchanted: { valueDelta: 1, chanceDelta: 0.08 },
 };
 
-const ITEM_VARIANTS: ReadonlyArray<'cracked' | 'normal' | 'enchanted'> = ['cracked', 'normal', 'enchanted'];
+const DEFAULT_CONSUMABLE_PROFILE: ItemBalanceProfile['consumables'] = {
+	smallPotionHeal: 4,
+	mediumPotionHeal: 7,
+	largePotionHeal: 11,
+	fullPotionHeal: 999,
+};
+
+const DEFAULT_DROP_RATE_PROFILE: ItemBalanceProfile['dropRates'] = {
+	typeWeights: {
+		weapon: 1,
+		armor: 1,
+		item: 1,
+	},
+	healthItemMultiplier: 1,
+	extraHeartMultiplier: 1,
+	itemWeightOverrides: {},
+};
+
+const ITEM_VARIANTS: ReadonlyArray<ItemVariant> = ['cracked', 'normal', 'enchanted'];
+
+export const DEFAULT_ITEM_BALANCE_PROFILE: ItemBalanceProfile = {
+	tierBase: ITEM_TIER_BASE,
+	variantModifiers: ITEM_VARIANT_MODIFIERS,
+	consumables: DEFAULT_CONSUMABLE_PROFILE,
+	dropRates: DEFAULT_DROP_RATE_PROFILE,
+};
+
+let activeItemBalanceProfile: ItemBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_ITEM_BALANCE_PROFILE));
+let activeItemDefs: ReadonlyArray<ItemDef> = [];
 
 function clampChance(value: number) {
 	return Math.max(0.15, Math.min(0.95, Number(value.toFixed(2))));
@@ -882,37 +961,38 @@ function resolveItemTier(itemBiome: string): number {
 	return tier;
 }
 
-function toVariantId(baseId: string, variant: 'cracked' | 'normal' | 'enchanted') {
+function toVariantId(baseId: string, variant: ItemVariant) {
 	if (variant === 'cracked') return `cracked_${baseId}`;
 	if (variant === 'enchanted') return `enchanted_${baseId}`;
 	return baseId;
 }
 
-function toVariantName(baseName: string, variant: 'cracked' | 'normal' | 'enchanted') {
+function toVariantName(baseName: string, variant: ItemVariant) {
 	if (variant === 'cracked') return `Cracked ${baseName}`;
 	if (variant === 'enchanted') return `Enchanted ${baseName}`;
 	return baseName;
 }
 
-function rebalanceConsumable(itemDef: ItemDef): ItemDef {
+function rebalanceConsumable(itemDef: ItemDef, profile: ItemBalanceProfile): ItemDef {
 	if (itemDef.id === 'small_potion') {
-		return { ...itemDef, heal: 4 };
+		return { ...itemDef, heal: profile.consumables.smallPotionHeal };
 	}
 	if (itemDef.id === 'medium_potion') {
-		return { ...itemDef, heal: 7 };
+		return { ...itemDef, heal: profile.consumables.mediumPotionHeal };
 	}
 	if (itemDef.id === 'large_potion') {
-		return { ...itemDef, heal: 11 };
+		return { ...itemDef, heal: profile.consumables.largePotionHeal };
 	}
 	if (itemDef.id === 'full_potion') {
-		return { ...itemDef, heal: 999 };
+		return { ...itemDef, heal: profile.consumables.fullPotionHeal };
 	}
 	return itemDef;
 }
 
 function applyItemBalance(
 	itemDef: ItemDef,
-	variant: 'cracked' | 'normal' | 'enchanted' = 'normal'
+	profile: ItemBalanceProfile,
+	variant: ItemVariant = 'normal'
 ): ItemDef {
 	if (itemDef.noRandom) {
 		return itemDef;
@@ -920,8 +1000,8 @@ function applyItemBalance(
 
 	if (itemDef.type === 'weapon') {
 		const tier = resolveItemTier(itemDef.biome);
-		const base = ITEM_TIER_BASE.weapon[tier] || ITEM_TIER_BASE.weapon[1];
-		const mods = ITEM_VARIANT_MODIFIERS[variant] || ITEM_VARIANT_MODIFIERS.normal;
+		const base = profile.tierBase.weapon[tier] || profile.tierBase.weapon[1];
+		const mods = profile.variantModifiers[variant] || profile.variantModifiers.normal;
 		return {
 			...itemDef,
 			id: toVariantId(itemDef.id, variant),
@@ -933,8 +1013,8 @@ function applyItemBalance(
 
 	if (itemDef.type === 'armor') {
 		const tier = resolveItemTier(itemDef.biome);
-		const base = ITEM_TIER_BASE.armor[tier] || ITEM_TIER_BASE.armor[1];
-		const mods = ITEM_VARIANT_MODIFIERS[variant] || ITEM_VARIANT_MODIFIERS.normal;
+		const base = profile.tierBase.armor[tier] || profile.tierBase.armor[1];
+		const mods = profile.variantModifiers[variant] || profile.variantModifiers.normal;
 		return {
 			...itemDef,
 			id: toVariantId(itemDef.id, variant),
@@ -945,14 +1025,94 @@ function applyItemBalance(
 	}
 
 	if (itemDef.type === 'item') {
-		return rebalanceConsumable(itemDef);
+		return rebalanceConsumable(itemDef, profile);
 	}
 
 	return itemDef;
 }
 
-export const ITEM_DEFS = BASE_ITEM_DEFS.flatMap(itemDef => {
-	if (itemDef.noRandom) return [itemDef];
-	if (itemDef.type === 'item') return [rebalanceConsumable(itemDef)];
-	return ITEM_VARIANTS.map(variant => applyItemBalance(itemDef, variant));
-});
+function buildItemDefs(profile: ItemBalanceProfile): ReadonlyArray<ItemDef> {
+	return BASE_ITEM_DEFS.flatMap(itemDef => {
+		if (itemDef.noRandom) return [itemDef];
+		if (itemDef.type === 'item') return [rebalanceConsumable(itemDef, profile)];
+		return ITEM_VARIANTS.map(variant => applyItemBalance(itemDef, profile, variant));
+	});
+}
+
+function normalizeTierOverrides(profile: ItemBalanceProfile, overrides?: ItemBalanceProfileOverride['tierBase']): void {
+	if (!overrides) return;
+	for (const tier of [1, 2, 3] as const) {
+		if (overrides.weapon?.[tier]) {
+			profile.tierBase.weapon[tier] = {
+				...profile.tierBase.weapon[tier],
+				...overrides.weapon[tier],
+			};
+		}
+		if (overrides.armor?.[tier]) {
+			profile.tierBase.armor[tier] = {
+				...profile.tierBase.armor[tier],
+				...overrides.armor[tier],
+			};
+		}
+	}
+}
+
+export function getItemDefs(): ReadonlyArray<ItemDef> {
+	return activeItemDefs;
+}
+
+export function getItemBalanceProfile(): ItemBalanceProfile {
+	return JSON.parse(JSON.stringify(activeItemBalanceProfile));
+}
+
+export function resetItemBalanceProfile(): void {
+	activeItemBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_ITEM_BALANCE_PROFILE));
+	activeItemDefs = buildItemDefs(activeItemBalanceProfile);
+}
+
+export function applyItemBalanceProfile(overrides: ItemBalanceProfileOverride): void {
+	const nextProfile: ItemBalanceProfile = JSON.parse(JSON.stringify(activeItemBalanceProfile));
+	normalizeTierOverrides(nextProfile, overrides.tierBase);
+
+	for (const variant of ITEM_VARIANTS) {
+		if (overrides.variantModifiers?.[variant]) {
+			nextProfile.variantModifiers[variant] = {
+				...nextProfile.variantModifiers[variant],
+				...overrides.variantModifiers[variant],
+			};
+		}
+	}
+
+	if (overrides.consumables) {
+		nextProfile.consumables = {
+			...nextProfile.consumables,
+			...overrides.consumables,
+		};
+	}
+
+	if (overrides.dropRates) {
+		nextProfile.dropRates = {
+			...nextProfile.dropRates,
+			...overrides.dropRates,
+			typeWeights: {
+				...nextProfile.dropRates.typeWeights,
+				...(overrides.dropRates.typeWeights || {}),
+			},
+			itemWeightOverrides: {
+				...nextProfile.dropRates.itemWeightOverrides,
+				...(overrides.dropRates.itemWeightOverrides || {}),
+			},
+		};
+	}
+
+	activeItemBalanceProfile = nextProfile;
+	activeItemDefs = buildItemDefs(activeItemBalanceProfile);
+}
+
+resetItemBalanceProfile();
+
+export const ITEM_DEFS = buildItemDefs(DEFAULT_ITEM_BALANCE_PROFILE);
+
+export function getItemDropRateProfile(): ItemBalanceProfile['dropRates'] {
+	return JSON.parse(JSON.stringify(activeItemBalanceProfile.dropRates));
+}

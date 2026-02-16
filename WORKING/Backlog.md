@@ -189,7 +189,7 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
 - **Title:** Build AI-driven gameplay simulation harness for concurrency and balance feedback
 - **Why:** Automated, repeatable game runs are needed to stress multiplayer concurrency, collect large gameplay datasets, and create a feedback loop for balancing changes.
 - **Acceptance Criteria:**
-  - An **in-process server-side simulation runner** can execute full game loops quickly (create/join/roll/move/battle/loot/equip/use/turn progression), suitable for repeated AI-guided balancing runs.
+  - An **in-process server-side simulation runner** can execute full game loops quickly (create/join/roll/move/battle/loot/equip/use/turn progression), suitable for repeated AI-guided balancing runs or for auto-tuning the monster or item base rank or modifiers.
   - Runner supports parallel execution of many games/players to test concurrency and race-condition behavior.
   - Runner outputs structured per-game logs and aggregate summaries and can return machine-readable results to AI agent workflows.
   - Runner supports configurable player behavior profiles (e.g., risk-averse, aggressive, completionist) to emulate different player expectations.
@@ -203,8 +203,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Batch output includes pacing and quality signals: `encounters`, `avgTurnsBetweenEncounters`, `turnsToOutcome` percentiles, early-loss frequency, and timeout frequency.
   - Runner produces explicit regression/fail signals when beatable rate drops, timeout rate exceeds threshold, or ratio moves outside target band.
   - Tooling and usage are documented so future AI prompt sessions can run simulations after logic/constant changes.
-- **Status:** TODO
-- **Notes:** Agreed direction: in-process server-side test/harness (fast execution) with AI-consumable summary output for iterative auto-balancing. Include child-friendly difficulty validation heuristics for target demographic (10-year-olds), plus explicit fail signals when beatable condition regresses.
+- **Status:** DONE
+- **Notes:** Implemented in-process simulation + auto-balancing toolchain in `server/simulation/` with deterministic seeded runs, configurable parallel batches, behavior profiles (`risk-averse`, `aggressive`, `completionist`), per-game logs, and machine-readable aggregate scorecards. Added runtime tuning APIs (no JSON migration) for biome encounter rates, item tier bases/modifiers, and monster tier bases/modifiers in `server/constants/biomes.ts`, `server/constants/items.ts`, and `server/constants/monsters.ts`. Runner now emits `winRate`, `lossRate`, `timeoutRate`, `winLossRatio`, `beatableRate`, pacing metrics, profile breakdowns, and explicit fail signals for beatable-rate regression, timeout thresholds, and ratio-band drift. Added baseline-vs-candidate compare mode and GA-style optimizer (`npm run autobalance`) that iteratively proposes override payloads for further balancing runs.
 
   Planned implementation blueprint (for later):
   - **Runner shape:** Add a server-side simulation entrypoint (test/tool) callable via npm script, deterministic by `seed`.

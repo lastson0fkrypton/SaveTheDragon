@@ -1,4 +1,4 @@
-import { ITEM_DEFS } from '../constants/items.js';
+import { getItemDefs } from '../constants/items.js';
 import {
 	getGameById,
 	getPlayerById,
@@ -7,6 +7,7 @@ import {
 	updatePlayerStateById,
 } from '../repositories/gameRepository.js';
 import { addRecentAction, getRandomItemForBiome } from '../utils/gameUtils.js';
+import { random } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
 
 function parseJson(text, fallback = {}) {
@@ -61,7 +62,7 @@ function movePlayerToNearestTown(gameState, playerState) {
 }
 
 function findItem(itemId) {
-	return ITEM_DEFS.find(i => i.id === itemId);
+	return getItemDefs().find(i => i.id === itemId);
 }
 
 async function attackBattle(gameId, playerId) {
@@ -82,8 +83,8 @@ async function attackBattle(gameId, playerId) {
 	const weapon = findItem(weaponId) || findItem('fist');
 	const log = battle.battleLog || [];
 
-	const playerHit = Math.random() < (weapon?.attackChance || 0.5);
-	const monsterBlock = Math.random() < (battle.monster.defenseChance || 0);
+	const playerHit = random() < (weapon?.attackChance || 0.5);
+	const monsterBlock = random() < (battle.monster.defenseChance || 0);
 	let playerDamage = 0;
 
 	if (playerHit) {
@@ -127,8 +128,8 @@ async function attackBattle(gameId, playerId) {
 	} else {
 		const armorId = playerState.inventory?.equippedArmorId;
 		const armor = armorId ? findItem(armorId) : null;
-		const monsterHit = Math.random() < (battle.monster.attackChance || 0.5);
-		const playerBlock = armor ? Math.random() < (armor.defenseChance || 0) : false;
+		const monsterHit = random() < (battle.monster.attackChance || 0.5);
+		const playerBlock = armor ? random() < (armor.defenseChance || 0) : false;
 		let monsterDamage = 0;
 
 		if (monsterHit) {

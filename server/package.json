@@ -7,7 +7,12 @@
     "build": "tsc -p tsconfig.json",
     "start": "tsx watch index.ts",
     "start:prod": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "simulate": "tsx simulation/runSimulation.ts",
+    "simulate:js": "node dist/simulation/runSimulation.js",
+    "simulate:compare": "tsx simulation/runSimulation.ts --compare=true",
+    "autobalance": "tsx simulation/autoBalance.ts",
+    "autobalance:js": "node dist/simulation/autoBalance.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
