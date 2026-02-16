@@ -192,6 +192,14 @@ npm run build
 npm run autobalance:js -- --seed=ga-fast --runName=autobalance-ga-fast --generations=4 --population=16 --elite=4 --runs=120 --parallelism=8 --candidateParallelism=4 --progressEveryRuns=10 --turnCap=120 --artifactDir=simulation-output
 ```
 
+Profile-floor focused run (pushes all behavior profiles toward a minimum win chance):
+
+```powershell
+$env:SAVE_THE_DRAGON_DB_CLIENT='in-memory'
+cd server
+npm run autobalance -- --seed=ga-profile-floor --runName=autobalance-ga-profile-floor --generations=6 --population=16 --elite=4 --runs=120 --parallelism=8 --candidateParallelism=4 --turnCap=120 --artifactDir=simulation-output --targetWinRate=0.35 --minBeatableRate=0.30 --minProfileWinRate=0.15 --maxProfileTimeoutRate=0.30 --maxTimeoutRate=0.30 --profileFloorWeight=3
+```
+
 #### Auto-balancer flags
 
 - `--seed`, `--runName`, `--artifactDir`
@@ -205,6 +213,14 @@ npm run autobalance:js -- --seed=ga-fast --runName=autobalance-ga-fast --generat
 - `--progressEveryRuns`: progress log cadence per batch
 - `--reportRuns`: runs used for final best-candidate detailed report
 - `--turnCap`, `--playersPerGame`
+- `--targetWinLossRatio`: preferred global win/loss ratio target
+- `--targetWinRate`: preferred global win rate target
+- `--minBeatableRate`: minimum acceptable beatable rate target
+- `--maxTimeoutRate`: global timeout ceiling used by fitness
+- `--maxEarlyLossRate`: global early-loss ceiling used by fitness
+- `--minProfileWinRate`: minimum win-rate floor per behavior profile (`risk-averse`, `aggressive`, `completionist`)
+- `--maxProfileTimeoutRate`: per-profile timeout ceiling
+- `--profileFloorWeight`: weight of per-profile win floor penalty in fitness
 
 ### Live progress and artifacts
 

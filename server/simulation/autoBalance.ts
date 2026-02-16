@@ -29,6 +29,17 @@ type CandidateResult = {
 	fitness: number;
 };
 
+type FitnessConfig = {
+	targetWinLossRatio: number;
+	minBeatableRate: number;
+	maxTimeoutRate: number;
+	targetWinRate: number;
+	maxEarlyLossRate: number;
+	minProfileWinRate: number;
+	maxProfileTimeoutRate: number;
+	profileFloorWeight: number;
+};
+
 function parseArgs(argv: string[]): Record<string, string> {
 	const args: Record<string, string> = {};
 	for (const raw of argv) {
@@ -121,19 +132,56 @@ function genomeToOverrides(genome: Genome): BalanceOverrideSet {
 	return buildScaledBaselineOverrides(genome);
 }
 
-function evaluateFitness(summary: SimulationBatchSummary): number {
-	const targetRatio = 2;
-	const ratioPenalty = Math.abs(summary.winLossRatio - targetRatio) / targetRatio;
-	const beatablePenalty = Math.max(0, 0.65 - summary.beatableRate) * 2.5;
-	const timeoutPenalty = Math.max(0, summary.timeoutRate - 0.25) * 3;
-	const winPenalty = Math.max(0, 0.55 - summary.winRate) * 1.5;
-	const earlyLossPenalty = summary.earlyLossFrequency * 1.2;
+function getProfileStats(summary: SimulationBatchSummary): {
+	minProfileWinRate: number;
+	maxProfileTimeoutRate: number;
+} {
+	const profiles = Object.values(summary.profileBreakdown);
+	if (profiles.length === 0) {
+		return {
+			minProfileWinRate: 0,
+			maxProfileTimeoutRate: 0,
+		};
+	}
+
+	let minProfileWinRate = Number.POSITIVE_INFINITY;
+	let maxProfileTimeoutRate = 0;
+	for (const profile of profiles) {
+		minProfileWinRate = Math.min(minProfileWinRate, profile.winRate);
+		maxProfileTimeoutRate = Math.max(maxProfileTimeoutRate, profile.timeoutRate);
+	}
+
+	return {
+		minProfileWinRate,
+		maxProfileTimeoutRate,
+	};
+}
+
+function evaluateFitness(summary: SimulationBatchSummary, config: FitnessConfig): number {
+	const ratioPenalty = Math.abs(summary.winLossRatio - config.targetWinLossRatio) / config.targetWinLossRatio;
+	const beatablePenalty = Math.max(0, config.minBeatableRate - summary.beatableRate) * 2.5;
+	const timeoutPenalty = Math.max(0, summary.timeoutRate - config.maxTimeoutRate) * 3;
+	const winPenalty = Math.max(0, config.targetWinRate - summary.winRate) * 1.5;
+	const earlyLossPenalty = Math.max(0, summary.earlyLossFrequency - config.maxEarlyLossRate) * 2;
+	const profileStats = getProfileStats(summary);
+	const profileWinPenalty = Math.max(0, config.minProfileWinRate - profileStats.minProfileWinRate) * config.profileFloorWeight;
+	const profileTimeoutPenalty = Math.max(0, profileStats.maxProfileTimeoutRate - config.maxProfileTimeoutRate) * 1.5;
 	const failPenalty =
 		(summary.failSignals.beatableRateDropped ? 0.7 : 0) +
 		(summary.failSignals.timeoutRateTooHigh ? 0.7 : 0) +
 		(summary.failSignals.winLossRatioOutsideBand ? 0.5 : 0);
 
-	return Number((1 - (ratioPenalty + beatablePenalty + timeoutPenalty + winPenalty + earlyLossPenalty + failPenalty)).toFixed(6));
+	return Number((
+		1 -
+		(ratioPenalty +
+			beatablePenalty +
+			timeoutPenalty +
+			winPenalty +
+			earlyLossPenalty +
+			profileWinPenalty +
+			profileTimeoutPenalty +
+			failPenalty)
+	).toFixed(6));
 }
 
 async function evaluateCandidate(
@@ -146,7 +194,8 @@ async function evaluateCandidate(
 		label?: string;
 		progressEveryRuns?: number;
 		progressFilePath?: string;
-	}
+	},
+	fitnessConfig?: FitnessConfig
 ): Promise<CandidateResult> {
 	const overrides = genomeToOverrides(genome);
 	const result = await runSimulationBatch(
@@ -166,7 +215,16 @@ async function evaluateCandidate(
 		genome,
 		overrides,
 		summary: result.summary,
-		fitness: evaluateFitness(result.summary),
+		fitness: evaluateFitness(result.summary, fitnessConfig ?? {
+			targetWinLossRatio: 2,
+			minBeatableRate: 0.65,
+			maxTimeoutRate: 0.25,
+			targetWinRate: 0.55,
+			maxEarlyLossRate: 0.2,
+			minProfileWinRate: 0.2,
+			maxProfileTimeoutRate: 0.35,
+			profileFloorWeight: 2.5,
+		}),
 	};
 }
 
@@ -185,6 +243,16 @@ async function main() {
 	const candidateParallelism = Math.max(1, Math.min(populationSize, Number(args.candidateParallelism ?? 2)));
 	const progressEveryRuns = Math.max(1, Number(args.progressEveryRuns ?? Math.max(5, Math.floor((Number(args.runs ?? 80) || 80) / 10))));
 	const mutationRate = clamp(Number(args.mutationRate ?? 0.28), 0.01, 0.95);
+	const fitnessConfig: FitnessConfig = {
+		targetWinLossRatio: clamp(Number(args.targetWinLossRatio ?? 2), 0.2, 10),
+		minBeatableRate: clamp(Number(args.minBeatableRate ?? 0.65), 0, 1),
+		maxTimeoutRate: clamp(Number(args.maxTimeoutRate ?? 0.25), 0, 1),
+		targetWinRate: clamp(Number(args.targetWinRate ?? 0.55), 0, 1),
+		maxEarlyLossRate: clamp(Number(args.maxEarlyLossRate ?? 0.2), 0, 1),
+		minProfileWinRate: clamp(Number(args.minProfileWinRate ?? 0.2), 0, 1),
+		maxProfileTimeoutRate: clamp(Number(args.maxProfileTimeoutRate ?? 0.35), 0, 1),
+		profileFloorWeight: clamp(Number(args.profileFloorWeight ?? 2.5), 0.1, 10),
+	};
 	const config: Partial<SimulationConfig> = {
 		seed,
 		runs: Math.max(10, Number(args.runs ?? 80)),
@@ -201,6 +269,9 @@ async function main() {
 
 	console.error(
 		`[autobalance] seed=${seed} generations=${generations} population=${populationSize} runs=${config.runs} parallelism=${config.parallelism} candidateParallelism=${candidateParallelism}`
+	);
+	console.error(
+		`[autobalance] fitness minProfileWinRate=${(fitnessConfig.minProfileWinRate * 100).toFixed(1)}% maxProfileTimeoutRate=${(fitnessConfig.maxProfileTimeoutRate * 100).toFixed(1)}% targetWinRate=${(fitnessConfig.targetWinRate * 100).toFixed(1)}%`
 	);
 	console.error(`[autobalance] runName=${runName} writing artifacts to ${artifactDir}`);
 	await fs.mkdir(artifactDir, { recursive: true });
@@ -252,7 +323,7 @@ async function main() {
 						artifactDir,
 						`progress-${toSafeFolderName(`${runName}-g${generation + 1}-c${index + 1}`)}.json`
 					),
-				});
+				}, fitnessConfig);
 				evaluations[index] = evaluated;
 				console.error(
 					`[autobalance] generation ${generation + 1}/${generations} candidate ${index + 1}/${population.length} fitness=${evaluated.fitness.toFixed(4)} winRate=${(evaluated.summary.winRate * 100).toFixed(2)}% beatable=${(evaluated.summary.beatableRate * 100).toFixed(2)}% timeout=${(evaluated.summary.timeoutRate * 100).toFixed(2)}%`
@@ -324,6 +395,7 @@ async function main() {
 			candidateParallelism,
 			eliteCount,
 			mutationRate,
+			fitnessConfig,
 			reportRuns,
 			durationSeconds: Number(((Date.now() - startedAt) / 1000).toFixed(2)),
 		},
@@ -344,7 +416,8 @@ async function main() {
 		recommendation: {
 			applyOverrides: bestCandidate.overrides,
 			notes: [
-				'Candidate targets beatable rate and timeout limits while steering win/loss ratio toward 2:1.',
+				'Candidate targets beatable rate and timeout limits while steering win/loss ratio toward configured target.',
+				'Fitness also enforces a minimum per-profile win floor and maximum per-profile timeout ceiling.',
 				'Re-run baseline vs candidate with higher runs for confidence before applying to live constants.',
 			],
 		},

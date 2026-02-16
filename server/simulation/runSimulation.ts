@@ -1,5 +1,6 @@
 import { initDb } from '../db.js';
 import path from 'node:path';
+import vm from 'node:vm';
 import {
 	runBaselineVsCandidate,
 	runSimulationBatch,
@@ -10,11 +11,31 @@ import {
 
 function parseJsonArg<T>(value: string | undefined, fallback: T): T {
 	if (!value) return fallback;
-	try {
-		return JSON.parse(value) as T;
-	} catch (_error) {
-		return fallback;
+	const raw = value.trim();
+	const candidates = [raw];
+	if (
+		(raw.startsWith('"') && raw.endsWith('"')) ||
+		(raw.startsWith("'") && raw.endsWith("'"))
+	) {
+		candidates.push(raw.slice(1, -1));
 	}
+
+	for (const candidate of candidates) {
+		try {
+			return JSON.parse(candidate) as T;
+		} catch (_error) {
+			// Try a JS object literal fallback for shell-passed payloads like
+			// {biomeEncounterRates:{plains:0.12,...}}
+			try {
+				const script = new vm.Script(`(${candidate})`);
+				return script.runInNewContext(Object.create(null)) as T;
+			} catch (_fallbackError) {
+				// Continue trying next candidate
+			}
+		}
+	}
+
+	return fallback;
 }
 
 function parseArgs(argv: string[]): Record<string, string> {
