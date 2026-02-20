@@ -32,9 +32,11 @@ export type SingleRunResult = {
 
 export type AggregateResult = {
 	totalGames: number;
-	completedGames: number;
-	completionRate: number;
+	successfulGames: number;
+	successRate: number;
+	minTurnsPlayed: number;
 	avgTurnsPlayed: number;
+	maxTurnsPlayed: number;
 };
 
 export type SimulationRunOutput = {
@@ -138,11 +140,26 @@ async function apiRequest(baseUrl: string, method: string, pathName: string, bod
 async function maybeUseHealingItem(baseUrl: string, gameId: string, player, itemMeta: Record<string, any>, events: SimEvent[], turn: number) {
 	const maxHearts = player.maxHearts || 5;
 	const damage = player.damage || 0;
+	const inventoryItems: string[] = player.inventory?.items || [];
+	let extraHeartItemId: string | null = null;
+	for (const itemId of inventoryItems) {
+		const item = itemMeta[itemId];
+		if (item?.effect === 'extra_heart') {
+			extraHeartItemId = itemId;
+			break;
+		}
+	}
+
+	if (extraHeartItemId && maxHearts < 12 && damage >= 2) {
+		await apiRequest(baseUrl, 'POST', `/api/games/${gameId}/player/${player.id}/use-item`, { itemId: extraHeartItemId });
+		events.push({ turn, type: 'use-item', detail: extraHeartItemId });
+		return;
+	}
+
 	if (damage < Math.max(2, Math.floor(maxHearts * 0.35))) {
 		return;
 	}
 
-	const inventoryItems: string[] = player.inventory?.items || [];
 	let selectedItemId: string | null = null;
 	let selectedHeal = -1;
 	for (const itemId of inventoryItems) {
@@ -213,6 +230,9 @@ function chooseBattleItem(player, battle, itemMeta: Record<string, any>) {
 	}
 
 	if (playerHealth > lowHealthThreshold) {
+		if (extraHeartId && (player?.maxHearts || 5) < 12 && playerHealth <= Math.ceil(maxHearts * 0.7)) {
+			return extraHeartId;
+		}
 		return null;
 	}
 
@@ -355,12 +375,15 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 }
 
 function summarize(results: SingleRunResult[]): AggregateResult {
-	const completedGames = results.filter(result => result.completed).length;
+	const successfulGames = results.filter(result => result.bossDefeated).length;
+	const turns = results.map(result => result.turnsPlayed);
 	return {
 		totalGames: results.length,
-		completedGames,
-		completionRate: Number((completedGames / Math.max(1, results.length)).toFixed(4)),
+		successfulGames,
+		successRate: Number((successfulGames / Math.max(1, results.length)).toFixed(4)),
+		minTurnsPlayed: turns.length > 0 ? Math.min(...turns) : 0,
 		avgTurnsPlayed: Number(average(results.map(result => result.turnsPlayed)).toFixed(2)),
+		maxTurnsPlayed: turns.length > 0 ? Math.max(...turns) : 0,
 	};
 }
 
@@ -373,9 +396,11 @@ function writeReport(options: SimOptions, aggregate: AggregateResult, runs: Sing
 		`games=${options.games}`,
 		`maxTurns=${options.maxTurns}`,
 		`seed=${options.seed}`,
-		`completedGames=${aggregate.completedGames}`,
-		`completionRate=${aggregate.completionRate}`,
+		`successfulGames=${aggregate.successfulGames}`,
+		`successRate=${aggregate.successRate}`,
+		`minTurnsPlayed=${aggregate.minTurnsPlayed}`,
 		`avgTurnsPlayed=${aggregate.avgTurnsPlayed}`,
+		`maxTurnsPlayed=${aggregate.maxTurnsPlayed}`,
 	].join('\n');
 	fs.writeFileSync(path.join(outputDir, 'deck-balance-report.txt'), `${reportText}\n`, 'utf8');
 

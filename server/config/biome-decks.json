@@ -1,29 +1,94 @@
 {
   "BIOME_DECKS": {
     "plains": {
-      "encounterComposition": { "monster": 9, "item": 5, "consumable": 4, "heart": 2 },
-      "lootComposition": { "item": 7, "consumable": 4, "heart": 1 },
-      "monsterVariantWeights": { "weak": 0.6, "normal": 0.35, "strong": 0.05 }
+      "encounterComposition": {
+        "monster": 18,
+        "item": 10,
+        "consumable": 6,
+        "heart": 1
+      },
+      "lootComposition": {
+        "item": 7,
+        "consumable": 2,
+        "heart": 1
+      },
+      "monsterVariantWeights": {
+        "weak": 0.6759037980937271,
+        "normal": 0.30156023010090954,
+        "strong": 0.02253597180536347
+      }
     },
     "forest": {
-      "encounterComposition": { "monster": 10, "item": 5, "consumable": 3, "heart": 2 },
-      "lootComposition": { "item": 7, "consumable": 4, "heart": 1 },
-      "monsterVariantWeights": { "weak": 0.4, "normal": 0.45, "strong": 0.15 }
+      "encounterComposition": {
+        "monster": 17,
+        "item": 10,
+        "consumable": 5,
+        "heart": 1
+      },
+      "lootComposition": {
+        "item": 7,
+        "consumable": 2,
+        "heart": 1
+      },
+      "monsterVariantWeights": {
+        "weak": 0.4973918098969132,
+        "normal": 0.4279800621645969,
+        "strong": 0.07462812793848993
+      }
     },
     "desert": {
-      "encounterComposition": { "monster": 12, "item": 4, "consumable": 3, "heart": 1 },
-      "lootComposition": { "item": 8, "consumable": 3, "heart": 1 },
-      "monsterVariantWeights": { "weak": 0.2, "normal": 0.55, "strong": 0.25 }
+      "encounterComposition": {
+        "monster": 17,
+        "item": 8,
+        "consumable": 5,
+        "heart": 1
+      },
+      "lootComposition": {
+        "item": 8,
+        "consumable": 1,
+        "heart": 1
+      },
+      "monsterVariantWeights": {
+        "weak": 0.2775119521462196,
+        "normal": 0.5836960730152692,
+        "strong": 0.13879197483851116
+      }
     },
     "cave": {
-      "encounterComposition": { "monster": 13, "item": 3, "consumable": 3, "heart": 1 },
-      "lootComposition": { "item": 8, "consumable": 3, "heart": 1 },
-      "monsterVariantWeights": { "weak": 0.1, "normal": 0.5, "strong": 0.4 }
+      "encounterComposition": {
+        "monster": 19,
+        "item": 6,
+        "consumable": 5,
+        "heart": 1
+      },
+      "lootComposition": {
+        "item": 8,
+        "consumable": 1,
+        "heart": 1
+      },
+      "monsterVariantWeights": {
+        "weak": 0.15565096544524346,
+        "normal": 0.595242878656622,
+        "strong": 0.2491061558981346
+      }
     },
     "volcano": {
-      "encounterComposition": { "monster": 14, "item": 3, "consumable": 2, "heart": 1 },
-      "lootComposition": { "item": 9, "consumable": 2, "heart": 1 },
-      "monsterVariantWeights": { "weak": 0.05, "normal": 0.45, "strong": 0.5 }
+      "encounterComposition": {
+        "monster": 20,
+        "item": 6,
+        "consumable": 3,
+        "heart": 1
+      },
+      "lootComposition": {
+        "item": 9,
+        "consumable": 1,
+        "heart": 1
+      },
+      "monsterVariantWeights": {
+        "weak": 0.08414231848690726,
+        "normal": 0.5792010882392837,
+        "strong": 0.336656593273809
+      }
     }
   }
 }

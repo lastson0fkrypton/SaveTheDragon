@@ -26,14 +26,12 @@ type Candidate = {
 	genome: Genome;
 	fitness: number;
 	aggregate: AggregateResult;
-	bossDefeatRate: number;
 	deckConfig: BiomeDeckConfig;
 	balanceConfig: GameBalanceConfig;
 };
 
 type WorkerSimulationResult = {
 	aggregate: AggregateResult;
-	bossDefeatRate: number;
 };
 
 type Args = {
@@ -46,9 +44,14 @@ type Args = {
 	population: number;
 	elite: number;
 	candidateParallelism: number;
-	targetCompletionRate: number;
+	targetSuccessRate: number;
+	targetMinTurns: number;
 	targetAvgTurns: number;
-	minBossDefeatRate: number;
+	targetMaxTurns: number;
+	successPenaltyWeight: number;
+	minTurnsPenaltyWeight: number;
+	turnsPenaltyWeight: number;
+	maxTurnsPenaltyWeight: number;
 	artifactDir: string;
 	runName: string;
 	baseDeckPath: string;
@@ -84,9 +87,14 @@ function parseRuntimeArgs(raw: Record<string, string>): Args {
 		population: Math.max(4, Number(raw.population || 10)),
 		elite: Math.max(1, Number(raw.elite || 3)),
 		candidateParallelism: Math.max(1, Number(raw.candidateParallelism || 2)),
-		targetCompletionRate: clamp(Number(raw.targetCompletionRate || 0.35), 0, 1),
+		targetSuccessRate: clamp(Number(raw.targetSuccessRate || raw.targetCompletionRate || 1.0), 0, 1),
+		targetMinTurns: Math.max(1, Number(raw.targetMinTurns || 30)),
 		targetAvgTurns: Math.max(20, Number(raw.targetAvgTurns || 95)),
-		minBossDefeatRate: clamp(Number(raw.minBossDefeatRate || 0.15), 0, 1),
+		targetMaxTurns: Math.max(20, Number(raw.targetMaxTurns || 100)),
+		successPenaltyWeight: Math.max(0, Number(raw.successPenaltyWeight || 1.8)),
+		minTurnsPenaltyWeight: Math.max(0, Number(raw.minTurnsPenaltyWeight || 0.8)),
+		turnsPenaltyWeight: Math.max(0, Number(raw.turnsPenaltyWeight || 0.35)),
+		maxTurnsPenaltyWeight: Math.max(0, Number(raw.maxTurnsPenaltyWeight || 1.1)),
 		artifactDir,
 		runName,
 		baseDeckPath: raw.baseDeckPath || path.resolve(process.cwd(), 'config', 'biome-decks.json'),
@@ -194,6 +202,14 @@ function applyGenome(
 			template.encounterComposition.heart;
 		if (totalEncounter <= 0) {
 			template.encounterComposition.monster = 1;
+		}
+
+		const nonMonsterEncounter =
+			template.encounterComposition.item +
+			template.encounterComposition.consumable +
+			template.encounterComposition.heart;
+		if (template.encounterComposition.monster <= nonMonsterEncounter) {
+			template.encounterComposition.monster = nonMonsterEncounter + 1;
 		}
 
 		const totalLoot = template.lootComposition.item + template.lootComposition.consumable + template.lootComposition.heart;
@@ -339,18 +355,33 @@ async function evaluateCandidate(
 		};
 
 		const output = await runSimulationWorker(simOptions);
-		const bossDefeatRate = output.bossDefeatRate;
 
-		const completionPenalty = Math.abs(output.aggregate.completionRate - args.targetCompletionRate);
+		const successPenalty = Math.abs(output.aggregate.successRate - args.targetSuccessRate);
+		const minTurnsPenalty =
+			output.aggregate.minTurnsPlayed < args.targetMinTurns
+				? (args.targetMinTurns - output.aggregate.minTurnsPlayed) / args.targetMinTurns
+				: 0;
 		const turnsPenalty = Math.abs(output.aggregate.avgTurnsPlayed - args.targetAvgTurns) / args.targetAvgTurns;
-		const bossPenalty = Math.max(0, args.minBossDefeatRate - bossDefeatRate) * 1.5;
-		const fitness = Number((1 - (completionPenalty * 1.6 + turnsPenalty * 0.35 + bossPenalty)).toFixed(6));
+		const maxTurnsPenalty =
+			output.aggregate.maxTurnsPlayed > args.targetMaxTurns
+				? (output.aggregate.maxTurnsPlayed - args.targetMaxTurns) / args.targetMaxTurns
+				: 0;
+		const fitness = Number(
+			(
+				1 -
+				(
+					successPenalty * args.successPenaltyWeight +
+					minTurnsPenalty * args.minTurnsPenaltyWeight +
+					turnsPenalty * args.turnsPenaltyWeight +
+					maxTurnsPenalty * args.maxTurnsPenaltyWeight
+				)
+			).toFixed(6)
+		);
 
 		return {
 			genome,
 			fitness,
 			aggregate: output.aggregate,
-			bossDefeatRate: Number(bossDefeatRate.toFixed(4)),
 			deckConfig,
 			balanceConfig,
 		};
@@ -406,7 +437,7 @@ async function evaluatePopulation(
 				);
 				results[index] = candidate;
 				console.error(
-					`[autobalance] g${generation + 1} c${index + 1}/${population.length} fitness=${candidate.fitness.toFixed(4)} completion=${(candidate.aggregate.completionRate * 100).toFixed(1)}% avgTurns=${candidate.aggregate.avgTurnsPlayed.toFixed(1)} boss=${(candidate.bossDefeatRate * 100).toFixed(1)}%`
+					`[autobalance] g${generation + 1} c${index + 1}/${population.length} fitness=${candidate.fitness.toFixed(4)} success=${(candidate.aggregate.successRate * 100).toFixed(1)}% avgTurns=${candidate.aggregate.avgTurnsPlayed.toFixed(1)}`
 				);
 			} catch (error) {
 				const fallback = await evaluateCandidateWithRetry(
@@ -455,8 +486,10 @@ async function main() {
 	const history: Array<{
 		generation: number;
 		bestFitness: number;
-		completionRate: number;
+		successRate: number;
+		minTurnsPlayed: number;
 		avgTurnsPlayed: number;
+		maxTurnsPlayed: number;
 		bossDefeatRate: number;
 	}> = [];
 
@@ -471,13 +504,15 @@ async function main() {
 		history.push({
 			generation: generation + 1,
 			bestFitness: generationBest.fitness,
-			completionRate: generationBest.aggregate.completionRate,
+			successRate: generationBest.aggregate.successRate,
+			minTurnsPlayed: generationBest.aggregate.minTurnsPlayed,
 			avgTurnsPlayed: generationBest.aggregate.avgTurnsPlayed,
-			bossDefeatRate: generationBest.bossDefeatRate,
+			maxTurnsPlayed: generationBest.aggregate.maxTurnsPlayed,
+			bossDefeatRate: generationBest.aggregate.successRate,
 		});
 
 		console.error(
-			`[autobalance] generation ${generation + 1} best fitness=${generationBest.fitness.toFixed(4)} completion=${(generationBest.aggregate.completionRate * 100).toFixed(1)}% avgTurns=${generationBest.aggregate.avgTurnsPlayed.toFixed(1)} boss=${(generationBest.bossDefeatRate * 100).toFixed(1)}%`
+			`[autobalance] generation ${generation + 1} best fitness=${generationBest.fitness.toFixed(4)} success=${(generationBest.aggregate.successRate * 100).toFixed(1)}% min/avg/max=${generationBest.aggregate.minTurnsPlayed}/${generationBest.aggregate.avgTurnsPlayed.toFixed(1)}/${generationBest.aggregate.maxTurnsPlayed}`
 		);
 
 		const next: Genome[] = evaluated.slice(0, Math.min(args.elite, evaluated.length)).map(entry => entry.genome);
@@ -535,15 +570,20 @@ async function main() {
 			gamesPerCandidate: args.games,
 			durationSeconds: Number(((Date.now() - startedAt) / 1000).toFixed(2)),
 			targets: {
-				completionRate: args.targetCompletionRate,
+				successRate: args.targetSuccessRate,
+				minTurns: args.targetMinTurns,
 				avgTurns: args.targetAvgTurns,
-				minBossDefeatRate: args.minBossDefeatRate,
+				maxTurns: args.targetMaxTurns,
+				successPenaltyWeight: args.successPenaltyWeight,
+				minTurnsPenaltyWeight: args.minTurnsPenaltyWeight,
+				turnsPenaltyWeight: args.turnsPenaltyWeight,
+				maxTurnsPenaltyWeight: args.maxTurnsPenaltyWeight,
 			},
 		},
 		history,
 		bestCandidate: {
 			fitness: best.fitness,
-			bossDefeatRate: best.bossDefeatRate,
+			bossDefeatRate: best.aggregate.successRate,
 			aggregate: best.aggregate,
 			genome: best.genome,
 			bestDeckPath,

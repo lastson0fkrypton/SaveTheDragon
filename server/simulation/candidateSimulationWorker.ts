@@ -23,13 +23,9 @@ function parseArgs(argv: string[]): SimOptions {
 async function main() {
 	const options = parseArgs(process.argv.slice(2));
 	const output = await runApiSimulation(options, { writeArtifacts: false });
-	const bossDefeatRate = output.runs.length > 0
-		? output.runs.filter(run => run.bossDefeated).length / output.runs.length
-		: 0;
 
 	const result = {
 		aggregate: output.aggregate,
-		bossDefeatRate: Number(bossDefeatRate.toFixed(4)),
 	};
 
 	console.log(JSON.stringify(result));
