@@ -80,11 +80,11 @@
   "ITEM_TIER_BASE": {
     "weapon": {
       "plains": {
-        "attack": 5,
+        "attack": 3,
         "attackChance": 0.603
       },
       "forest": {
-        "attack": 5,
+        "attack": 4,
         "attackChance": 0.603
       },
       "desert": {
@@ -102,11 +102,11 @@
     },
     "armor": {
       "plains": {
-        "defense": 5,
+        "defense": 3,
         "defenseChance": 0.603
       },
       "forest": {
-        "defense": 5,
+        "defense": 4,
         "defenseChance": 0.603
       },
       "desert": {

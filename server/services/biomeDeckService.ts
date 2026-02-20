@@ -75,6 +75,7 @@ function buildItemPoolForBiome(biome: PlayBiome): ItemDef[] {
 function buildConsumablePoolForBiome(biome: PlayBiome): ItemDef[] {
 	return getItemDefs().filter(item => {
 		if (item.noRandom || item.type !== 'item') return false;
+		if (item.id === 'extra_heart') return false;
 		if (item.biome === 'any') return true;
 		return Boolean(item.biome && item.biome.split(',').includes(biome));
 	});

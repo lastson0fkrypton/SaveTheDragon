@@ -41,9 +41,8 @@ function applyLootCardToPlayer(playerState, lootCard: LootCard): void {
 	ensureInventory(playerState);
 
 	if (lootCard.kind === 'heart') {
-		const hearts = Math.max(1, lootCard.hearts || 1);
-		playerState.maxHearts = (playerState.maxHearts || 5) + hearts;
-		playerState.damage = Math.max(0, (playerState.damage || 0) - hearts);
+		const extraHeartItem = getExtraHeartItemRequired();
+		playerState.inventory.items.push(extraHeartItem.id);
 		return;
 	}
 
@@ -117,6 +116,14 @@ function movePlayerToNearestTown(gameState, playerState) {
 
 function findItem(itemId) {
 	return getItemDefs().find(i => i.id === itemId);
+}
+
+function getExtraHeartItemRequired() {
+	const item = findItem('extra_heart');
+	if (!item) {
+		throw serviceError(500, 'Missing required item definition: extra_heart');
+	}
+	return item;
 }
 
 function resolveMonsterCounterAttack(battle, playerState, log, playerName) {
@@ -349,7 +356,8 @@ async function collectBattleLoot(gameId, playerId) {
 		reward = drawLootCard(deckState, battleBiome);
 		applyLootCardToPlayer(playerState, reward);
 		if (reward.kind === 'heart') {
-			gameState.recentlyFoundItem = null;
+			const extraHeartItem = getExtraHeartItemRequired();
+			gameState.recentlyFoundItem = { playerId, item: extraHeartItem, ts: Date.now() };
 		} else {
 			gameState.recentlyFoundItem = { playerId, item: reward.item, ts: Date.now() };
 		}

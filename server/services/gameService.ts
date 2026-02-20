@@ -1,4 +1,5 @@
 import { CHARACTERS } from '../constants/characters.js';
+import { getItemDefs } from '../constants/items.js';
 import { EVIL_PRINCESS_MONSTER } from '../constants/monsters.js';
 import type { PlayBiome } from '../config/biomeDeckConfig.js';
 import { createBiomeDeckRuntime, drawEncounterCard, type BiomeDeckRuntime } from './biomeDeckService.js';
@@ -18,6 +19,8 @@ import {
 import { addRecentAction, generateBiomeGrid, serializeGame } from '../utils/gameUtils.js';
 import { randomChoice, randomId, randomInt } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
+
+const REQUIRED_EXTRA_HEART_ITEM_ID = 'extra_heart';
 
 function isDeckBiome(biome: string): biome is PlayBiome {
 	return biome === 'plains' || biome === 'forest' || biome === 'desert' || biome === 'cave' || biome === 'volcano';
@@ -57,6 +60,20 @@ function grantItemToPlayer(playerState, item): void {
 
 	playerState.inventory.items.push(item.id);
 }
+
+function getExtraHeartItem() {
+	return getItemDefs().find(item => item.id === REQUIRED_EXTRA_HEART_ITEM_ID) || null;
+}
+
+export function assertRequiredGameItems(itemDefs = getItemDefs()): void {
+	const hasExtraHeart = itemDefs.some(item => item.id === REQUIRED_EXTRA_HEART_ITEM_ID);
+	if (!hasExtraHeart) {
+		throw new Error(`Missing required item definition: ${REQUIRED_EXTRA_HEART_ITEM_ID}`);
+	}
+}
+
+assertRequiredGameItems();
+
 function buildGameState(gameRow, playerRows, validMoveRows) {
 	return serializeGame(gameRow, playerRows, validMoveRows);
 }
@@ -346,11 +363,18 @@ function startEncounterIfNeeded(gameState, playerRows, playerId, playerState, bi
 
 	if (encounterCard.kind !== 'monster') {
 		if (encounterCard.kind === 'heart') {
-			const hearts = Math.max(1, encounterCard.hearts || 1);
-			playerState.maxHearts = (playerState.maxHearts || 5) + hearts;
-			playerState.damage = Math.max(0, (playerState.damage || 0) - hearts);
-			addRecentAction(gameState, 'find-heart', playerRows.find(p => p.id === playerId)?.name || 'Player', `+${hearts} heart`);
-			gameState.recentlyFoundItem = null;
+			const extraHeartItem = getExtraHeartItem();
+			if (!extraHeartItem) {
+				throw serviceError(500, `Missing required item definition: ${REQUIRED_EXTRA_HEART_ITEM_ID}`);
+			}
+			grantItemToPlayer(playerState, extraHeartItem);
+			gameState.recentlyFoundItem = { playerId, item: extraHeartItem, ts: Date.now() };
+			addRecentAction(
+				gameState,
+				'find-item',
+				playerRows.find(p => p.id === playerId)?.name || 'Player',
+				extraHeartItem.name || 'Additional Heart'
+			);
 			gameState.currentBattle = null;
 			return false;
 		}
