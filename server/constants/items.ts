@@ -1,4 +1,5 @@
 import type { ItemDef, ItemType } from '../types.js';
+import { getGameBalanceConfig, getGameBalanceConfigVersion } from '../config/gameBalanceConfig.js';
 
 type ItemCatalogSourceEntry = {
 	id: string;
@@ -836,21 +837,13 @@ const BASE_ITEM_DEFS: ReadonlyArray<ItemDef> = ITEM_CATALOG_SOURCE.map(item => {
 	return baseDef;
 });
 
-const ITEM_TIER_RANK = {
-	plains: 1,
-	forest: 1,
-	desert: 2,
-	cave: 3,
-	volcano: 3,
-};
-
-export type ItemTier = 1 | 2 | 3;
+type ItemTierBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
 type ItemVariant = 'cracked' | 'normal' | 'enchanted';
 
 export type ItemBalanceProfile = {
-	tierBase: {
-		weapon: Record<ItemTier, { attack: number; attackChance: number }>;
-		armor: Record<ItemTier, { defense: number; defenseChance: number }>;
+	biomeTierBase: {
+		weapon: Record<ItemTierBiome, { attack: number; attackChance: number }>;
+		armor: Record<ItemTierBiome, { defense: number; defenseChance: number }>;
 	};
 	variantModifiers: Record<ItemVariant, { valueDelta: number; chanceDelta: number }>;
 	consumables: {
@@ -859,22 +852,13 @@ export type ItemBalanceProfile = {
 		largePotionHeal: number;
 		fullPotionHeal: number;
 	};
-	dropRates: {
-		typeWeights: {
-			weapon: number;
-			armor: number;
-			item: number;
-		};
-		healthItemMultiplier: number;
-		extraHeartMultiplier: number;
-		itemWeightOverrides: Record<string, number>;
-	};
+	dropRates: Record<string, number>;
 };
 
 export type ItemBalanceProfileOverride = {
-	tierBase?: {
-		weapon?: Partial<Record<ItemTier, Partial<{ attack: number; attackChance: number }>>>;
-		armor?: Partial<Record<ItemTier, Partial<{ defense: number; defenseChance: number }>>>;
+	biomeTierBase?: {
+		weapon?: Partial<Record<ItemTierBiome, Partial<{ attack: number; attackChance: number }>>>;
+		armor?: Partial<Record<ItemTierBiome, Partial<{ defense: number; defenseChance: number }>>>;
 	};
 	variantModifiers?: Partial<Record<ItemVariant, Partial<{ valueDelta: number; chanceDelta: number }>>>;
 	consumables?: Partial<{
@@ -883,82 +867,44 @@ export type ItemBalanceProfileOverride = {
 		largePotionHeal: number;
 		fullPotionHeal: number;
 	}>;
-	dropRates?: Partial<{
-		typeWeights: Partial<{
-			weapon: number;
-			armor: number;
-			item: number;
-		}>;
-		healthItemMultiplier: number;
-		extraHeartMultiplier: number;
-		itemWeightOverrides: Record<string, number>;
-	}>;
-};
-
-const ITEM_TIER_BASE: ItemBalanceProfile['tierBase'] = {
-	weapon: {
-		1: { attack: 2, attackChance: 0.5153 },
-		2: { attack: 5, attackChance: 0.6353 },
-		3: { attack: 7, attackChance: 0.7353 },
-	},
-	armor: {
-		1: { defense: 2, defenseChance: 0.5153 },
-		2: { defense: 5, defenseChance: 0.6353 },
-		3: { defense: 7, defenseChance: 0.7353 },
-	},
-};
-
-const ITEM_VARIANT_MODIFIERS: ItemBalanceProfile['variantModifiers'] = {
-	cracked: { valueDelta: -1, chanceDelta: -0.0596 },
-	normal: { valueDelta: 0, chanceDelta: 0 },
-	enchanted: { valueDelta: 1, chanceDelta: 0.0596 },
-};
-
-const DEFAULT_CONSUMABLE_PROFILE: ItemBalanceProfile['consumables'] = {
-	smallPotionHeal: 4,
-	mediumPotionHeal: 7,
-	largePotionHeal: 11,
-	fullPotionHeal: 999,
-};
-
-const DEFAULT_DROP_RATE_PROFILE: ItemBalanceProfile['dropRates'] = {
-	typeWeights: {
-		weapon: 1,
-		armor: 1,
-		item: 1,
-	},
-	healthItemMultiplier: 1,
-	extraHeartMultiplier: 3,
-	itemWeightOverrides: {},
+	dropRates?: Partial<Record<string, number>>;
 };
 
 const ITEM_VARIANTS: ReadonlyArray<ItemVariant> = ['cracked', 'normal', 'enchanted'];
 
-export const DEFAULT_ITEM_BALANCE_PROFILE: ItemBalanceProfile = {
-	tierBase: ITEM_TIER_BASE,
-	variantModifiers: ITEM_VARIANT_MODIFIERS,
-	consumables: DEFAULT_CONSUMABLE_PROFILE,
-	dropRates: DEFAULT_DROP_RATE_PROFILE,
-};
+function getItemBalanceProfileFromConfig(): ItemBalanceProfile {
+	const config = getGameBalanceConfig();
+	return {
+		biomeTierBase: structuredClone(config.ITEM_TIER_BASE),
+		variantModifiers: structuredClone(config.ITEM_VARIANT_MODIFIERS),
+		consumables: structuredClone(config.CONSUMABLES),
+		dropRates: structuredClone(config.ITEM_DROP_RATES),
+	};
+}
 
-let activeItemBalanceProfile: ItemBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_ITEM_BALANCE_PROFILE));
-let activeItemDefs: ReadonlyArray<ItemDef> = [];
+export const DEFAULT_ITEM_BALANCE_PROFILE: ItemBalanceProfile = getItemBalanceProfileFromConfig();
+
+let cachedItemDefs: ReadonlyArray<ItemDef> = [];
+let cachedConfigVersion = -1;
 
 function clampChance(value: number) {
 	return Math.max(0.15, Math.min(0.95, Number(value.toFixed(2))));
 }
 
-function resolveItemTier(itemBiome: string): number {
+function resolveItemTierBiome(itemBiome: string): ItemTierBiome {
 	const biomes = (itemBiome || '')
 		.split(',')
 		.map(part => part.trim())
 		.filter(Boolean);
-	let tier = 1;
-	for (const biome of biomes) {
-		const rank = ITEM_TIER_RANK[biome] || 0;
-		if (rank > tier) tier = rank;
+
+	const strongestFirst: ItemTierBiome[] = ['volcano', 'cave', 'desert', 'forest', 'plains'];
+	for (const biome of strongestFirst) {
+		if (biomes.includes(biome)) {
+			return biome;
+		}
 	}
-	return tier;
+
+	return 'plains';
 }
 
 function toVariantId(baseId: string, variant: ItemVariant) {
@@ -999,8 +945,8 @@ function applyItemBalance(
 	}
 
 	if (itemDef.type === 'weapon') {
-		const tier = resolveItemTier(itemDef.biome);
-		const base = profile.tierBase.weapon[tier] || profile.tierBase.weapon[1];
+		const tierBiome = resolveItemTierBiome(itemDef.biome || 'plains');
+		const base = profile.biomeTierBase.weapon[tierBiome] || profile.biomeTierBase.weapon.plains;
 		const mods = profile.variantModifiers[variant] || profile.variantModifiers.normal;
 		return {
 			...itemDef,
@@ -1012,8 +958,8 @@ function applyItemBalance(
 	}
 
 	if (itemDef.type === 'armor') {
-		const tier = resolveItemTier(itemDef.biome);
-		const base = profile.tierBase.armor[tier] || profile.tierBase.armor[1];
+		const tierBiome = resolveItemTierBiome(itemDef.biome || 'plains');
+		const base = profile.biomeTierBase.armor[tierBiome] || profile.biomeTierBase.armor.plains;
 		const mods = profile.variantModifiers[variant] || profile.variantModifiers.normal;
 		return {
 			...itemDef,
@@ -1039,80 +985,31 @@ function buildItemDefs(profile: ItemBalanceProfile): ReadonlyArray<ItemDef> {
 	});
 }
 
-function normalizeTierOverrides(profile: ItemBalanceProfile, overrides?: ItemBalanceProfileOverride['tierBase']): void {
-	if (!overrides) return;
-	for (const tier of [1, 2, 3] as const) {
-		if (overrides.weapon?.[tier]) {
-			profile.tierBase.weapon[tier] = {
-				...profile.tierBase.weapon[tier],
-				...overrides.weapon[tier],
-			};
-		}
-		if (overrides.armor?.[tier]) {
-			profile.tierBase.armor[tier] = {
-				...profile.tierBase.armor[tier],
-				...overrides.armor[tier],
-			};
-		}
+function getOrBuildItemDefs(): ReadonlyArray<ItemDef> {
+	const nextVersion = getGameBalanceConfigVersion();
+	if (cachedConfigVersion !== nextVersion) {
+		cachedItemDefs = buildItemDefs(getItemBalanceProfileFromConfig());
+		cachedConfigVersion = nextVersion;
 	}
+	return cachedItemDefs;
 }
 
 export function getItemDefs(): ReadonlyArray<ItemDef> {
-	return activeItemDefs;
+	return getOrBuildItemDefs();
 }
 
 export function getItemBalanceProfile(): ItemBalanceProfile {
-	return JSON.parse(JSON.stringify(activeItemBalanceProfile));
+	return getItemBalanceProfileFromConfig();
 }
 
 export function resetItemBalanceProfile(): void {
-	activeItemBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_ITEM_BALANCE_PROFILE));
-	activeItemDefs = buildItemDefs(activeItemBalanceProfile);
+	cachedConfigVersion = -1;
 }
 
-export function applyItemBalanceProfile(overrides: ItemBalanceProfileOverride): void {
-	const nextProfile: ItemBalanceProfile = JSON.parse(JSON.stringify(activeItemBalanceProfile));
-	normalizeTierOverrides(nextProfile, overrides.tierBase);
-
-	for (const variant of ITEM_VARIANTS) {
-		if (overrides.variantModifiers?.[variant]) {
-			nextProfile.variantModifiers[variant] = {
-				...nextProfile.variantModifiers[variant],
-				...overrides.variantModifiers[variant],
-			};
-		}
-	}
-
-	if (overrides.consumables) {
-		nextProfile.consumables = {
-			...nextProfile.consumables,
-			...overrides.consumables,
-		};
-	}
-
-	if (overrides.dropRates) {
-		nextProfile.dropRates = {
-			...nextProfile.dropRates,
-			...overrides.dropRates,
-			typeWeights: {
-				...nextProfile.dropRates.typeWeights,
-				...(overrides.dropRates.typeWeights || {}),
-			},
-			itemWeightOverrides: {
-				...nextProfile.dropRates.itemWeightOverrides,
-				...(overrides.dropRates.itemWeightOverrides || {}),
-			},
-		};
-	}
-
-	activeItemBalanceProfile = nextProfile;
-	activeItemDefs = buildItemDefs(activeItemBalanceProfile);
+export function applyItemBalanceProfile(_overrides: ItemBalanceProfileOverride): void {
+	return;
 }
 
 resetItemBalanceProfile();
 
 export const ITEM_DEFS = buildItemDefs(DEFAULT_ITEM_BALANCE_PROFILE);
-
-export function getItemDropRateProfile(): ItemBalanceProfile['dropRates'] {
-	return JSON.parse(JSON.stringify(activeItemBalanceProfile.dropRates));
-}

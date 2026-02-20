@@ -8,6 +8,7 @@
     "start": "tsx watch index.ts",
     "start:prod": "node dist/index.js",
     "test": "vitest run",
+    "simulate:deck": "tsx simulation/deckBalanceSimulator.ts",
     "simulate": "tsx simulation/runSimulation.ts",
     "simulate:js": "node dist/simulation/runSimulation.js",
     "simulate:compare": "tsx simulation/runSimulation.ts --compare=true",

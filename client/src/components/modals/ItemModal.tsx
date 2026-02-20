@@ -4,7 +4,7 @@ import { getAppState } from '../../stores/AppState';
 import type { ItemMeta } from '../../types';
 import { CachedImage } from '../common/CachedImage';
 
-const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
+const ItemModal: React.FC<{ onClose: () => void; battleMode?: boolean }> = observer(({ onClose, battleMode = false }) => {
 	const state = getAppState();
 	const service = state.service;
 
@@ -14,6 +14,16 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const player = gameState.players.find(p => p.id === playerId);
 	if (!player) return null;
 	const { inventory } = player;
+
+	const isBattleUsableItem = (item: ItemMeta | undefined): boolean => {
+		if (!item) return false;
+		if (typeof item.heal === 'number' && item.heal > 0) return true;
+		return item.effect === 'full_heal' || item.effect === 'extra_heart' || item.effect === 'teleport';
+	};
+
+	const availableItemIds = battleMode
+		? inventory.items.filter(id => isBattleUsableItem(gameState.itemMeta?.[id]))
+		: inventory.items;
 
 	const getItemDescription = (eqItem: ItemMeta | undefined) => {
 		if (eqItem?.heal) {
@@ -26,7 +36,7 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 			return 'Increases max hearts by 1';
 		}
 		if (eqItem?.effect === 'teleport') {
-			return 'Teleport to a random location';
+			return battleMode ? 'Teleport to town and end battle' : 'Teleport to a random location';
 		}
 		return '';
 	};
@@ -35,9 +45,9 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 		<div className="modal">
 			<div className="modal-window inventory-modal-window">
 				<div className="modal-background-image"></div>
-				<h2>Use an Item</h2>
+				<h2>{battleMode ? 'Use Battle Item' : 'Use an Item'}</h2>
 				<div className="inventory inventory-scroll-area">
-					{inventory.items.map(id => {
+					{availableItemIds.map(id => {
 						const eqItem = gameState.itemMeta?.[id];
 						return (
 							<button
@@ -45,7 +55,11 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 								className={'card '}
 								onClick={() => {
 									if (id !== inventory.equippedArmorId) {
-										service.useItem(id);
+										if (battleMode) {
+											service.useBattleItem(id);
+										} else {
+											service.useItem(id);
+										}
 									}
 									onClose();
 								}}
@@ -63,7 +77,7 @@ const ItemModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 						);
 					})}
 
-					{inventory.items.length === 0 && (
+					{availableItemIds.length === 0 && (
 						<div style={{ color: '#aaa', fontSize: 12 }}>No items available</div>
 					)}
 				</div>

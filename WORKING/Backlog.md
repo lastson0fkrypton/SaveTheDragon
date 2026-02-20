@@ -188,30 +188,8 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
 - **ID:** BACKLOG-014
 - **Title:** Build AI-driven gameplay simulation harness for concurrency and balance feedback
 - **Why:** Automated, repeatable game runs are needed to stress multiplayer concurrency, collect large gameplay datasets, and create a feedback loop for balancing changes.
-- **Acceptance Criteria:**
-  - An **in-process server-side simulation runner** can execute full game loops quickly (create/join/roll/move/battle/loot/equip/use/turn progression), suitable for repeated AI-guided balancing runs or for auto-tuning the monster or item base rank or modifiers.
-  - Runner supports parallel execution of many games/players to test concurrency and race-condition behavior.
-  - Runner outputs structured per-game logs and aggregate summaries and can return machine-readable results to AI agent workflows.
-  - Runner supports configurable player behavior profiles (e.g., risk-averse, aggressive, completionist) to emulate different player expectations.
-  - Runner tracks balancing metrics including at minimum: battles won/lost, turns between encounters, encounter count, win streaks, loss streaks, per-game outcome, and turns-to-win/lose.
-  - Runner can compare balance revisions by running baseline vs candidate batches and producing simple scorecards (survival rate, turn count, win/loss distribution, biome progression cadence).
-  - A max-turn cap is enforced per game so non-beatable/broken states are detected and reported explicitly.
-  - Assumes final-boss win condition from `BACKLOG-007` exists before full rollout; simulation reports beatable-rate against this condition.
-  - Target balancing guidance is measurable and reportable (initial target: approximate win/loss ratio near 2:1).
-  - Simulation config supports at minimum: `seed`, `runs`, `parallelism`, `playersPerGame`, `turnCap`, behavior profile weights, and output/artifact settings.
-  - Batch output includes machine-readable summary fields for AI workflows: `winRate`, `lossRate`, `timeoutRate`, `winLossRatio`, `beatableRate`, and profile-level breakdowns.
-  - Batch output includes pacing and quality signals: `encounters`, `avgTurnsBetweenEncounters`, `turnsToOutcome` percentiles, early-loss frequency, and timeout frequency.
-  - Runner produces explicit regression/fail signals when beatable rate drops, timeout rate exceeds threshold, or ratio moves outside target band.
-  - Tooling and usage are documented so future AI prompt sessions can run simulations after logic/constant changes.
-- **Status:** DONE
-- **Notes:** Implemented in-process simulation + auto-balancing toolchain in `server/simulation/` with deterministic seeded runs, configurable parallel batches, behavior profiles (`risk-averse`, `aggressive`, `completionist`), per-game logs, and machine-readable aggregate scorecards. Added runtime tuning APIs (no JSON migration) for biome encounter rates, item tier bases/modifiers, and monster tier bases/modifiers in `server/constants/biomes.ts`, `server/constants/items.ts`, and `server/constants/monsters.ts`. Runner now emits `winRate`, `lossRate`, `timeoutRate`, `winLossRatio`, `beatableRate`, pacing metrics, profile breakdowns, and explicit fail signals for beatable-rate regression, timeout thresholds, and ratio-band drift. Added baseline-vs-candidate compare mode and GA-style optimizer (`npm run autobalance`) that iteratively proposes override payloads for further balancing runs.
+- **Status:** TODO
 
-  Planned implementation blueprint (for later):
-  - **Runner shape:** Add a server-side simulation entrypoint (test/tool) callable via npm script, deterministic by `seed`.
-  - **Execution model:** Run many games quickly in-process, with configurable parallelism and per-game `turnCap`.
-  - **Per-game metrics:** `battlesWon`, `battlesLost`, `encounterCount`, `avgTurnsBetweenEncounters`, `longestWinStreak`, `longestLoseStreak`, `turnsPlayed`, `outcome` (`win|loss|timeout|aborted`).
-  - **Batch scorecard:** Aggregate `win/loss/timeout` rates, `winLossRatio` (target near `2:1`), beatable rate, profile breakdowns, and outcome pacing percentiles.
-  - **Balancing loop:** Support baseline-vs-candidate runs and emit recommendation/regression payloads for AI-driven tuning iterations.
 
 ## BACKLOG-015
 - **ID:** BACKLOG-015

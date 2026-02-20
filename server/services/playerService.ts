@@ -95,6 +95,9 @@ async function useItem(gameId, playerId, itemId) {
 	const gameRow = await getGameById(gameId);
 	if (!gameRow) throw serviceError(404, 'Game not found');
 	const gameState = parseJson(gameRow.gameStateJson);
+	if (gameState.currentBattle?.battleActive && gameState.currentBattle?.playerId === playerId) {
+		throw serviceError(400, 'Use /battle/use-item while in an active battle.');
+	}
 
 	let used = false;
 	if (item.heal) {

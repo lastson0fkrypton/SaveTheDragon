@@ -1,436 +1,565 @@
-import { initDb } from '../db.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
+import { spawn } from 'node:child_process';
 import { createSeededRandom } from '../utils/random.js';
-import {
-	buildScaledBaselineOverrides,
-	runSimulationBatch,
-	type BalanceOverrideSet,
-	type SimulationBatchProgress,
-	type SimulationBatchSummary,
-	type SimulationConfig,
-} from './simulator.js';
+import type { BiomeDeckConfig, PlayBiome } from '../config/biomeDeckConfig.js';
+import type { GameBalanceConfig } from '../config/gameBalanceConfig.js';
+import { runApiSimulation, type AggregateResult, type SimOptions } from './deckBalanceSimulator.js';
 
 type Genome = {
-	monsterBaseScale: number;
-	monsterVariantScale: number;
-	itemBaseScale: number;
-	itemVariantScale: number;
-	encounterRateScale: number;
-	chanceDelta: number;
-	healthItemDropScale: number;
-	extraHeartDropScale: number;
+	monsterEncounterScale: number;
+	itemEncounterScale: number;
+	consumableEncounterScale: number;
+	heartEncounterScale: number;
+	lootItemScale: number;
+	lootConsumableScale: number;
+	lootHeartScale: number;
+	strongWeightScale: number;
+	weakWeightScale: number;
+	monsterStatScale: number;
+	itemStatScale: number;
+	consumableHealScale: number;
 };
 
-type CandidateResult = {
+type Candidate = {
 	genome: Genome;
-	overrides: BalanceOverrideSet;
-	summary: SimulationBatchSummary;
 	fitness: number;
+	aggregate: AggregateResult;
+	bossDefeatRate: number;
+	deckConfig: BiomeDeckConfig;
+	balanceConfig: GameBalanceConfig;
 };
 
-type FitnessConfig = {
-	targetWinLossRatio: number;
-	minBeatableRate: number;
-	maxTimeoutRate: number;
-	targetWinRate: number;
-	maxEarlyLossRate: number;
-	minProfileWinRate: number;
-	maxProfileTimeoutRate: number;
-	profileFloorWeight: number;
+type WorkerSimulationResult = {
+	aggregate: AggregateResult;
+	bossDefeatRate: number;
+};
+
+type Args = {
+	seed: string;
+	games: number;
+	maxTurns: number;
+	gridSizeX: number;
+	gridSizeY: number;
+	generations: number;
+	population: number;
+	elite: number;
+	candidateParallelism: number;
+	targetCompletionRate: number;
+	targetAvgTurns: number;
+	minBossDefeatRate: number;
+	artifactDir: string;
+	runName: string;
+	baseDeckPath: string;
+	baseBalancePath: string;
 };
 
 function parseArgs(argv: string[]): Record<string, string> {
-	const args: Record<string, string> = {};
-	for (const raw of argv) {
-		if (!raw.startsWith('--')) continue;
-		const [key, ...rest] = raw.slice(2).split('=');
-		args[key] = rest.length > 0 ? rest.join('=') : 'true';
+	const output: Record<string, string> = {};
+	for (const arg of argv) {
+		if (!arg.startsWith('--')) continue;
+		const [key, ...rest] = arg.slice(2).split('=');
+		output[key] = rest.length > 0 ? rest.join('=') : 'true';
 	}
-	return args;
-}
-
-function toSafeFolderName(value: string): string {
-	return value
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9-_]+/g, '-')
-		.replace(/-{2,}/g, '-')
-		.replace(/^-|-$/g, '') || 'run';
+	return output;
 }
 
 function clamp(value: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, value));
 }
 
-function formatDurationMs(ms: number): string {
-	const totalSeconds = Math.max(0, Math.round(ms / 1000));
-	const minutes = Math.floor(totalSeconds / 60);
-	const seconds = totalSeconds % 60;
-	if (minutes <= 0) return `${seconds}s`;
-	return `${minutes}m${seconds.toString().padStart(2, '0')}s`;
+function parseRuntimeArgs(raw: Record<string, string>): Args {
+	const seed = raw.seed || `deck-autobalance-${Date.now()}`;
+	const runName = raw.runName || seed;
+	const artifactDir = raw.artifactDir || 'simulation-output';
+
+	return {
+		seed,
+		games: Math.max(10, Number(raw.games || 40)),
+		maxTurns: Math.max(30, Number(raw.maxTurns || 120)),
+		gridSizeX: Math.max(10, Number(raw.gridSizeX || 20)),
+		gridSizeY: Math.max(10, Number(raw.gridSizeY || 20)),
+		generations: Math.max(1, Number(raw.generations || 4)),
+		population: Math.max(4, Number(raw.population || 10)),
+		elite: Math.max(1, Number(raw.elite || 3)),
+		candidateParallelism: Math.max(1, Number(raw.candidateParallelism || 2)),
+		targetCompletionRate: clamp(Number(raw.targetCompletionRate || 0.35), 0, 1),
+		targetAvgTurns: Math.max(20, Number(raw.targetAvgTurns || 95)),
+		minBossDefeatRate: clamp(Number(raw.minBossDefeatRate || 0.15), 0, 1),
+		artifactDir,
+		runName,
+		baseDeckPath: raw.baseDeckPath || path.resolve(process.cwd(), 'config', 'biome-decks.json'),
+		baseBalancePath: raw.baseBalancePath || path.resolve(process.cwd(), 'config', 'game-balance.json'),
+	};
 }
 
-function buildProgressLogger(prefix: string, progressFilePath?: string) {
-	return (progress: SimulationBatchProgress) => {
-		const etaText = progress.etaMs < 0 ? 'n/a' : formatDurationMs(progress.etaMs);
-		if (progressFilePath) {
-			void fs.writeFile(progressFilePath, JSON.stringify(progress, null, 2), 'utf-8');
-		}
-		console.error(
-			`[autobalance] ${prefix} ${progress.completedRuns}/${progress.totalRuns} (${progress.percentComplete.toFixed(1)}%) active=${progress.activeRuns} rpm=${progress.runsPerMinute.toFixed(1)} eta=${etaText}`
-		);
+function normalizeWeights(weights: { weak: number; normal: number; strong: number }) {
+	const total = Math.max(0.0001, weights.weak + weights.normal + weights.strong);
+	return {
+		weak: weights.weak / total,
+		normal: weights.normal / total,
+		strong: weights.strong / total,
 	};
+}
+
+function clampChance(value: number): number {
+	return clamp(Number(value.toFixed(4)), 0.05, 0.95);
+}
+
+function toCount(value: number): number {
+	return Math.max(0, Math.round(value));
 }
 
 function buildRandomGenome(rand: () => number): Genome {
 	return {
-		monsterBaseScale: 0.45 + rand() * 0.95,
-		monsterVariantScale: 0.45 + rand() * 1.15,
-		itemBaseScale: 0.9 + rand() * 1.5,
-		itemVariantScale: 0.8 + rand() * 1.4,
-		encounterRateScale: 0.65 + rand() * 0.6,
-		chanceDelta: -0.2 + rand() * 0.55,
-		healthItemDropScale: 0.8 + rand() * 2.7,
-		extraHeartDropScale: 0.8 + rand() * 3,
+		monsterEncounterScale: 0.65 + rand() * 0.9,
+		itemEncounterScale: 0.65 + rand() * 0.9,
+		consumableEncounterScale: 0.6 + rand() * 1.4,
+		heartEncounterScale: 0.4 + rand() * 1.8,
+		lootItemScale: 0.7 + rand() * 0.9,
+		lootConsumableScale: 0.6 + rand() * 1.2,
+		lootHeartScale: 0.3 + rand() * 1.6,
+		strongWeightScale: 0.6 + rand() * 1.1,
+		weakWeightScale: 0.6 + rand() * 1.1,
+		monsterStatScale: 0.75 + rand() * 0.7,
+		itemStatScale: 0.75 + rand() * 0.7,
+		consumableHealScale: 0.7 + rand() * 1.1,
 	};
 }
 
-function crossover(parentA: Genome, parentB: Genome, rand: () => number): Genome {
-	const mix = (a: number, b: number) => a * (1 - rand()) + b * rand();
+function crossover(a: Genome, b: Genome, rand: () => number): Genome {
+	const mix = (left: number, right: number) => left * (1 - rand()) + right * rand();
 	return {
-		monsterBaseScale: mix(parentA.monsterBaseScale, parentB.monsterBaseScale),
-		monsterVariantScale: mix(parentA.monsterVariantScale, parentB.monsterVariantScale),
-		itemBaseScale: mix(parentA.itemBaseScale, parentB.itemBaseScale),
-		itemVariantScale: mix(parentA.itemVariantScale, parentB.itemVariantScale),
-		encounterRateScale: mix(parentA.encounterRateScale, parentB.encounterRateScale),
-		chanceDelta: mix(parentA.chanceDelta, parentB.chanceDelta),
-		healthItemDropScale: mix(parentA.healthItemDropScale, parentB.healthItemDropScale),
-		extraHeartDropScale: mix(parentA.extraHeartDropScale, parentB.extraHeartDropScale),
+		monsterEncounterScale: mix(a.monsterEncounterScale, b.monsterEncounterScale),
+		itemEncounterScale: mix(a.itemEncounterScale, b.itemEncounterScale),
+		consumableEncounterScale: mix(a.consumableEncounterScale, b.consumableEncounterScale),
+		heartEncounterScale: mix(a.heartEncounterScale, b.heartEncounterScale),
+		lootItemScale: mix(a.lootItemScale, b.lootItemScale),
+		lootConsumableScale: mix(a.lootConsumableScale, b.lootConsumableScale),
+		lootHeartScale: mix(a.lootHeartScale, b.lootHeartScale),
+		strongWeightScale: mix(a.strongWeightScale, b.strongWeightScale),
+		weakWeightScale: mix(a.weakWeightScale, b.weakWeightScale),
+		monsterStatScale: mix(a.monsterStatScale, b.monsterStatScale),
+		itemStatScale: mix(a.itemStatScale, b.itemStatScale),
+		consumableHealScale: mix(a.consumableHealScale, b.consumableHealScale),
 	};
 }
 
 function mutate(genome: Genome, mutationRate: number, rand: () => number): Genome {
 	const maybeMutate = (value: number, span: number, min: number, max: number) => {
 		if (rand() > mutationRate) return value;
-		const delta = (rand() * 2 - 1) * span;
-		return clamp(value + delta, min, max);
+		return clamp(value + (rand() * 2 - 1) * span, min, max);
 	};
 	return {
-		monsterBaseScale: maybeMutate(genome.monsterBaseScale, 0.3, 0.3, 1.8),
-		monsterVariantScale: maybeMutate(genome.monsterVariantScale, 0.35, 0.3, 2.2),
-		itemBaseScale: maybeMutate(genome.itemBaseScale, 0.3, 0.6, 2.6),
-		itemVariantScale: maybeMutate(genome.itemVariantScale, 0.35, 0.5, 2.4),
-		encounterRateScale: maybeMutate(genome.encounterRateScale, 0.18, 0.45, 1.5),
-		chanceDelta: maybeMutate(genome.chanceDelta, 0.08, -0.3, 0.4),
-		healthItemDropScale: maybeMutate(genome.healthItemDropScale, 0.35, 0.4, 4),
-		extraHeartDropScale: maybeMutate(genome.extraHeartDropScale, 0.4, 0.4, 4.5),
+		monsterEncounterScale: maybeMutate(genome.monsterEncounterScale, 0.22, 0.4, 1.8),
+		itemEncounterScale: maybeMutate(genome.itemEncounterScale, 0.22, 0.4, 1.8),
+		consumableEncounterScale: maybeMutate(genome.consumableEncounterScale, 0.25, 0.3, 2.4),
+		heartEncounterScale: maybeMutate(genome.heartEncounterScale, 0.3, 0.1, 2.8),
+		lootItemScale: maybeMutate(genome.lootItemScale, 0.22, 0.3, 2.0),
+		lootConsumableScale: maybeMutate(genome.lootConsumableScale, 0.25, 0.2, 2.4),
+		lootHeartScale: maybeMutate(genome.lootHeartScale, 0.3, 0.1, 2.8),
+		strongWeightScale: maybeMutate(genome.strongWeightScale, 0.2, 0.2, 2.0),
+		weakWeightScale: maybeMutate(genome.weakWeightScale, 0.2, 0.2, 2.0),
+		monsterStatScale: maybeMutate(genome.monsterStatScale, 0.16, 0.6, 1.7),
+		itemStatScale: maybeMutate(genome.itemStatScale, 0.16, 0.6, 1.7),
+		consumableHealScale: maybeMutate(genome.consumableHealScale, 0.2, 0.4, 2.0),
 	};
 }
 
-function genomeToOverrides(genome: Genome): BalanceOverrideSet {
-	return buildScaledBaselineOverrides(genome);
-}
+function applyGenome(
+	baseDeck: BiomeDeckConfig,
+	baseBalance: GameBalanceConfig,
+	genome: Genome
+): { deckConfig: BiomeDeckConfig; balanceConfig: GameBalanceConfig } {
+	const deckConfig: BiomeDeckConfig = structuredClone(baseDeck);
+	const balanceConfig: GameBalanceConfig = structuredClone(baseBalance);
+	const biomeOrder: PlayBiome[] = ['plains', 'forest', 'desert', 'cave', 'volcano'];
 
-function getProfileStats(summary: SimulationBatchSummary): {
-	minProfileWinRate: number;
-	maxProfileTimeoutRate: number;
-} {
-	const profiles = Object.values(summary.profileBreakdown);
-	if (profiles.length === 0) {
-		return {
-			minProfileWinRate: 0,
-			maxProfileTimeoutRate: 0,
-		};
+	for (const biome of biomeOrder) {
+		const template = deckConfig.BIOME_DECKS[biome];
+		template.encounterComposition.monster = toCount(template.encounterComposition.monster * genome.monsterEncounterScale);
+		template.encounterComposition.item = toCount(template.encounterComposition.item * genome.itemEncounterScale);
+		template.encounterComposition.consumable = toCount(template.encounterComposition.consumable * genome.consumableEncounterScale);
+		template.encounterComposition.heart = toCount(template.encounterComposition.heart * genome.heartEncounterScale);
+
+		template.lootComposition.item = toCount(template.lootComposition.item * genome.lootItemScale);
+		template.lootComposition.consumable = toCount(template.lootComposition.consumable * genome.lootConsumableScale);
+		template.lootComposition.heart = toCount(template.lootComposition.heart * genome.lootHeartScale);
+
+		const totalEncounter =
+			template.encounterComposition.monster +
+			template.encounterComposition.item +
+			template.encounterComposition.consumable +
+			template.encounterComposition.heart;
+		if (totalEncounter <= 0) {
+			template.encounterComposition.monster = 1;
+		}
+
+		const totalLoot = template.lootComposition.item + template.lootComposition.consumable + template.lootComposition.heart;
+		if (totalLoot <= 0) {
+			template.lootComposition.item = 1;
+		}
+
+		const scaledWeights = normalizeWeights({
+			weak: template.monsterVariantWeights.weak * genome.weakWeightScale,
+			normal: template.monsterVariantWeights.normal,
+			strong: template.monsterVariantWeights.strong * genome.strongWeightScale,
+		});
+		template.monsterVariantWeights = scaledWeights;
 	}
 
-	let minProfileWinRate = Number.POSITIVE_INFINITY;
-	let maxProfileTimeoutRate = 0;
-	for (const profile of profiles) {
-		minProfileWinRate = Math.min(minProfileWinRate, profile.winRate);
-		maxProfileTimeoutRate = Math.max(maxProfileTimeoutRate, profile.timeoutRate);
+	for (const biome of ['plains', 'forest', 'desert', 'cave', 'volcano'] as const) {
+		const monsterBase = balanceConfig.BIOME_TIER_BASE_STATS[biome];
+		monsterBase.health = Math.max(1, Math.round(monsterBase.health * genome.monsterStatScale));
+		monsterBase.attack = Math.max(1, Math.round(monsterBase.attack * genome.monsterStatScale));
+		monsterBase.defense = Math.max(0, Math.round(monsterBase.defense * genome.monsterStatScale));
+		monsterBase.attackChance = clampChance(monsterBase.attackChance + (genome.monsterStatScale - 1) * 0.08);
+		monsterBase.defenseChance = clampChance(monsterBase.defenseChance + (genome.monsterStatScale - 1) * 0.08);
+
+		const weaponBase = balanceConfig.ITEM_TIER_BASE.weapon[biome];
+		weaponBase.attack = Math.max(1, Math.round(weaponBase.attack * genome.itemStatScale));
+		weaponBase.attackChance = clampChance(weaponBase.attackChance + (genome.itemStatScale - 1) * 0.06);
+
+		const armorBase = balanceConfig.ITEM_TIER_BASE.armor[biome];
+		armorBase.defense = Math.max(0, Math.round(armorBase.defense * genome.itemStatScale));
+		armorBase.defenseChance = clampChance(armorBase.defenseChance + (genome.itemStatScale - 1) * 0.06);
 	}
 
-	return {
-		minProfileWinRate,
-		maxProfileTimeoutRate,
-	};
+	balanceConfig.CONSUMABLES.smallPotionHeal = Math.max(1, Math.round(balanceConfig.CONSUMABLES.smallPotionHeal * genome.consumableHealScale));
+	balanceConfig.CONSUMABLES.mediumPotionHeal = Math.max(1, Math.round(balanceConfig.CONSUMABLES.mediumPotionHeal * genome.consumableHealScale));
+	balanceConfig.CONSUMABLES.largePotionHeal = Math.max(1, Math.round(balanceConfig.CONSUMABLES.largePotionHeal * genome.consumableHealScale));
+	balanceConfig.CONSUMABLES.fullPotionHeal = Math.max(
+		balanceConfig.CONSUMABLES.largePotionHeal + 1,
+		Math.round(balanceConfig.CONSUMABLES.fullPotionHeal * clamp(genome.consumableHealScale, 0.9, 1.4))
+	);
+
+	return { deckConfig, balanceConfig };
 }
 
-function evaluateFitness(summary: SimulationBatchSummary, config: FitnessConfig): number {
-	const ratioPenalty = Math.abs(summary.winLossRatio - config.targetWinLossRatio) / config.targetWinLossRatio;
-	const beatablePenalty = Math.max(0, config.minBeatableRate - summary.beatableRate) * 2.5;
-	const timeoutPenalty = Math.max(0, summary.timeoutRate - config.maxTimeoutRate) * 3;
-	const winPenalty = Math.max(0, config.targetWinRate - summary.winRate) * 1.5;
-	const earlyLossPenalty = Math.max(0, summary.earlyLossFrequency - config.maxEarlyLossRate) * 2;
-	const profileStats = getProfileStats(summary);
-	const profileWinPenalty = Math.max(0, config.minProfileWinRate - profileStats.minProfileWinRate) * config.profileFloorWeight;
-	const profileTimeoutPenalty = Math.max(0, profileStats.maxProfileTimeoutRate - config.maxProfileTimeoutRate) * 1.5;
-	const failPenalty =
-		(summary.failSignals.beatableRateDropped ? 0.7 : 0) +
-		(summary.failSignals.timeoutRateTooHigh ? 0.7 : 0) +
-		(summary.failSignals.winLossRatioOutsideBand ? 0.5 : 0);
-
-	return Number((
-		1 -
-		(ratioPenalty +
-			beatablePenalty +
-			timeoutPenalty +
-			winPenalty +
-			earlyLossPenalty +
-			profileWinPenalty +
-			profileTimeoutPenalty +
-			failPenalty)
-	).toFixed(6));
+function getTsxBinPath(): string {
+	return 'tsx';
 }
 
-async function evaluateCandidate(
-	config: Partial<SimulationConfig>,
-	seedPrefix: string,
-	index: number,
-	genome: Genome,
-	baselineSummary: SimulationBatchSummary,
-	progress?: {
-		label?: string;
-		progressEveryRuns?: number;
-		progressFilePath?: string;
-	},
-	fitnessConfig?: FitnessConfig
-): Promise<CandidateResult> {
-	const overrides = genomeToOverrides(genome);
-	const result = await runSimulationBatch(
-		{
-			...config,
-			seed: `${seedPrefix}-cand-${index}`,
-		},
-		overrides,
-		baselineSummary,
-		{
-			label: progress?.label,
-			progressEvery: progress?.progressEveryRuns,
-			onProgress: progress?.label ? buildProgressLogger(progress.label, progress.progressFilePath) : undefined,
-		}
-	);
-	return {
-		genome,
-		overrides,
-		summary: result.summary,
-		fitness: evaluateFitness(result.summary, fitnessConfig ?? {
-			targetWinLossRatio: 2,
-			minBeatableRate: 0.65,
-			maxTimeoutRate: 0.25,
-			targetWinRate: 0.55,
-			maxEarlyLossRate: 0.2,
-			minProfileWinRate: 0.2,
-			maxProfileTimeoutRate: 0.35,
-			profileFloorWeight: 2.5,
-		}),
-	};
-}
+async function runSimulationWorker(simOptions: SimOptions): Promise<WorkerSimulationResult> {
+	const workerScript = path.resolve(process.cwd(), 'simulation', 'candidateSimulationWorker.ts');
+	const tsxLoader = getTsxBinPath();
+	const args = [
+		'--import',
+		tsxLoader,
+		workerScript,
+		`--games=${simOptions.games}`,
+		`--maxTurns=${simOptions.maxTurns}`,
+		`--seed=${simOptions.seed}`,
+		`--gridSizeX=${simOptions.gridSizeX}`,
+		`--gridSizeY=${simOptions.gridSizeY}`,
+		`--playerName=${simOptions.playerName}`,
+		`--biomeDeckConfigPath=${simOptions.biomeDeckConfigPath || ''}`,
+		`--gameBalanceConfigPath=${simOptions.gameBalanceConfigPath || ''}`,
+	];
 
-async function main() {
-	initDb();
-	const args = parseArgs(process.argv.slice(2));
-	const seed = args.seed ?? 'auto-balance-seed';
-	const startedAt = Date.now();
-	const artifactRoot = args.artifactDir || 'simulation-output';
-	const runName = args.runName || `autobalance-${seed}`;
-	const artifactDir = path.join(artifactRoot, toSafeFolderName(runName));
-	const rand = createSeededRandom(seed);
-	const generations = Math.max(1, Number(args.generations ?? 6));
-	const populationSize = Math.max(4, Number(args.population ?? 12));
-	const eliteCount = Math.max(1, Math.min(populationSize - 1, Number(args.elite ?? 3)));
-	const candidateParallelism = Math.max(1, Math.min(populationSize, Number(args.candidateParallelism ?? 2)));
-	const progressEveryRuns = Math.max(1, Number(args.progressEveryRuns ?? Math.max(5, Math.floor((Number(args.runs ?? 80) || 80) / 10))));
-	const mutationRate = clamp(Number(args.mutationRate ?? 0.28), 0.01, 0.95);
-	const fitnessConfig: FitnessConfig = {
-		targetWinLossRatio: clamp(Number(args.targetWinLossRatio ?? 2), 0.2, 10),
-		minBeatableRate: clamp(Number(args.minBeatableRate ?? 0.65), 0, 1),
-		maxTimeoutRate: clamp(Number(args.maxTimeoutRate ?? 0.25), 0, 1),
-		targetWinRate: clamp(Number(args.targetWinRate ?? 0.55), 0, 1),
-		maxEarlyLossRate: clamp(Number(args.maxEarlyLossRate ?? 0.2), 0, 1),
-		minProfileWinRate: clamp(Number(args.minProfileWinRate ?? 0.2), 0, 1),
-		maxProfileTimeoutRate: clamp(Number(args.maxProfileTimeoutRate ?? 0.35), 0, 1),
-		profileFloorWeight: clamp(Number(args.profileFloorWeight ?? 2.5), 0.1, 10),
-	};
-	const config: Partial<SimulationConfig> = {
-		seed,
-		runs: Math.max(10, Number(args.runs ?? 80)),
-		parallelism: Math.max(1, Number(args.parallelism ?? 6)),
-		playersPerGame: Math.max(1, Number(args.playersPerGame ?? 3)),
-		turnCap: Math.max(20, Number(args.turnCap ?? 150)),
-		behaviorProfileWeights: {
-			'risk-averse': 0.34,
-			aggressive: 0.33,
-			completionist: 0.33,
-		},
-		output: undefined,
-	};
+	return await new Promise<WorkerSimulationResult>((resolve, reject) => {
+		const child = spawn(process.execPath, args, {
+			cwd: process.cwd(),
+			env: { ...process.env },
+			stdio: ['ignore', 'pipe', 'pipe'],
+		});
 
-	console.error(
-		`[autobalance] seed=${seed} generations=${generations} population=${populationSize} runs=${config.runs} parallelism=${config.parallelism} candidateParallelism=${candidateParallelism}`
-	);
-	console.error(
-		`[autobalance] fitness minProfileWinRate=${(fitnessConfig.minProfileWinRate * 100).toFixed(1)}% maxProfileTimeoutRate=${(fitnessConfig.maxProfileTimeoutRate * 100).toFixed(1)}% targetWinRate=${(fitnessConfig.targetWinRate * 100).toFixed(1)}%`
-	);
-	console.error(`[autobalance] runName=${runName} writing artifacts to ${artifactDir}`);
-	await fs.mkdir(artifactDir, { recursive: true });
+		let stdout = '';
+		let stderr = '';
+		child.stdout.on('data', chunk => {
+			stdout += chunk.toString();
+		});
+		child.stderr.on('data', chunk => {
+			stderr += chunk.toString();
+		});
 
-	const baseline = await runSimulationBatch(
-		{
-			...config,
-			seed: `${seed}-baseline`,
-			output: {
-				artifactDir,
-				writePerGameLogs: false,
-				writeTextReport: true,
-				textReportFileName: `autobalance-${seed}-baseline-report.txt`,
-			},
-		},
-		null,
-		undefined,
-		{
-			label: `${runName}:baseline`,
-			progressEvery: progressEveryRuns,
-			onProgress: buildProgressLogger(
-				`${runName}:baseline`,
-				path.join(artifactDir, `progress-${toSafeFolderName(`${runName}-baseline`)}.json`)
-			),
-		}
-	);
-	console.error(
-		`[autobalance] baseline complete | winRate=${(baseline.summary.winRate * 100).toFixed(2)}% | beatableRate=${(baseline.summary.beatableRate * 100).toFixed(2)}% | timeoutRate=${(baseline.summary.timeoutRate * 100).toFixed(2)}%`
-	);
-	let population: Genome[] = Array.from({ length: populationSize }, () => buildRandomGenome(rand));
-	let bestCandidate: CandidateResult | null = null;
-	const history: Array<{ generation: number; bestFitness: number; bestSummary: SimulationBatchSummary }> = [];
+		child.on('error', error => {
+			reject(error);
+		});
 
-	for (let generation = 0; generation < generations; generation += 1) {
-		console.error(`[autobalance] generation ${generation + 1}/${generations} started`);
-		const evaluations: CandidateResult[] = new Array(population.length);
-		let nextCandidateIndex = 0;
-		const generationWorkers = Array.from({ length: Math.min(candidateParallelism, population.length) }, async () => {
-			while (true) {
-				const index = nextCandidateIndex;
-				nextCandidateIndex += 1;
-				if (index >= population.length) break;
-				const genome = population[index];
-				console.error(`[autobalance] generation ${generation + 1}/${generations} candidate ${index + 1}/${population.length} started`);
-				const evaluated = await evaluateCandidate(config, `${seed}-g${generation}`, index, genome, baseline.summary, {
-					label: `${runName}:g${generation + 1}:c${index + 1}`,
-					progressEveryRuns,
-					progressFilePath: path.join(
-						artifactDir,
-						`progress-${toSafeFolderName(`${runName}-g${generation + 1}-c${index + 1}`)}.json`
-					),
-				}, fitnessConfig);
-				evaluations[index] = evaluated;
-				console.error(
-					`[autobalance] generation ${generation + 1}/${generations} candidate ${index + 1}/${population.length} fitness=${evaluated.fitness.toFixed(4)} winRate=${(evaluated.summary.winRate * 100).toFixed(2)}% beatable=${(evaluated.summary.beatableRate * 100).toFixed(2)}% timeout=${(evaluated.summary.timeoutRate * 100).toFixed(2)}%`
+		child.on('close', code => {
+			if (code !== 0) {
+				reject(
+					new Error(
+						`candidate worker exited with code ${code}. ${stderr.trim() || stdout.trim() || 'no worker output'}`
+					)
+				);
+				return;
+			}
+
+			const lines = stdout
+				.split(/\r?\n/)
+				.map(line => line.trim())
+				.filter(Boolean);
+			const jsonLine = lines[lines.length - 1];
+			if (!jsonLine) {
+				reject(new Error(`candidate worker produced no stdout. stderr=${stderr.trim() || 'none'}`));
+				return;
+			}
+
+			try {
+				const parsed = JSON.parse(jsonLine) as WorkerSimulationResult;
+				resolve(parsed);
+			} catch (error) {
+				reject(
+					new Error(
+						`candidate worker output was not valid JSON. output=${jsonLine.slice(0, 300)} error=${error instanceof Error ? error.message : String(error)}`
+					)
 				);
 			}
 		});
+	});
+}
 
-		await Promise.all(generationWorkers);
-		evaluations.sort((left, right) => right.fitness - left.fitness);
-		const generationBest = evaluations[0];
-		if (!bestCandidate || generationBest.fitness > bestCandidate.fitness) {
-			bestCandidate = generationBest;
+async function evaluateCandidate(
+	baseDeck: BiomeDeckConfig,
+	baseBalance: GameBalanceConfig,
+	genome: Genome,
+	args: Args,
+	seedSuffix: string
+): Promise<Candidate> {
+	const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dragon-ga-'));
+	const deckPath = path.join(tempDir, 'biome-decks.json');
+	const balancePath = path.join(tempDir, 'game-balance.json');
+	const { deckConfig, balanceConfig } = applyGenome(baseDeck, baseBalance, genome);
+	await fs.writeFile(deckPath, JSON.stringify(deckConfig, null, 2), 'utf8');
+	await fs.writeFile(balancePath, JSON.stringify(balanceConfig, null, 2), 'utf8');
+
+	try {
+		const simOptions: SimOptions = {
+			games: args.games,
+			maxTurns: args.maxTurns,
+			seed: `${args.seed}-${seedSuffix}`,
+			gridSizeX: args.gridSizeX,
+			gridSizeY: args.gridSizeY,
+			playerName: 'AutoBalanceBot',
+			biomeDeckConfigPath: deckPath,
+			gameBalanceConfigPath: balancePath,
+		};
+
+		const output = await runSimulationWorker(simOptions);
+		const bossDefeatRate = output.bossDefeatRate;
+
+		const completionPenalty = Math.abs(output.aggregate.completionRate - args.targetCompletionRate);
+		const turnsPenalty = Math.abs(output.aggregate.avgTurnsPlayed - args.targetAvgTurns) / args.targetAvgTurns;
+		const bossPenalty = Math.max(0, args.minBossDefeatRate - bossDefeatRate) * 1.5;
+		const fitness = Number((1 - (completionPenalty * 1.6 + turnsPenalty * 0.35 + bossPenalty)).toFixed(6));
+
+		return {
+			genome,
+			fitness,
+			aggregate: output.aggregate,
+			bossDefeatRate: Number(bossDefeatRate.toFixed(4)),
+			deckConfig,
+			balanceConfig,
+		};
+	} finally {
+		await fs.rm(tempDir, { recursive: true, force: true });
+	}
+}
+
+async function evaluateCandidateWithRetry(
+	baseDeck: BiomeDeckConfig,
+	baseBalance: GameBalanceConfig,
+	genome: Genome,
+	args: Args,
+	seedSuffix: string
+): Promise<Candidate> {
+	let lastError: unknown;
+	for (let attempt = 1; attempt <= 3; attempt += 1) {
+		try {
+			return await evaluateCandidate(baseDeck, baseBalance, genome, args, `${seedSuffix}-a${attempt}`);
+		} catch (error) {
+			lastError = error;
+			if (attempt < 3) {
+				await new Promise(resolve => setTimeout(resolve, attempt * 250));
+			}
 		}
+	}
+	throw lastError;
+}
 
+async function evaluatePopulation(
+	population: Genome[],
+	baseDeck: BiomeDeckConfig,
+	baseBalance: GameBalanceConfig,
+	args: Args,
+	generation: number
+): Promise<Candidate[]> {
+	const results: Candidate[] = new Array(population.length);
+	let nextIndex = 0;
+	const workerCount = Math.min(args.candidateParallelism, population.length);
+
+	const workers = Array.from({ length: Math.min(workerCount, population.length) }, async () => {
+		while (true) {
+			const index = nextIndex;
+			nextIndex += 1;
+			if (index >= population.length) break;
+			try {
+				const candidate = await evaluateCandidateWithRetry(
+					baseDeck,
+					baseBalance,
+					population[index],
+					args,
+					`g${generation + 1}-c${index + 1}`
+				);
+				results[index] = candidate;
+				console.error(
+					`[autobalance] g${generation + 1} c${index + 1}/${population.length} fitness=${candidate.fitness.toFixed(4)} completion=${(candidate.aggregate.completionRate * 100).toFixed(1)}% avgTurns=${candidate.aggregate.avgTurnsPlayed.toFixed(1)} boss=${(candidate.bossDefeatRate * 100).toFixed(1)}%`
+				);
+			} catch (error) {
+				const fallback = await evaluateCandidateWithRetry(
+					baseDeck,
+					baseBalance,
+					buildRandomGenome(createSeededRandom(`${args.seed}-fallback-${generation + 1}-${index + 1}`)),
+					args,
+					`g${generation + 1}-fallback-c${index + 1}`
+				);
+				results[index] = fallback;
+				console.error(
+					`[autobalance] g${generation + 1} c${index + 1}/${population.length} failed; substituted fallback. error=${error instanceof Error ? error.message : String(error)}`
+				);
+			}
+		}
+	});
+
+	await Promise.all(workers);
+	return results;
+}
+
+async function main() {
+	const args = parseRuntimeArgs(parseArgs(process.argv.slice(2)));
+	const startedAt = Date.now();
+	const rand = createSeededRandom(args.seed);
+	const mutationRate = 0.3;
+
+	console.error(
+		`[autobalance] seed=${args.seed} generations=${args.generations} population=${args.population} games=${args.games} maxTurns=${args.maxTurns}`
+	);
+
+	const baseDeck = JSON.parse(await fs.readFile(args.baseDeckPath, 'utf8')) as BiomeDeckConfig;
+	const baseBalance = JSON.parse(await fs.readFile(args.baseBalancePath, 'utf8')) as GameBalanceConfig;
+
+	const runFolder = `${args.runName}`
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9-_]+/g, '-')
+		.replace(/-{2,}/g, '-')
+		.replace(/^-|-$/g, '') || `autobalance-${Date.now()}`;
+	const artifactDir = path.resolve(process.cwd(), args.artifactDir, runFolder);
+	await fs.mkdir(artifactDir, { recursive: true });
+
+	let population = Array.from({ length: args.population }, () => buildRandomGenome(rand));
+	let best: Candidate | null = null;
+	const history: Array<{
+		generation: number;
+		bestFitness: number;
+		completionRate: number;
+		avgTurnsPlayed: number;
+		bossDefeatRate: number;
+	}> = [];
+
+	for (let generation = 0; generation < args.generations; generation += 1) {
+		console.error(`[autobalance] generation ${generation + 1}/${args.generations} started`);
+		const evaluated = await evaluatePopulation(population, baseDeck, baseBalance, args, generation);
+		evaluated.sort((left, right) => right.fitness - left.fitness);
+		const generationBest = evaluated[0];
+		if (!best || generationBest.fitness > best.fitness) {
+			best = generationBest;
+		}
 		history.push({
-			generation,
+			generation: generation + 1,
 			bestFitness: generationBest.fitness,
-			bestSummary: generationBest.summary,
+			completionRate: generationBest.aggregate.completionRate,
+			avgTurnsPlayed: generationBest.aggregate.avgTurnsPlayed,
+			bossDefeatRate: generationBest.bossDefeatRate,
 		});
+
 		console.error(
-			`[autobalance] generation ${generation + 1}/${generations} best fitness=${generationBest.fitness.toFixed(4)} winRate=${(generationBest.summary.winRate * 100).toFixed(2)}% beatable=${(generationBest.summary.beatableRate * 100).toFixed(2)}% timeout=${(generationBest.summary.timeoutRate * 100).toFixed(2)}%`
+			`[autobalance] generation ${generation + 1} best fitness=${generationBest.fitness.toFixed(4)} completion=${(generationBest.aggregate.completionRate * 100).toFixed(1)}% avgTurns=${generationBest.aggregate.avgTurnsPlayed.toFixed(1)} boss=${(generationBest.bossDefeatRate * 100).toFixed(1)}%`
 		);
 
-		const nextPopulation: Genome[] = evaluations.slice(0, eliteCount).map(entry => entry.genome);
-		while (nextPopulation.length < populationSize) {
-			const parentA = evaluations[Math.floor(rand() * Math.min(6, evaluations.length))].genome;
-			const parentB = evaluations[Math.floor(rand() * Math.min(6, evaluations.length))].genome;
-			const child = mutate(crossover(parentA, parentB, rand), mutationRate, rand);
-			nextPopulation.push(child);
+		const next: Genome[] = evaluated.slice(0, Math.min(args.elite, evaluated.length)).map(entry => entry.genome);
+		while (next.length < args.population) {
+			const parentA = evaluated[Math.floor(rand() * Math.min(6, evaluated.length))].genome;
+			const parentB = evaluated[Math.floor(rand() * Math.min(6, evaluated.length))].genome;
+			next.push(mutate(crossover(parentA, parentB, rand), mutationRate, rand));
 		}
-		population = nextPopulation;
+		population = next;
 	}
 
-	if (!bestCandidate) {
-		throw new Error('Auto-balancer failed to evaluate candidates');
+	if (!best) {
+		throw new Error('No candidate evaluated');
 	}
 
-	const reportRuns = Math.max(10, Math.min(Number(args.reportRuns ?? config.runs ?? 80), Number(config.runs ?? 80)));
-	console.error(`[autobalance] running detailed best-candidate report batch (runs=${reportRuns})`);
-	const bestCandidateDetailed = await runSimulationBatch(
+	const bestDeckPath = path.join(artifactDir, 'best-biome-decks.json');
+	const bestBalancePath = path.join(artifactDir, 'best-game-balance.json');
+	await fs.writeFile(bestDeckPath, JSON.stringify(best.deckConfig, null, 2), 'utf8');
+	await fs.writeFile(bestBalancePath, JSON.stringify(best.balanceConfig, null, 2), 'utf8');
+
+	const baselineSummary = await runApiSimulation(
 		{
-			...config,
-			seed: `${seed}-best-report`,
-			runs: reportRuns,
-			output: {
-				artifactDir,
-				writePerGameLogs: true,
-				writeTextReport: true,
-				textReportFileName: `autobalance-${seed}-best-candidate-report.txt`,
-			},
+			games: args.games,
+			maxTurns: args.maxTurns,
+			seed: `${args.seed}-baseline`,
+			gridSizeX: args.gridSizeX,
+			gridSizeY: args.gridSizeY,
+			playerName: 'AutoBalanceBot',
+			biomeDeckConfigPath: args.baseDeckPath,
+			gameBalanceConfigPath: args.baseBalancePath,
 		},
-		bestCandidate.overrides,
-		baseline.summary,
+		{ writeArtifacts: true, artifactRoot: path.join(args.artifactDir, runFolder), runName: 'baseline-report' }
+	);
+
+	const bestSummary = await runApiSimulation(
 		{
-			label: `${runName}:best-candidate-report`,
-			progressEvery: progressEveryRuns,
-			onProgress: buildProgressLogger(
-				`${runName}:best-candidate-report`,
-				path.join(artifactDir, `progress-${toSafeFolderName(`${runName}-best-candidate-report`)}.json`)
-			),
-		}
+			games: Math.max(args.games, 50),
+			maxTurns: args.maxTurns,
+			seed: `${args.seed}-best`,
+			gridSizeX: args.gridSizeX,
+			gridSizeY: args.gridSizeY,
+			playerName: 'AutoBalanceBot',
+			biomeDeckConfigPath: bestDeckPath,
+			gameBalanceConfigPath: bestBalancePath,
+		},
+		{ writeArtifacts: true, artifactRoot: path.join(args.artifactDir, runFolder), runName: 'best-report' }
 	);
 
 	const output = {
 		meta: {
-			seed,
-			generations,
-			populationSize,
-			candidateParallelism,
-			eliteCount,
-			mutationRate,
-			fitnessConfig,
-			reportRuns,
+			seed: args.seed,
+			generations: args.generations,
+			population: args.population,
+			candidateParallelism: args.candidateParallelism,
+			gamesPerCandidate: args.games,
 			durationSeconds: Number(((Date.now() - startedAt) / 1000).toFixed(2)),
-		},
-		baselineSummary: baseline.summary,
-		bestCandidateDetailedSummary: bestCandidateDetailed.summary,
-		bestCandidate: {
-			fitness: bestCandidate.fitness,
-			summary: bestCandidate.summary,
-			overrides: bestCandidate.overrides,
-			genome: bestCandidate.genome,
+			targets: {
+				completionRate: args.targetCompletionRate,
+				avgTurns: args.targetAvgTurns,
+				minBossDefeatRate: args.minBossDefeatRate,
+			},
 		},
 		history,
-		reportArtifacts: {
-			baselineTextReport: path.join(artifactDir, `autobalance-${seed}-baseline-report.txt`),
-			bestCandidateTextReport: path.join(artifactDir, `autobalance-${seed}-best-candidate-report.txt`),
-			note: 'Per-game quest-log JSON is written as games-<timestamp>.json in artifactDir.',
+		bestCandidate: {
+			fitness: best.fitness,
+			bossDefeatRate: best.bossDefeatRate,
+			aggregate: best.aggregate,
+			genome: best.genome,
+			bestDeckPath,
+			bestBalancePath,
 		},
-		recommendation: {
-			applyOverrides: bestCandidate.overrides,
-			notes: [
-				'Candidate targets beatable rate and timeout limits while steering win/loss ratio toward configured target.',
-				'Fitness also enforces a minimum per-profile win floor and maximum per-profile timeout ceiling.',
-				'Re-run baseline vs candidate with higher runs for confidence before applying to live constants.',
-			],
-		},
+		baselineAggregate: baselineSummary.aggregate,
+		bestDetailedAggregate: bestSummary.aggregate,
 	};
 
-	const finalJsonPath = path.join(artifactDir, `autobalance-${seed}-result.json`);
-	await fs.writeFile(finalJsonPath, JSON.stringify(output, null, 2), 'utf-8');
-	console.error(`[autobalance] complete in ${output.meta.durationSeconds}s | result written: ${finalJsonPath}`);
-
+	const resultPath = path.join(artifactDir, 'autobalance-result.json');
+	await fs.writeFile(resultPath, JSON.stringify(output, null, 2), 'utf8');
+	console.error(`[autobalance] complete. result: ${resultPath}`);
 	console.log(JSON.stringify(output, null, 2));
 }
 
 main().catch(error => {
-	console.error('Auto-balancer failed:', error);
-	process.exit(1);
+	console.error('Auto-balance failed:', error);
+	process.exitCode = 1;
 });

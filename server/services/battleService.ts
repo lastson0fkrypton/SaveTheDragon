@@ -1,4 +1,11 @@
 import { getItemDefs } from '../constants/items.js';
+import type { PlayBiome } from '../config/biomeDeckConfig.js';
+import {
+	createBiomeDeckRuntime,
+	drawLootCard,
+	type BiomeDeckRuntime,
+	type LootCard,
+} from './biomeDeckService.js';
 import {
 	getGameById,
 	getPlayerById,
@@ -6,9 +13,56 @@ import {
 	updateGameStateJson,
 	updatePlayerStateById,
 } from '../repositories/gameRepository.js';
-import { addRecentAction, getRandomItemForBiome } from '../utils/gameUtils.js';
+import { addRecentAction } from '../utils/gameUtils.js';
 import { random } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
+
+function isDeckBiome(biome: string): biome is PlayBiome {
+	return biome === 'plains' || biome === 'forest' || biome === 'desert' || biome === 'cave' || biome === 'volcano';
+}
+
+function ensureBiomeDeckState(gameState): BiomeDeckRuntime {
+	if (!gameState.biomeDecks) {
+		gameState.biomeDecks = createBiomeDeckRuntime();
+	}
+	return gameState.biomeDecks;
+}
+
+function ensureInventory(playerState): void {
+	if (!playerState.inventory) {
+		playerState.inventory = { weapons: [], armor: [], items: [], equippedWeaponId: 'fist', equippedArmorId: null };
+	}
+	if (!Array.isArray(playerState.inventory.weapons)) playerState.inventory.weapons = [];
+	if (!Array.isArray(playerState.inventory.armor)) playerState.inventory.armor = [];
+	if (!Array.isArray(playerState.inventory.items)) playerState.inventory.items = [];
+}
+
+function applyLootCardToPlayer(playerState, lootCard: LootCard): void {
+	ensureInventory(playerState);
+
+	if (lootCard.kind === 'heart') {
+		const hearts = Math.max(1, lootCard.hearts || 1);
+		playerState.maxHearts = (playerState.maxHearts || 5) + hearts;
+		playerState.damage = Math.max(0, (playerState.damage || 0) - hearts);
+		return;
+	}
+
+	if (lootCard.item.type === 'weapon') {
+		if (!playerState.inventory.weapons.includes(lootCard.item.id)) {
+			playerState.inventory.weapons.push(lootCard.item.id);
+		}
+		return;
+	}
+
+	if (lootCard.item.type === 'armor') {
+		if (!playerState.inventory.armor.includes(lootCard.item.id)) {
+			playerState.inventory.armor.push(lootCard.item.id);
+		}
+		return;
+	}
+
+	playerState.inventory.items.push(lootCard.item.id);
+}
 
 function parseJson(text, fallback = {}) {
 	if (!text) return fallback;
@@ -63,6 +117,35 @@ function movePlayerToNearestTown(gameState, playerState) {
 
 function findItem(itemId) {
 	return getItemDefs().find(i => i.id === itemId);
+}
+
+function resolveMonsterCounterAttack(battle, playerState, log, playerName) {
+	const armorId = playerState.inventory?.equippedArmorId;
+	const armor = armorId ? findItem(armorId) : null;
+	const monsterHit = random() < (battle.monster.attackChance || 0.5);
+	const playerBlock = armor ? random() < (armor.defenseChance || 0) : false;
+	let monsterDamage = 0;
+
+	if (monsterHit) {
+		monsterDamage = battle.monster.attack || 1;
+		if (playerBlock) {
+			monsterDamage = Math.max(0, monsterDamage - (armor?.defense || 0));
+			log.push(`${playerName} blocks! Damage reduced.`);
+		}
+		battle.playerHealth -= monsterDamage;
+		log.push(`Monster attacks: Hit${monsterDamage > 0 ? ` for ${monsterDamage} damage!` : ''}`);
+	} else {
+		log.push('Monster attacks: Miss!');
+	}
+
+	const maxHearts = playerState.maxHearts || 5;
+	playerState.damage = Math.max(0, maxHearts - battle.playerHealth);
+
+	if (battle.playerHealth <= 0) {
+		battle.playerHealth = 0;
+		log.push(`${playerName} fainted due to injuries.`);
+		battle.battleActive = false;
+	}
 }
 
 async function attackBattle(gameId, playerId) {
@@ -126,32 +209,7 @@ async function attackBattle(gameId, playerId) {
 			log.push('The Evil Princess has fallen! The realm is saved.');
 		}
 	} else {
-		const armorId = playerState.inventory?.equippedArmorId;
-		const armor = armorId ? findItem(armorId) : null;
-		const monsterHit = random() < (battle.monster.attackChance || 0.5);
-		const playerBlock = armor ? random() < (armor.defenseChance || 0) : false;
-		let monsterDamage = 0;
-
-		if (monsterHit) {
-			monsterDamage = battle.monster.attack || 1;
-			if (playerBlock) {
-				monsterDamage = Math.max(0, monsterDamage - (armor?.defense || 0));
-				log.push(`${playerRow.name} blocks! Damage reduced.`);
-			}
-			battle.playerHealth -= monsterDamage;
-			log.push(`Monster attacks: Hit${monsterDamage > 0 ? ` for ${monsterDamage} damage!` : ''}`);
-		} else {
-			log.push('Monster attacks: Miss!');
-		}
-
-		const maxHearts = playerState.maxHearts || 5;
-		playerState.damage = Math.max(0, maxHearts - battle.playerHealth);
-
-		if (battle.playerHealth <= 0) {
-			battle.playerHealth = 0;
-			log.push(`${playerRow.name} fainted due to injuries.`);
-			battle.battleActive = false;
-		}
+		resolveMonsterCounterAttack(battle, playerState, log, playerRow.name || 'Player');
 	}
 
 	battle.battleLog = log;
@@ -163,9 +221,10 @@ async function attackBattle(gameId, playerId) {
 	return { success: true, battleLog: log, battleActive: battle.battleActive };
 }
 
-async function runFromBattle(gameId, playerId) {
+async function useBattleItem(gameId, playerId, itemId) {
 	const gameRow = await getGameById(gameId);
 	if (!gameRow) throw serviceError(404, 'Game not found');
+
 	const gameState = getGameState(gameRow);
 	ensureGameNotCompleted(gameState);
 	const battle = gameState.currentBattle;
@@ -175,22 +234,82 @@ async function runFromBattle(gameId, playerId) {
 	const playerRow = await getPlayerById(playerId);
 	if (!playerRow) throw serviceError(404, 'Player not found');
 	const playerState = getPlayerState(playerRow);
+	ensureInventory(playerState);
 
-	battle.battleActive = false;
-	if (isRaidBossBattle(battle) && gameState.raidBoss) {
-		gameState.raidBoss.currentHealth = Math.max(0, battle.monsterHealth);
-		movePlayerToNearestTown(gameState, playerState);
-		battle.battleLog.push(`${playerRow.name || 'Player'} escaped the castle and retreated to the nearest town.`);
+	if (!itemId) throw serviceError(400, 'Missing itemId');
+	if (!playerState.inventory.items.includes(itemId)) {
+		throw serviceError(400, 'Item not in inventory');
 	}
-	battle.battleLog.push(`${playerRow.name || 'Player'} ran away! The battle is over.`);
-	addRecentAction(gameState, 'battle-end', playerRow.name || 'Player', `ran away from ${battle.monster?.name || 'a monster'}`);
 
-	const playerRows = await getPlayersByGameId(gameId);
-	gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+	const item = findItem(itemId);
+	if (!item || item.type !== 'item') throw serviceError(400, 'Invalid item');
+
+	const log = battle.battleLog || [];
+	let consumed = false;
+
+	if (typeof item.heal === 'number' && item.heal > 0) {
+		battle.playerHealth = Math.min(playerState.maxHearts || 5, battle.playerHealth + item.heal);
+		playerState.damage = Math.max(0, (playerState.maxHearts || 5) - battle.playerHealth);
+		log.push(`${playerRow.name || 'Player'} used ${item.name} and recovered ${item.heal} health.`);
+		consumed = true;
+	} else if (item.effect === 'full_heal') {
+		battle.playerHealth = playerState.maxHearts || 5;
+		playerState.damage = 0;
+		log.push(`${playerRow.name || 'Player'} used ${item.name} and fully healed.`);
+		consumed = true;
+	} else if (item.effect === 'extra_heart') {
+		playerState.maxHearts = Math.min((playerState.maxHearts || 5) + 1, 20);
+		battle.playerHealth = Math.min(playerState.maxHearts, battle.playerHealth + 1);
+		playerState.damage = Math.max(0, playerState.maxHearts - battle.playerHealth);
+		log.push(`${playerRow.name || 'Player'} used ${item.name} and gained a heart.`);
+		consumed = true;
+	} else if (item.effect === 'teleport') {
+		movePlayerToNearestTown(gameState, playerState);
+		playerState.damage = 0;
+		battle.battleActive = false;
+		gameState.currentBattle = null;
+		const usedItemIndex = playerState.inventory.items.indexOf(itemId);
+		playerState.inventory.items.splice(usedItemIndex, 1);
+		addRecentAction(gameState, 'use-item', playerRow.name || 'Player', item.name || item.id);
+		addRecentAction(gameState, 'battle-end', playerRow.name || 'Player', 'teleported away from battle');
+
+		const playerRows = await getPlayersByGameId(gameId);
+		gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+
+		await updatePlayerStateById(playerId, JSON.stringify(playerState));
+		await updateGameStateJson(gameId, JSON.stringify(gameState));
+		return { success: true, battleLog: [...log, `${playerRow.name || 'Player'} teleported to town and escaped the battle.`], escaped: true };
+	}
+
+	if (!consumed) {
+		throw serviceError(400, 'This item cannot be used in battle');
+	}
+
+	const usedItemIndex = playerState.inventory.items.indexOf(itemId);
+	playerState.inventory.items.splice(usedItemIndex, 1);
+	addRecentAction(gameState, 'use-item', playerRow.name || 'Player', item.name || item.id);
+
+	if (battle.battleActive) {
+		resolveMonsterCounterAttack(battle, playerState, log, playerRow.name || 'Player');
+	}
+
+	battle.battleLog = log;
+	gameState.currentBattle = battle;
 
 	await updatePlayerStateById(playerId, JSON.stringify(playerState));
 	await updateGameStateJson(gameId, JSON.stringify(gameState));
-	return { success: true, battleLog: battle.battleLog, ranAway: true };
+	return { success: true, battleLog: log, battleActive: battle.battleActive };
+}
+
+async function runFromBattle(gameId, playerId) {
+	const gameRow = await getGameById(gameId);
+	if (!gameRow) throw serviceError(404, 'Game not found');
+	const gameState = getGameState(gameRow);
+	ensureGameNotCompleted(gameState);
+	const battle = gameState.currentBattle;
+	if (!battle || !battle.battleActive) throw serviceError(400, 'No active battle');
+	if (battle.playerId !== playerId) throw serviceError(403, 'Not your battle');
+	throw serviceError(400, 'Run away is disabled. Use a teleport item via battle/use-item or continue fighting.');
 }
 
 async function collectBattleLoot(gameId, playerId) {
@@ -218,27 +337,30 @@ async function collectBattleLoot(gameId, playerId) {
 			gameState.raidBoss.currentHealth = 0;
 			gameState.raidBoss.defeated = true;
 		}
+		gameState.currentBattle = null;
 		await updateGameStateJson(gameId, JSON.stringify(gameState));
 		return { success: true, reward: null };
 	}
 
-	const biome = battle.monster.biome.split(',')[0];
-	const reward = getRandomItemForBiome(biome);
-	if (reward) {
-		if (reward.type === 'weapon' && !playerState.inventory.weapons.includes(reward.id)) {
-			playerState.inventory.weapons.push(reward.id);
-		} else if (reward.type === 'armor' && !playerState.inventory.armor.includes(reward.id)) {
-			playerState.inventory.armor.push(reward.id);
-		} else if (reward.type === 'item') {
-			playerState.inventory.items.push(reward.id);
+	const battleBiome = battle.biome || battle.monster?.biome?.split(',')[0] || 'plains';
+	let reward: LootCard | null = null;
+	if (isDeckBiome(battleBiome)) {
+		const deckState = ensureBiomeDeckState(gameState);
+		reward = drawLootCard(deckState, battleBiome);
+		applyLootCardToPlayer(playerState, reward);
+		if (reward.kind === 'heart') {
+			gameState.recentlyFoundItem = null;
+		} else {
+			gameState.recentlyFoundItem = { playerId, item: reward.item, ts: Date.now() };
 		}
+	} else {
+		gameState.recentlyFoundItem = null;
 	}
-
-	gameState.recentlyFoundItem = { playerId, item: reward, ts: Date.now() };
 	addRecentAction(gameState, 'battle-end', playerRow.name, `defeated ${battle.monster?.name || 'a monster'}`);
 
 	const playerRows = await getPlayersByGameId(gameId);
 	gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+	gameState.currentBattle = null;
 
 	await updatePlayerStateById(playerId, JSON.stringify(playerState));
 	await updateGameStateJson(gameId, JSON.stringify(gameState));
@@ -271,6 +393,7 @@ async function returnPlayerToTown(gameId, playerId) {
 
 	const playerRows = await getPlayersByGameId(gameId);
 	gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
+	gameState.currentBattle = null;
 
 	await updatePlayerStateById(playerId, JSON.stringify(playerState));
 	await updateGameStateJson(gameId, JSON.stringify(gameState));
@@ -278,4 +401,4 @@ async function returnPlayerToTown(gameId, playerId) {
 	return { success: true, returnedToTown: true };
 }
 
-export { attackBattle, runFromBattle, collectBattleLoot, returnPlayerToTown };
+export { attackBattle, useBattleItem, runFromBattle, collectBattleLoot, returnPlayerToTown };

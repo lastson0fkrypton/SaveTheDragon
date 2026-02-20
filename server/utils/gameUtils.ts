@@ -1,4 +1,4 @@
-import { getItemDefs, getItemDropRateProfile } from '../constants/items.js';
+import { getItemDefs } from '../constants/items.js';
 import type {
 	BiomeGrid,
 	GameRow,
@@ -44,9 +44,10 @@ function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows:
 	itemDefs.forEach(def => {
 		if (allItemIds.has(def.id)) itemMeta[def.id] = def;
 	});
+	const { biomeDecks: _hiddenBiomeDecks, ...publicGameState } = gameState as Record<string, unknown>;
 	return {
 		id: gameRow.id,
-		...gameState,
+		...publicGameState,
 		players,
 		validMoves: validMoveRows.map(m => ({ x: m.x, y: m.y })),
 		gridSizeX: gameState.gridSizeX || 10,
@@ -68,53 +69,6 @@ function addRecentAction(gameState: Partial<GameStateJson>, type: string, player
 	gameState.recentActions.push(action);
 	// Keep only the latest 10 actions
 	if (gameState.recentActions.length > 10) gameState.recentActions = gameState.recentActions.slice(-10);
-}
-
-function getRandomItemForBiome(tilebiome: string): ItemDefFromConstants | null {
-	const itemDefs = getItemDefs();
-	const dropRates = getItemDropRateProfile();
-	// Only give biome-appropriate items (or biome:any), and not 'fist'
-	const pool = itemDefs.filter(
-		i => (i.biome === 'any' || (i.biome && i.biome.indexOf(tilebiome) !== -1)) && !i.noRandom
-	);
-	if (pool.length === 0) {
-		return null;
-	}
-
-	const weightedPool = pool.map(item => {
-		let weight = dropRates.typeWeights[item.type] || 1;
-		const isHealthItem =
-			item.type === 'item' &&
-			((typeof item.heal === 'number' && item.heal > 0) || item.effect === 'full_heal' || item.effect === 'extra_heart');
-		if (isHealthItem) {
-			weight *= dropRates.healthItemMultiplier || 1;
-		}
-		if (item.id === 'extra_heart') {
-			weight *= dropRates.extraHeartMultiplier || 1;
-		}
-		if (typeof dropRates.itemWeightOverrides[item.id] === 'number') {
-			weight *= dropRates.itemWeightOverrides[item.id];
-		}
-		return {
-			item,
-			weight: Math.max(0, weight),
-		};
-	});
-
-	const totalWeight = weightedPool.reduce((sum, entry) => sum + entry.weight, 0);
-	if (totalWeight <= 0) {
-		return randomChoice(pool);
-	}
-
-	let roll = random() * totalWeight;
-	for (const entry of weightedPool) {
-		roll -= entry.weight;
-		if (roll <= 0) {
-			return entry.item;
-		}
-	}
-
-	return weightedPool[weightedPool.length - 1].item;
 }
 
 // --- Biome grid generation ---
@@ -209,4 +163,4 @@ function generateBiomeGrid(width: number, height: number): BiomeGrid {
 	return grid;
 }
 
-export { serializeGame, addRecentAction, getRandomItemForBiome, generateBiomeGrid };
+export { serializeGame, addRecentAction, generateBiomeGrid };

@@ -1,0 +1,29 @@
+{
+  "BIOME_DECKS": {
+    "plains": {
+      "encounterComposition": { "monster": 9, "item": 5, "consumable": 4, "heart": 2 },
+      "lootComposition": { "item": 7, "consumable": 4, "heart": 1 },
+      "monsterVariantWeights": { "weak": 0.6, "normal": 0.35, "strong": 0.05 }
+    },
+    "forest": {
+      "encounterComposition": { "monster": 10, "item": 5, "consumable": 3, "heart": 2 },
+      "lootComposition": { "item": 7, "consumable": 4, "heart": 1 },
+      "monsterVariantWeights": { "weak": 0.4, "normal": 0.45, "strong": 0.15 }
+    },
+    "desert": {
+      "encounterComposition": { "monster": 12, "item": 4, "consumable": 3, "heart": 1 },
+      "lootComposition": { "item": 8, "consumable": 3, "heart": 1 },
+      "monsterVariantWeights": { "weak": 0.2, "normal": 0.55, "strong": 0.25 }
+    },
+    "cave": {
+      "encounterComposition": { "monster": 13, "item": 3, "consumable": 3, "heart": 1 },
+      "lootComposition": { "item": 8, "consumable": 3, "heart": 1 },
+      "monsterVariantWeights": { "weak": 0.1, "normal": 0.5, "strong": 0.4 }
+    },
+    "volcano": {
+      "encounterComposition": { "monster": 14, "item": 3, "consumable": 2, "heart": 1 },
+      "lootComposition": { "item": 9, "consumable": 2, "heart": 1 },
+      "monsterVariantWeights": { "weak": 0.05, "normal": 0.45, "strong": 0.5 }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import type { MonsterDef } from '../types.js';
+import { getGameBalanceConfig, getGameBalanceConfigVersion } from '../config/gameBalanceConfig.js';
 
 export const EVIL_PRINCESS_MONSTER: MonsterDef = {
 	id: 'evil_princess',
@@ -213,16 +214,8 @@ const BIOME_EXPANDED_MONSTER_DEFS: ReadonlyArray<MonsterCatalogBase> = BASE_MONS
 		}))
 );
 
-const BIOME_TIER_RANK = {
-	plains: 1,
-	forest: 2,
-	desert: 3,
-	cave: 4,
-	volcano: 4,
-};
-
 type MonsterVariant = 'weak' | 'normal' | 'strong';
-type MonsterTierBiome = keyof typeof BIOME_TIER_RANK;
+type MonsterTierBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
 
 export type MonsterBalanceProfile = {
 	biomeTierBaseStats: Record<MonsterTierBiome, {
@@ -241,57 +234,44 @@ export type MonsterBalanceProfile = {
 	}>;
 };
 
+const MONSTER_VARIANTS: ReadonlyArray<MonsterVariant> = ['weak', 'normal', 'strong'];
+
 export type MonsterBalanceProfileOverride = {
 	biomeTierBaseStats?: Partial<Record<MonsterTierBiome, Partial<MonsterBalanceProfile['biomeTierBaseStats'][MonsterTierBiome]>>>;
 	variantModifiers?: Partial<Record<MonsterVariant, Partial<MonsterBalanceProfile['variantModifiers'][MonsterVariant]>>>;
 };
 
-const BIOME_TIER_BASE_STATS: MonsterBalanceProfile['biomeTierBaseStats'] = {
-	plains: { health: 3, attack: 2, attackChance: 0.5, defense: 1, defenseChance: 0.2 },
-	forest: { health: 4, attack: 2, attackChance: 0.58, defense: 1, defenseChance: 0.28 },
-	desert: { health: 9, attack: 3, attackChance: 0.7, defense: 2, defenseChance: 0.42 },
-	cave: { health: 17, attack: 5, attackChance: 0.82, defense: 4, defenseChance: 0.58 },
-	volcano: { health: 17, attack: 5, attackChance: 0.82, defense: 4, defenseChance: 0.58 },
-};
+function getMonsterBalanceProfileFromConfig(): MonsterBalanceProfile {
+	const config = getGameBalanceConfig();
+	return {
+		biomeTierBaseStats: structuredClone(config.BIOME_TIER_BASE_STATS),
+		variantModifiers: structuredClone(config.BIOME_VARIANT_MODIFIERS),
+	};
+}
 
-const VARIANT_MODIFIERS: MonsterBalanceProfile['variantModifiers'] = {
-	weak: { health: -1, attack: -1, attackChance: -0.08, defense: -1, defenseChance: -0.08 },
-	normal: { health: 0, attack: 0, attackChance: 0, defense: 0, defenseChance: 0 },
-	strong: { health: 1, attack: 1, attackChance: 0.08, defense: 1, defenseChance: 0.08 },
-};
+export const DEFAULT_MONSTER_BALANCE_PROFILE: MonsterBalanceProfile = getMonsterBalanceProfileFromConfig();
 
-const MONSTER_VARIANTS: ReadonlyArray<MonsterVariant> = ['weak', 'normal', 'strong'];
-
-export const DEFAULT_MONSTER_BALANCE_PROFILE: MonsterBalanceProfile = {
-	biomeTierBaseStats: BIOME_TIER_BASE_STATS,
-	variantModifiers: VARIANT_MODIFIERS,
-};
-
-let activeMonsterBalanceProfile: MonsterBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_MONSTER_BALANCE_PROFILE));
-let activeMonsterDefs: ReadonlyArray<MonsterDef> = [];
+let cachedMonsterDefs: ReadonlyArray<MonsterDef> = [];
+let cachedConfigVersion = -1;
 
 function clampChance(value: number) {
 	return Math.max(0.05, Math.min(0.95, Number(value.toFixed(2))));
 }
 
-function resolveBiomeTier(monsterBiome: string): string {
+function resolveBiomeTier(monsterBiome: string): MonsterTierBiome {
 	const biomes = (monsterBiome || '').split(',').map(part => part.trim()).filter(Boolean);
 	if (biomes.length === 0) {
 		return 'plains';
 	}
 
-	let selectedBiome = biomes[0];
-	let selectedRank = BIOME_TIER_RANK[selectedBiome] || 0;
-
-	for (const biome of biomes) {
-		const rank = BIOME_TIER_RANK[biome] || 0;
-		if (rank > selectedRank) {
-			selectedRank = rank;
-			selectedBiome = biome;
+	const strongestFirst: MonsterTierBiome[] = ['volcano', 'cave', 'desert', 'forest', 'plains'];
+	for (const biome of strongestFirst) {
+		if (biomes.includes(biome)) {
+			return biome;
 		}
 	}
 
-	return selectedBiome;
+	return 'plains';
 }
 
 function toVariantId(baseId: string, variant: MonsterVariant) {
@@ -334,42 +314,29 @@ function buildMonsterDefs(profile: MonsterBalanceProfile): ReadonlyArray<Monster
 	);
 }
 
+function getOrBuildMonsterDefs(): ReadonlyArray<MonsterDef> {
+	const nextVersion = getGameBalanceConfigVersion();
+	if (cachedConfigVersion !== nextVersion) {
+		cachedMonsterDefs = buildMonsterDefs(getMonsterBalanceProfileFromConfig());
+		cachedConfigVersion = nextVersion;
+	}
+	return cachedMonsterDefs;
+}
+
 export function getMonsterDefs(): ReadonlyArray<MonsterDef> {
-	return activeMonsterDefs;
+	return getOrBuildMonsterDefs();
 }
 
 export function getMonsterBalanceProfile(): MonsterBalanceProfile {
-	return JSON.parse(JSON.stringify(activeMonsterBalanceProfile));
+	return getMonsterBalanceProfileFromConfig();
 }
 
 export function resetMonsterBalanceProfile(): void {
-	activeMonsterBalanceProfile = JSON.parse(JSON.stringify(DEFAULT_MONSTER_BALANCE_PROFILE));
-	activeMonsterDefs = buildMonsterDefs(activeMonsterBalanceProfile);
+	cachedConfigVersion = -1;
 }
 
-export function applyMonsterBalanceProfile(overrides: MonsterBalanceProfileOverride): void {
-	const nextProfile: MonsterBalanceProfile = JSON.parse(JSON.stringify(activeMonsterBalanceProfile));
-
-	for (const biome of Object.keys(nextProfile.biomeTierBaseStats) as MonsterTierBiome[]) {
-		if (overrides.biomeTierBaseStats?.[biome]) {
-			nextProfile.biomeTierBaseStats[biome] = {
-				...nextProfile.biomeTierBaseStats[biome],
-				...overrides.biomeTierBaseStats[biome],
-			};
-		}
-	}
-
-	for (const variant of MONSTER_VARIANTS) {
-		if (overrides.variantModifiers?.[variant]) {
-			nextProfile.variantModifiers[variant] = {
-				...nextProfile.variantModifiers[variant],
-				...overrides.variantModifiers[variant],
-			};
-		}
-	}
-
-	activeMonsterBalanceProfile = nextProfile;
-	activeMonsterDefs = buildMonsterDefs(activeMonsterBalanceProfile);
+export function applyMonsterBalanceProfile(_overrides: MonsterBalanceProfileOverride): void {
+	return;
 }
 
 resetMonsterBalanceProfile();

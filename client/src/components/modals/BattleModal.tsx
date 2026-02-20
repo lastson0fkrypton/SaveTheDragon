@@ -1,11 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppState } from '../../stores/AppState';
 import { CachedImage } from '../common/CachedImage';
 import { getChanceStyle } from '../../utils/chanceStyle';
+import ItemModal from './ItemModal';
 
 const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 	const battleLogRef = useRef<HTMLDivElement>(null);
+	const [showBattleItemModal, setShowBattleItemModal] = useState(false);
 	const state = getAppState();
 	const gameState = state.gameState;
 	const service = state.service;
@@ -138,12 +140,11 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 						</button>
 						<button
 							onClick={() => {
-								service.run();
-								handleClose();
+								setShowBattleItemModal(true);
 							}}
 							className="battle-modal-action-btn"
 						>
-							Run Away
+							Use Item
 						</button>
 					</div>
 				)}
@@ -177,6 +178,14 @@ const BattleModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) =>
 					<div className="battle-modal-center">
 						<button onClick={handleClose}>Close</button>
 					</div>
+				)}
+				{showBattleItemModal && (
+					<ItemModal
+						battleMode
+						onClose={() => {
+							setShowBattleItemModal(false);
+						}}
+					/>
 				)}
 			</div>
 		</div>

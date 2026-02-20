@@ -1,6 +1,7 @@
-import { getBiomeEncounterRates } from '../constants/biomes.js';
 import { CHARACTERS } from '../constants/characters.js';
-import { EVIL_PRINCESS_MONSTER, getMonsterDefs } from '../constants/monsters.js';
+import { EVIL_PRINCESS_MONSTER } from '../constants/monsters.js';
+import type { PlayBiome } from '../config/biomeDeckConfig.js';
+import { createBiomeDeckRuntime, drawEncounterCard, type BiomeDeckRuntime } from './biomeDeckService.js';
 import {
 	createGame,
 	createPlayer,
@@ -15,9 +16,47 @@ import {
 	clearValidMovesByGameId,
 } from '../repositories/gameRepository.js';
 import { addRecentAction, generateBiomeGrid, serializeGame } from '../utils/gameUtils.js';
-import { random, randomChoice, randomId, randomInt } from '../utils/random.js';
+import { randomChoice, randomId, randomInt } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
 
+function isDeckBiome(biome: string): biome is PlayBiome {
+	return biome === 'plains' || biome === 'forest' || biome === 'desert' || biome === 'cave' || biome === 'volcano';
+}
+
+function ensureBiomeDeckState(gameState): BiomeDeckRuntime {
+	if (!gameState.biomeDecks) {
+		gameState.biomeDecks = createBiomeDeckRuntime();
+	}
+	return gameState.biomeDecks;
+}
+
+function ensureInventory(playerState): void {
+	if (!playerState.inventory) {
+		playerState.inventory = { weapons: [], armor: [], items: [], equippedWeaponId: 'fist', equippedArmorId: null };
+	}
+	if (!Array.isArray(playerState.inventory.weapons)) playerState.inventory.weapons = [];
+	if (!Array.isArray(playerState.inventory.armor)) playerState.inventory.armor = [];
+	if (!Array.isArray(playerState.inventory.items)) playerState.inventory.items = [];
+}
+
+function grantItemToPlayer(playerState, item): void {
+	ensureInventory(playerState);
+	if (item.type === 'weapon') {
+		if (!playerState.inventory.weapons.includes(item.id)) {
+			playerState.inventory.weapons.push(item.id);
+		}
+		return;
+	}
+
+	if (item.type === 'armor') {
+		if (!playerState.inventory.armor.includes(item.id)) {
+			playerState.inventory.armor.push(item.id);
+		}
+		return;
+	}
+
+	playerState.inventory.items.push(item.id);
+}
 function buildGameState(gameRow, playerRows, validMoveRows) {
 	return serializeGame(gameRow, playerRows, validMoveRows);
 }
@@ -30,8 +69,10 @@ async function loadSerializedGame(gameId) {
 	const gameState = getGameState(gameRow);
 	const raidBossBefore = gameState.raidBoss;
 	const completionBefore = gameState.gameCompletion;
+	const deckBefore = gameState.biomeDecks;
 	ensureRaidBossState(gameState);
-	if (!raidBossBefore || !completionBefore) {
+	ensureBiomeDeckState(gameState);
+	if (!raidBossBefore || !completionBefore || !deckBefore) {
 		await updateGameStateJson(gameId, JSON.stringify(gameState));
 	}
 	const [playerRows, validMoveRows] = await Promise.all([
@@ -171,6 +212,7 @@ async function createNewGame(gridSizeX, gridSizeY) {
 		gridSizeX: safeX,
 		gridSizeY: safeY,
 		biomeGrid,
+		biomeDecks: createBiomeDeckRuntime(),
 		raidBoss: {
 			...EVIL_PRINCESS_MONSTER,
 			maxHealth: EVIL_PRINCESS_MONSTER.health,
@@ -294,19 +336,34 @@ function startEncounterIfNeeded(gameState, playerRows, playerId, playerState, bi
 		return true;
 	}
 
-	const biomeEncounterRates = getBiomeEncounterRates();
-	if (!(biomeEncounterRates[biome] > 0 && random() < biomeEncounterRates[biome])) {
+	if (!isDeckBiome(biome)) {
 		gameState.currentBattle = null;
 		return false;
 	}
 
-	const biomeMonsters = getMonsterDefs().filter(monster => monster.biome.split(',').includes(biome));
-	if (biomeMonsters.length === 0) {
+	const deckState = ensureBiomeDeckState(gameState);
+	const encounterCard = drawEncounterCard(deckState, biome);
+
+	if (encounterCard.kind !== 'monster') {
+		if (encounterCard.kind === 'heart') {
+			const hearts = Math.max(1, encounterCard.hearts || 1);
+			playerState.maxHearts = (playerState.maxHearts || 5) + hearts;
+			playerState.damage = Math.max(0, (playerState.damage || 0) - hearts);
+			addRecentAction(gameState, 'find-heart', playerRows.find(p => p.id === playerId)?.name || 'Player', `+${hearts} heart`);
+			gameState.recentlyFoundItem = null;
+			gameState.currentBattle = null;
+			return false;
+		}
+
+		grantItemToPlayer(playerState, encounterCard.item);
+		gameState.recentlyFoundItem = { playerId, item: encounterCard.item, ts: Date.now() };
+		addRecentAction(gameState, 'find-item', playerRows.find(p => p.id === playerId)?.name || 'Player', encounterCard.item.name || 'Item');
 		gameState.currentBattle = null;
 		return false;
 	}
 
-	const encounteredMonster = randomChoice(biomeMonsters);
+
+	const encounteredMonster = encounterCard.monster;
 	gameState.currentBattle = {
 		playerId,
 		monster: encounteredMonster,
@@ -374,6 +431,7 @@ async function reconnectPlayer(gameId, playerName) {
 	if (!playerRow) throw serviceError(404, 'Player not found');
 	const gameState = getGameState(gameRow);
 	ensureRaidBossState(gameState);
+	ensureBiomeDeckState(gameState);
 	await updateGameStateJson(gameId, JSON.stringify(gameState));
 
 	const [playerRows, validMoveRows] = await Promise.all([

@@ -210,7 +210,7 @@ describe('GameService', () => {
 			.mockResolvedValueOnce(mockResponse(true));
 
 		await service.attack();
-		await service.run();
+		await service.useBattleItem('small_potion');
 		await service.collectLoot();
 		await service.returnToTown();
 
@@ -221,8 +221,11 @@ describe('GameService', () => {
 		);
 		expect(fetch).toHaveBeenNthCalledWith(
 			2,
-			'/api/games/g-b/battle/run',
-			expect.objectContaining({ method: 'POST' })
+			'/api/games/g-b/battle/use-item',
+			expect.objectContaining({
+				method: 'POST',
+				body: JSON.stringify({ playerId: 'p-b', itemId: 'small_potion' }),
+			})
 		);
 		expect(fetch).toHaveBeenNthCalledWith(
 			3,

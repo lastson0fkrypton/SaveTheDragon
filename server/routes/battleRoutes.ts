@@ -1,5 +1,5 @@
 import express from 'express';
-import { attackBattle, collectBattleLoot, returnPlayerToTown, runFromBattle } from '../services/battleService.js';
+import { attackBattle, collectBattleLoot, returnPlayerToTown, useBattleItem } from '../services/battleService.js';
 
 const router = express.Router();
 
@@ -26,12 +26,12 @@ router.post('/games/:gameId/battle/attack', async (req, res) => {
 	}
 });
 
-// Player runs away
-router.post('/games/:gameId/battle/run', async (req, res) => {
+// Player uses an item during battle (potion/heal/teleport)
+router.post('/games/:gameId/battle/use-item', async (req, res) => {
 	try {
 		const { gameId } = req.params;
-		const { playerId } = req.body;
-		const result = await runFromBattle(gameId, playerId);
+		const { playerId, itemId } = req.body;
+		const result = await useBattleItem(gameId, playerId, itemId);
 		return res.json(result);
 	} catch (error) {
 		return handleError(res, error);

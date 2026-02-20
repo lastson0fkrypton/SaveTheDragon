@@ -227,15 +227,15 @@ class GameService {
 		}
 	}
 
-	async run() {
+	async useBattleItem(itemId: string) {
 		if (!this.store.gameId || !this.store.playerId) return;
-		const response = await fetch(`/api/games/${this.store.gameId}/battle/run`, {
+		const response = await fetch(`/api/games/${this.store.gameId}/battle/use-item`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ playerId: this.store.playerId }),
+			body: JSON.stringify({ playerId: this.store.playerId, itemId }),
 		});
 		if (!response.ok) {
-			console.error('Failed to run away');
+			console.error('Failed to use battle item');
 		}
 	}
 
