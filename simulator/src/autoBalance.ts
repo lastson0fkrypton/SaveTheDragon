@@ -161,6 +161,24 @@ type GenomeBound = {
 	chance?: boolean;
 };
 
+type RangeDeltaConstraint = {
+	minPath: string;
+	maxPath: string;
+	minDelta: number;
+	options: { min: number; max: number; integer?: boolean; chance?: boolean };
+};
+
+type AscendingConstraint = {
+	paths: [string, string, string];
+	options: { min: number; max: number; minStep: number; integer?: boolean; chance?: boolean };
+};
+
+type SignedConstraint = {
+	path: string;
+	direction: 'negative' | 'zero' | 'positive';
+	options: { min: number; max: number; integer?: boolean; chance?: boolean };
+};
+
 const BASE_GENOME: Genome = {
 	DEFAULT_HEALING_AMOUNT: {
 		smallHealthPotion: 3,
@@ -284,6 +302,146 @@ const GENOME_BOUNDS: GenomeBound[] = [
 		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.attackChanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
 		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.defenseDelta`, min: -20, max: 20, span: 1, integer: true },
 		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.defenseChanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
+	]),
+];
+
+const RANGE_DELTA_CONSTRAINTS: RangeDeltaConstraint[] = (['easy', 'medium', 'hard'] as const).flatMap(deck => [
+	{
+		minPath: `DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`,
+		maxPath: `DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`,
+		minDelta: 4,
+		options: { min: 1, max: 70, integer: true },
+	},
+	{
+		minPath: `DEFAULT_WEAPON_DAMAGE.${deck}.minChance`,
+		maxPath: `DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`,
+		minDelta: 0.2,
+		options: { min: 0.05, max: 0.95, chance: true },
+	},
+	{
+		minPath: `DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`,
+		maxPath: `DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`,
+		minDelta: 4,
+		options: { min: 0, max: 70, integer: true },
+	},
+	{
+		minPath: `DEFAULT_ARMOR_PROTECTION.${deck}.minChance`,
+		maxPath: `DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`,
+		minDelta: 0.2,
+		options: { min: 0.05, max: 0.95, chance: true },
+	},
+	{
+		minPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`,
+		maxPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`,
+		minDelta: 4,
+		options: { min: 1, max: 140, integer: true },
+	},
+	{
+		minPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`,
+		maxPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`,
+		minDelta: 4,
+		options: { min: 1, max: 90, integer: true },
+	},
+	{
+		minPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`,
+		maxPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`,
+		minDelta: 4,
+		options: { min: 0, max: 90, integer: true },
+	},
+	{
+		minPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`,
+		maxPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`,
+		minDelta: 0.2,
+		options: { min: 0.05, max: 0.95, chance: true },
+	},
+	{
+		minPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`,
+		maxPath: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`,
+		minDelta: 0.2,
+		options: { min: 0.05, max: 0.95, chance: true },
+	},
+]);
+
+const ASCENDING_CONSTRAINTS: AscendingConstraint[] = [
+	{
+		paths: [
+			'DEFAULT_HEALING_AMOUNT.smallHealthPotion',
+			'DEFAULT_HEALING_AMOUNT.mediumHealthPotion',
+			'DEFAULT_HEALING_AMOUNT.largeHealthPotion',
+		],
+		options: { min: 1, max: 40, minStep: 1, integer: true },
+	},
+	{
+		paths: [
+			'DEFAULT_WEAPON_DAMAGE.easy.minAttack',
+			'DEFAULT_WEAPON_DAMAGE.medium.minAttack',
+			'DEFAULT_WEAPON_DAMAGE.hard.minAttack',
+		],
+		options: { min: 1, max: 60, minStep: 1, integer: true },
+	},
+	{
+		paths: [
+			'DEFAULT_WEAPON_DAMAGE.easy.maxAttack',
+			'DEFAULT_WEAPON_DAMAGE.medium.maxAttack',
+			'DEFAULT_WEAPON_DAMAGE.hard.maxAttack',
+		],
+		options: { min: 1, max: 70, minStep: 1, integer: true },
+	},
+	{
+		paths: [
+			'DEFAULT_ARMOR_PROTECTION.easy.minDefense',
+			'DEFAULT_ARMOR_PROTECTION.medium.minDefense',
+			'DEFAULT_ARMOR_PROTECTION.hard.minDefense',
+		],
+		options: { min: 0, max: 60, minStep: 1, integer: true },
+	},
+	{
+		paths: [
+			'DEFAULT_ARMOR_PROTECTION.easy.maxDefense',
+			'DEFAULT_ARMOR_PROTECTION.medium.maxDefense',
+			'DEFAULT_ARMOR_PROTECTION.hard.maxDefense',
+		],
+		options: { min: 0, max: 70, minStep: 1, integer: true },
+	},
+	...(['minHealth', 'maxHealth', 'minAttack', 'maxAttack', 'minDefense', 'maxDefense'] as const).map(field => ({
+		paths: [
+			`DEFAULT_MONSTER_TIER_BASE.easy.${field}`,
+			`DEFAULT_MONSTER_TIER_BASE.medium.${field}`,
+			`DEFAULT_MONSTER_TIER_BASE.hard.${field}`,
+		] as [string, string, string],
+		options: {
+			min: field.includes('Health') ? 1 : 0,
+			max: field.includes('Health') ? 140 : 90,
+			minStep: 1,
+			integer: true,
+		},
+	})),
+	...(['minAttackChance', 'maxAttackChance', 'minDefenseChance', 'maxDefenseChance'] as const).map(field => ({
+		paths: [
+			`DEFAULT_MONSTER_TIER_BASE.easy.${field}`,
+			`DEFAULT_MONSTER_TIER_BASE.medium.${field}`,
+			`DEFAULT_MONSTER_TIER_BASE.hard.${field}`,
+		] as [string, string, string],
+		options: { min: 0.05, max: 0.95, minStep: 0.0001, chance: true },
+	})),
+];
+
+const SIGNED_CONSTRAINTS: SignedConstraint[] = [
+	{ path: 'DEFAULT_ITEM_VARIANT_MODIFIERS.cracked.valueDelta', direction: 'negative', options: { min: -12, max: 12, integer: true } },
+	{ path: 'DEFAULT_ITEM_VARIANT_MODIFIERS.cracked.chanceDelta', direction: 'negative', options: { min: -0.5, max: 0.5, chance: true } },
+	{ path: 'DEFAULT_ITEM_VARIANT_MODIFIERS.normal.valueDelta', direction: 'zero', options: { min: -12, max: 12, integer: true } },
+	{ path: 'DEFAULT_ITEM_VARIANT_MODIFIERS.normal.chanceDelta', direction: 'zero', options: { min: -0.5, max: 0.5, chance: true } },
+	{ path: 'DEFAULT_ITEM_VARIANT_MODIFIERS.enchanted.valueDelta', direction: 'positive', options: { min: -12, max: 12, integer: true } },
+	{ path: 'DEFAULT_ITEM_VARIANT_MODIFIERS.enchanted.chanceDelta', direction: 'positive', options: { min: -0.5, max: 0.5, chance: true } },
+	...(['healthDelta', 'attackDelta', 'defenseDelta'] as const).flatMap(field => [
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.weak.${field}`, direction: 'negative' as const, options: { min: -20, max: 20, integer: true } },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.normal.${field}`, direction: 'zero' as const, options: { min: -20, max: 20, integer: true } },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.strong.${field}`, direction: 'positive' as const, options: { min: -20, max: 20, integer: true } },
+	]),
+	...(['attackChanceDelta', 'defenseChanceDelta'] as const).flatMap(field => [
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.weak.${field}`, direction: 'negative' as const, options: { min: -0.5, max: 0.5, chance: true } },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.normal.${field}`, direction: 'zero' as const, options: { min: -0.5, max: 0.5, chance: true } },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.strong.${field}`, direction: 'positive' as const, options: { min: -0.5, max: 0.5, chance: true } },
 	]),
 ];
 
@@ -445,6 +603,30 @@ function enforceSignedValue(
 	setNumericByPath(target, path, value);
 }
 
+function applyRangeDeltaConstraints(target: Record<string, unknown>, constraints: RangeDeltaConstraint[]): void {
+	for (const constraint of constraints) {
+		enforceRangeDelta(
+			target,
+			constraint.minPath,
+			constraint.maxPath,
+			constraint.minDelta,
+			constraint.options
+		);
+	}
+}
+
+function applyAscendingConstraints(target: Record<string, unknown>, constraints: AscendingConstraint[]): void {
+	for (const constraint of constraints) {
+		enforceStrictAscending(target, constraint.paths, constraint.options);
+	}
+}
+
+function applySignedConstraints(target: Record<string, unknown>, constraints: SignedConstraint[]): void {
+	for (const constraint of constraints) {
+		enforceSignedValue(target, constraint.path, constraint.direction, constraint.options);
+	}
+}
+
 function createBalanceConfigFromGenome(genome: Genome): BalanceJsonConfig {
 	const normalized = structuredClone(genome) as Record<string, unknown>;
 
@@ -472,267 +654,14 @@ function createBalanceConfigFromGenome(genome: Genome): BalanceJsonConfig {
 		normalizeRangePair(normalized, `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`, `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`);
 	}
 
-	for (const deck of ['easy', 'medium', 'hard'] as const) {
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`,
-			4,
-			{ min: 1, max: 70, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.minChance`,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
+	applyRangeDeltaConstraints(normalized, RANGE_DELTA_CONSTRAINTS);
 
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`,
-			4,
-			{ min: 0, max: 70, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.minChance`,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
+	applyAscendingConstraints(normalized, ASCENDING_CONSTRAINTS);
 
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`,
-			4,
-			{ min: 1, max: 140, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`,
-			4,
-			{ min: 1, max: 90, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`,
-			4,
-			{ min: 0, max: 90, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
-	}
 
-	enforceStrictAscending(
-		normalized,
-		[
-			'DEFAULT_HEALING_AMOUNT.smallHealthPotion',
-			'DEFAULT_HEALING_AMOUNT.mediumHealthPotion',
-			'DEFAULT_HEALING_AMOUNT.largeHealthPotion',
-		],
-		{ min: 1, max: 40, minStep: 1, integer: true }
-	);
+	applyRangeDeltaConstraints(normalized, RANGE_DELTA_CONSTRAINTS);
 
-	enforceStrictAscending(
-		normalized,
-		[
-			'DEFAULT_WEAPON_DAMAGE.easy.minAttack',
-			'DEFAULT_WEAPON_DAMAGE.medium.minAttack',
-			'DEFAULT_WEAPON_DAMAGE.hard.minAttack',
-		],
-		{ min: 1, max: 60, minStep: 1, integer: true }
-	);
-	enforceStrictAscending(
-		normalized,
-		[
-			'DEFAULT_WEAPON_DAMAGE.easy.maxAttack',
-			'DEFAULT_WEAPON_DAMAGE.medium.maxAttack',
-			'DEFAULT_WEAPON_DAMAGE.hard.maxAttack',
-		],
-		{ min: 1, max: 70, minStep: 1, integer: true }
-	);
-
-	enforceStrictAscending(
-		normalized,
-		[
-			'DEFAULT_ARMOR_PROTECTION.easy.minDefense',
-			'DEFAULT_ARMOR_PROTECTION.medium.minDefense',
-			'DEFAULT_ARMOR_PROTECTION.hard.minDefense',
-		],
-		{ min: 0, max: 60, minStep: 1, integer: true }
-	);
-	enforceStrictAscending(
-		normalized,
-		[
-			'DEFAULT_ARMOR_PROTECTION.easy.maxDefense',
-			'DEFAULT_ARMOR_PROTECTION.medium.maxDefense',
-			'DEFAULT_ARMOR_PROTECTION.hard.maxDefense',
-		],
-		{ min: 0, max: 70, minStep: 1, integer: true }
-	);
-
-	for (const field of [
-		'minHealth',
-		'maxHealth',
-		'minAttack',
-		'maxAttack',
-		'minDefense',
-		'maxDefense',
-	] as const) {
-		enforceStrictAscending(
-			normalized,
-			[
-				`DEFAULT_MONSTER_TIER_BASE.easy.${field}`,
-				`DEFAULT_MONSTER_TIER_BASE.medium.${field}`,
-				`DEFAULT_MONSTER_TIER_BASE.hard.${field}`,
-			],
-			{ min: field.includes('Health') ? 1 : 0, max: field.includes('Health') ? 140 : 90, minStep: 1, integer: true }
-		);
-	}
-
-	for (const field of ['minAttackChance', 'maxAttackChance', 'minDefenseChance', 'maxDefenseChance'] as const) {
-		enforceStrictAscending(
-			normalized,
-			[
-				`DEFAULT_MONSTER_TIER_BASE.easy.${field}`,
-				`DEFAULT_MONSTER_TIER_BASE.medium.${field}`,
-				`DEFAULT_MONSTER_TIER_BASE.hard.${field}`,
-			],
-			{ min: 0.05, max: 0.95, minStep: 0.0001, chance: true }
-		);
-	}
-
-	for (const deck of ['easy', 'medium', 'hard'] as const) {
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`,
-			4,
-			{ min: 1, max: 70, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.minChance`,
-			`DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`,
-			4,
-			{ min: 0, max: 70, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.minChance`,
-			`DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`,
-			4,
-			{ min: 1, max: 140, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`,
-			4,
-			{ min: 1, max: 90, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`,
-			4,
-			{ min: 0, max: 90, integer: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
-		enforceRangeDelta(
-			normalized,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`,
-			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`,
-			0.2,
-			{ min: 0.05, max: 0.95, chance: true }
-		);
-	}
-
-	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.cracked.valueDelta', 'negative', { min: -12, max: 12, integer: true });
-	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.cracked.chanceDelta', 'negative', { min: -0.5, max: 0.5, chance: true });
-	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.normal.valueDelta', 'zero', { min: -12, max: 12, integer: true });
-	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.normal.chanceDelta', 'zero', { min: -0.5, max: 0.5, chance: true });
-	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.enchanted.valueDelta', 'positive', { min: -12, max: 12, integer: true });
-	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.enchanted.chanceDelta', 'positive', { min: -0.5, max: 0.5, chance: true });
-
-	for (const field of ['healthDelta', 'attackDelta', 'defenseDelta'] as const) {
-		enforceSignedValue(
-			normalized,
-			`DEFAULT_MONSTER_VARIANT_MODIFIERS.weak.${field}`,
-			'negative',
-			{ min: -20, max: 20, integer: true }
-		);
-		enforceSignedValue(
-			normalized,
-			`DEFAULT_MONSTER_VARIANT_MODIFIERS.normal.${field}`,
-			'zero',
-			{ min: -20, max: 20, integer: true }
-		);
-		enforceSignedValue(
-			normalized,
-			`DEFAULT_MONSTER_VARIANT_MODIFIERS.strong.${field}`,
-			'positive',
-			{ min: -20, max: 20, integer: true }
-		);
-	}
-
-	for (const field of ['attackChanceDelta', 'defenseChanceDelta'] as const) {
-		enforceSignedValue(
-			normalized,
-			`DEFAULT_MONSTER_VARIANT_MODIFIERS.weak.${field}`,
-			'negative',
-			{ min: -0.5, max: 0.5, chance: true }
-		);
-		enforceSignedValue(
-			normalized,
-			`DEFAULT_MONSTER_VARIANT_MODIFIERS.normal.${field}`,
-			'zero',
-			{ min: -0.5, max: 0.5, chance: true }
-		);
-		enforceSignedValue(
-			normalized,
-			`DEFAULT_MONSTER_VARIANT_MODIFIERS.strong.${field}`,
-			'positive',
-			{ min: -0.5, max: 0.5, chance: true }
-		);
-	}
+	applySignedConstraints(normalized, SIGNED_CONSTRAINTS);
 
 	return normalized as BalanceJsonConfig;
 }
