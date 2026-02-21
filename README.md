@@ -84,19 +84,23 @@ This separation keeps the API layer thin, game logic reusable/testable, and SQL 
 - **BACKLOG-013:** Movement now uses click-to-select destination and `End Turn` confirmation with visual destination highlight and path arrow.
 - **BACKLOG-014:** API-driven simulation and GA auto-balancing harness implemented with config-first deck/stat tuning and artifact output.
 
-## Simulation & Auto-balance
-- The simulator runs against the real server API (in-memory DB mode) rather than mocked game logic.
-- Core entrypoint: `server/simulation/deckBalanceSimulator.ts`.
-- GA auto-balancer: `server/simulation/autoBalance.ts`.
-- Candidate evaluations use isolated worker processes (`server/simulation/candidateSimulationWorker.ts`) to safely run in parallel.
-- Outputs are written to `server/simulation-output/<run-name>/` including:
-   - `autobalance-result.json` (GA history + best candidate)
-   - `best-biome-decks.json` and `best-game-balance.json`
-   - baseline/best simulation reports and game logs
+## Simulation & Deck Generation
+- Deck generation is now a standalone project in `deck-generator/`.
+- Simulation/auto-balance is now a standalone project in `simulator/`.
+- The server only consumes `server/config/deck-definitions.json` at runtime.
 
-Useful server commands:
+Generate deck definitions:
 ```sh
-cd server
+cd deck-generator
+npm install
+npm run generate -- --out=../server/config/deck-definitions.json
+```
+
+Run simulation / auto-balance:
+```sh
+cd simulator
+npm install
+npm run simulate -- --games=20 --maxTurns=120
 npm run autobalance -- --generations=2 --population=8 --games=20 --maxTurns=120 --candidateParallelism=3 --targetSuccessRate=1.0 --targetMinTurns=30 --targetAvgTurns=50 --targetMaxTurns=100
 ```
 

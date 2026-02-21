@@ -123,8 +123,11 @@ export interface AdminGame {
 }
 
 export interface AdminItem {
+	group: string;
+	groupLabel?: string;
 	id: string;
 	name: string;
 	type: 'weapon' | 'armor' | 'item';
-	biome: string;
+	variant?: string | null;
+	baseId?: string | null;
 }

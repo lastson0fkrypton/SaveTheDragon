@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import { spawn } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
-import { createSeededRandom, withRandomProvider } from '../utils/random.js';
+import { createSeededRandom, withRandomProvider } from './random.js';
 
 export type SimOptions = {
 	games: number;
@@ -10,8 +12,8 @@ export type SimOptions = {
 	gridSizeX: number;
 	gridSizeY: number;
 	playerName: string;
-	biomeDeckConfigPath?: string;
-	gameBalanceConfigPath?: string;
+	deckDefinitionsConfigPath?: string;
+	balanceConfigPath?: string;
 };
 
 type SimEvent = {
@@ -53,6 +55,39 @@ type RunOptions = {
 	runName?: string;
 };
 
+async function generateDeckDefinitionsFile(outPath?: string, balancePath?: string): Promise<string> {
+	const targetPath = outPath || path.resolve(os.tmpdir(), `deck-definitions-${Date.now()}.json`);
+	const generatorScript = path.resolve(process.cwd(), '..', 'deck-generator', 'src', 'generateDeckDefinitions.ts');
+	const generatorArgs = ['--import', 'tsx', generatorScript, `--out=${targetPath}`];
+	if (balancePath) {
+		generatorArgs.push(`--balance=${balancePath}`);
+	}
+
+	await new Promise<void>((resolve, reject) => {
+		const child = spawn(process.execPath, generatorArgs, {
+			cwd: process.cwd(),
+			env: { ...process.env },
+			stdio: ['ignore', 'pipe', 'pipe'],
+		});
+
+		let stderr = '';
+		child.stderr.on('data', chunk => {
+			stderr += chunk.toString();
+		});
+
+		child.on('error', reject);
+		child.on('close', code => {
+			if (code !== 0) {
+				reject(new Error(`Deck generator exited with code ${code}: ${stderr.trim() || 'no stderr output'}`));
+				return;
+			}
+			resolve();
+		});
+	});
+
+	return targetPath;
+}
+
 function parseArgs(): SimOptions {
 	const args = process.argv.slice(2);
 	const pairs = new Map<string, string>();
@@ -69,8 +104,11 @@ function parseArgs(): SimOptions {
 		gridSizeX: Math.max(10, Number(pairs.get('gridSizeX') || 20)),
 		gridSizeY: Math.max(10, Number(pairs.get('gridSizeY') || 20)),
 		playerName: pairs.get('playerName') || 'SimBot',
-		biomeDeckConfigPath: pairs.get('biomeDeckConfigPath') || process.env.BIOME_DECK_CONFIG_PATH,
-		gameBalanceConfigPath: pairs.get('gameBalanceConfigPath') || process.env.GAME_BALANCE_CONFIG_PATH,
+		deckDefinitionsConfigPath:
+			pairs.get('deckDefinitionsConfigPath') ||
+			process.env.DECK_DEFINITIONS_CONFIG_PATH ||
+			path.resolve(process.cwd(), '..', 'server', 'config', 'deck-definitions.json'),
+		balanceConfigPath: pairs.get('balanceConfigPath') || process.env.DECK_BALANCE_CONFIG_PATH || undefined,
 	};
 }
 
@@ -212,7 +250,7 @@ function chooseBattleItem(player, battle, itemMeta: Record<string, any>) {
 			teleportId = itemId;
 			continue;
 		}
-		if (item.effect === 'full_heal' && !fullHealId) {
+		if (item.effect === 'heal_full' && !fullHealId) {
 			fullHealId = itemId;
 			continue;
 		}
@@ -418,15 +456,15 @@ function writeReport(options: SimOptions, aggregate: AggregateResult, runs: Sing
 }
 
 export async function runApiSimulation(options: SimOptions, runOptions: RunOptions = {}): Promise<SimulationRunOutput> {
-	process.env.SAVE_THE_DRAGON_DB_CLIENT = 'in-memory';
-	if (options.gameBalanceConfigPath) {
-		process.env.GAME_BALANCE_CONFIG_PATH = options.gameBalanceConfigPath;
-	}
-	if (options.biomeDeckConfigPath) {
-		process.env.BIOME_DECK_CONFIG_PATH = options.biomeDeckConfigPath;
+	const deckDefinitionsPath = await generateDeckDefinitionsFile(options.deckDefinitionsConfigPath, options.balanceConfigPath);
+	if (!fs.existsSync(deckDefinitionsPath)) {
+		throw new Error(`Deck definitions were not generated: ${deckDefinitionsPath}`);
 	}
 
-	const { startServer } = await import('../serverApp.js');
+	process.env.SAVE_THE_DRAGON_DB_CLIENT = 'in-memory';
+	process.env.DECK_DEFINITIONS_CONFIG_PATH = deckDefinitionsPath;
+
+	const { startServer } = await import('../../server/serverApp.js');
 	const started = await startServer({ port: 0, disableCleanupInterval: true, silent: true });
 	const baseUrl = `http://127.0.0.1:${started.port}`;
 
@@ -442,7 +480,7 @@ export async function runApiSimulation(options: SimOptions, runOptions: RunOptio
 
 		const aggregate = summarize(runs);
 		const output: SimulationRunOutput = {
-			options,
+			options: { ...options, deckDefinitionsConfigPath: deckDefinitionsPath },
 			aggregate,
 			runs,
 			generatedAt: new Date().toISOString(),

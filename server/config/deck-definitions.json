@@ -1,0 +1,3591 @@
+{
+  "generatedAt": "2026-02-21T10:39:10.720Z",
+  "initialPlayerState": {
+    "playerHealth": 5,
+    "playerWeapon": {
+      "id": "fist",
+      "name": "Fist",
+      "type": "weapon",
+      "img": "fist.png",
+      "biome": "any",
+      "attack": 1,
+      "attackChance": 0.5
+    },
+    "playerArmor": ""
+  },
+  "healingAmount": {
+    "smallHealthPotion": 3,
+    "mediumHealthPotion": 5,
+    "largeHealthPotion": 7
+  },
+  "final-boss": {
+    "id": "evil_princess",
+    "name": "Evil Princess",
+    "biome": "castle",
+    "health": 120,
+    "attack": 8,
+    "attackChance": 0.85,
+    "defense": 5,
+    "defenseChance": 0.65,
+    "img": "evil_princess.png"
+  },
+  "startingItems": {
+    "weapon": {
+      "id": "fist",
+      "name": "Fist",
+      "type": "weapon",
+      "img": "fist.png",
+      "biome": "any",
+      "attack": 1,
+      "attackChance": 0.5
+    },
+    "armor": ""
+  },
+  "itemDefinitions": [
+    {
+      "id": "fist",
+      "name": "Fist",
+      "type": "weapon",
+      "img": "fist.png"
+    },
+    {
+      "id": "rusty_spoon",
+      "name": "Rusty Spoon",
+      "type": "weapon",
+      "img": "rusty_spoon.png"
+    },
+    {
+      "id": "foam_noodle",
+      "name": "Foam Noodle",
+      "type": "weapon",
+      "img": "foam_noodle.png"
+    },
+    {
+      "id": "rubber_chicken",
+      "name": "Rubber Chicken",
+      "type": "weapon",
+      "img": "rubber_chicken.png"
+    },
+    {
+      "id": "feather_duster",
+      "name": "Feather Duster",
+      "type": "weapon",
+      "img": "feather_duster.png"
+    },
+    {
+      "id": "banana_boomerang",
+      "name": "Banana Boomerang",
+      "type": "weapon",
+      "img": "banana_boomerang.png"
+    },
+    {
+      "id": "bubble_wrap_sword",
+      "name": "Bubble Wrap Sword",
+      "type": "weapon",
+      "img": "bubble_wrap_sword.png"
+    },
+    {
+      "id": "bubble_wand",
+      "name": "Bubble Wand",
+      "type": "weapon",
+      "img": "bubble_wand.png"
+    },
+    {
+      "id": "squirt_gun_blaster",
+      "name": "Squirt Gun Blaster",
+      "type": "weapon",
+      "img": "squirt_gun_blaster.png"
+    },
+    {
+      "id": "balloon_sword",
+      "name": "Balloon Sword",
+      "type": "weapon",
+      "img": "balloon_sword.png"
+    },
+    {
+      "id": "spaghetti_whip",
+      "name": "Spaghetti Whip",
+      "type": "weapon",
+      "img": "spaghetti_whip.png"
+    },
+    {
+      "id": "silly_string_shooter",
+      "name": "Silly String Shooter",
+      "type": "weapon",
+      "img": "silly_string_shooter.png"
+    },
+    {
+      "id": "cucumber_sword",
+      "name": "Cucumber Sword",
+      "type": "weapon",
+      "img": "cucumber_sword.png"
+    },
+    {
+      "id": "clown_nose_launcher",
+      "name": "Clown Nose Launcher",
+      "type": "weapon",
+      "img": "clown_nose_launcher.png"
+    },
+    {
+      "id": "balloon_launcher",
+      "name": "Balloon Launcher",
+      "type": "weapon",
+      "img": "balloon_launcher.png"
+    },
+    {
+      "id": "sausage_nunchucks",
+      "name": "Sausage Nunchucks",
+      "type": "weapon",
+      "img": "sausage_nunchucks.png"
+    },
+    {
+      "id": "bouncy_ball_blaster",
+      "name": "Bouncy Ball Blaster",
+      "type": "weapon",
+      "img": "bouncy_ball_blaster.png"
+    },
+    {
+      "id": "sock_with_a_rock",
+      "name": "Sock with a Rock",
+      "type": "weapon",
+      "img": "sock_with_a_rock.png"
+    },
+    {
+      "id": "pooper_scooper",
+      "name": "Pooper Scooper",
+      "type": "weapon",
+      "img": "pooper_scooper.png"
+    },
+    {
+      "id": "rubber_bracelet",
+      "name": "Rubber Bracelet",
+      "type": "armor",
+      "img": "rubber_bracelet.png"
+    },
+    {
+      "id": "popstick_shield",
+      "name": "Popstick Shield",
+      "type": "armor",
+      "img": "popstick_shield.png"
+    },
+    {
+      "id": "straw_hat",
+      "name": "Straw Hat",
+      "type": "armor",
+      "img": "straw_hat.png"
+    },
+    {
+      "id": "dog_collar_armbands",
+      "name": "Dog Collar Armbands",
+      "type": "armor",
+      "img": "dog_collar_armbands.png"
+    },
+    {
+      "id": "cardboard_gloves",
+      "name": "Cardboard Gloves",
+      "type": "armor",
+      "img": "cardboard_gloves.png"
+    },
+    {
+      "id": "steel_toeless_boots",
+      "name": "Steel Toeless Boots",
+      "type": "armor",
+      "img": "steel_toeless_boots.png"
+    },
+    {
+      "id": "tin_foil_shield",
+      "name": "Tin Foil Shield",
+      "type": "armor",
+      "img": "tin_foil_shield.png"
+    },
+    {
+      "id": "fuzzy_slippers",
+      "name": "Fuzzy Slippers",
+      "type": "armor",
+      "img": "fuzzy_slippers.png"
+    },
+    {
+      "id": "leather_undies",
+      "name": "Leather Undies",
+      "type": "armor",
+      "img": "leather_undies.png"
+    },
+    {
+      "id": "pizza_boots",
+      "name": "Pizza Boots",
+      "type": "armor",
+      "img": "pizza_boots.png"
+    },
+    {
+      "id": "jello_helmet",
+      "name": "Jello Helmet",
+      "type": "armor",
+      "img": "jello_helmet.png"
+    },
+    {
+      "id": "cardboard_chestplate",
+      "name": "Cardboard Chestplate",
+      "type": "armor",
+      "img": "cardboard_chestplate.png"
+    },
+    {
+      "id": "bubble_wrap_armor",
+      "name": "Bubble Wrap Armor",
+      "type": "armor",
+      "img": "bubble_wrap_armor.png"
+    },
+    {
+      "id": "booger_crown",
+      "name": "Booger Crown",
+      "type": "armor",
+      "img": "booger_crown.png"
+    },
+    {
+      "id": "cloud_gloves",
+      "name": "Cloud Gloves",
+      "type": "armor",
+      "img": "cloud_gloves.png"
+    },
+    {
+      "id": "toilet_seat_shield",
+      "name": "Toilet Seat Shield",
+      "type": "armor",
+      "img": "toilet_seat_shield.png"
+    },
+    {
+      "id": "patchwork_poncho",
+      "name": "Patchwork Poncho",
+      "type": "armor",
+      "img": "patchwork_poncho.png"
+    },
+    {
+      "id": "caterpillar_helmet",
+      "name": "Caterpillar Helmet",
+      "type": "armor",
+      "img": "caterpillar_helmet.png"
+    },
+    {
+      "id": "cola_bomb",
+      "name": "Cola Bomb",
+      "type": "weapon",
+      "img": "cola_bomb.png"
+    },
+    {
+      "id": "feather_boomerang",
+      "name": "Feather Boomerang",
+      "type": "weapon",
+      "img": "feather_boomerang.png"
+    },
+    {
+      "id": "confetti_cannon",
+      "name": "Confetti Cannon",
+      "type": "weapon",
+      "img": "confetti_cannon.png"
+    },
+    {
+      "id": "spitwad_blowpipe",
+      "name": "Spitwad Blowpipe",
+      "type": "weapon",
+      "img": "spitwad_blowpipe.png"
+    },
+    {
+      "id": "paper_fan",
+      "name": "Paper Fan",
+      "type": "weapon",
+      "img": "paper_fan.png"
+    },
+    {
+      "id": "banana_slingshot",
+      "name": "Banana Slingshot",
+      "type": "weapon",
+      "img": "banana_slingshot.png"
+    },
+    {
+      "id": "red_licorice_whip",
+      "name": "Red Licorice Whip",
+      "type": "weapon",
+      "img": "red_licorice_whip.png"
+    },
+    {
+      "id": "mallow_catapult",
+      "name": "Mallow Catapult",
+      "type": "weapon",
+      "img": "mallow_catapult.png"
+    },
+    {
+      "id": "fart_bomb",
+      "name": "Fart Bomb",
+      "type": "weapon",
+      "img": "fart_bomb.png"
+    },
+    {
+      "id": "pogo_stick_lance",
+      "name": "Pogo Stick Lance",
+      "type": "weapon",
+      "img": "pogo_stick_lance.png"
+    },
+    {
+      "id": "jesters_scepter",
+      "name": "Jester's Scepter",
+      "type": "weapon",
+      "img": "jesters_scepter.png"
+    },
+    {
+      "id": "jelly_bean_gun",
+      "name": "Jelly Bean Gun",
+      "type": "weapon",
+      "img": "jelly_bean_gun.png"
+    },
+    {
+      "id": "plunger_bow",
+      "name": "Plunger Bow",
+      "type": "weapon",
+      "img": "plunger_bow.png"
+    },
+    {
+      "id": "sharp_candy_cane",
+      "name": "Sharp Candy Cane",
+      "type": "weapon",
+      "img": "sharp_candy_cane.png"
+    },
+    {
+      "id": "glue_shooter",
+      "name": "Glue Shooter",
+      "type": "weapon",
+      "img": "glue_shooter.png"
+    },
+    {
+      "id": "baguette_sword",
+      "name": "Baguette Sword",
+      "type": "weapon",
+      "img": "baguette_sword.png"
+    },
+    {
+      "id": "rolling_pin_hammer",
+      "name": "Rolling Pin Hammer",
+      "type": "weapon",
+      "img": "rolling_pin_hammer.png"
+    },
+    {
+      "id": "exploding_ice_cream",
+      "name": "Exploding Ice Cream",
+      "type": "weapon",
+      "img": "exploding_ice_cream.png"
+    },
+    {
+      "id": "ice_cream_armor",
+      "name": "Ice Cream Armor",
+      "type": "armor",
+      "img": "ice_cream_armor.png"
+    },
+    {
+      "id": "knittted_armor",
+      "name": "Knittted Armor",
+      "type": "armor",
+      "img": "knittted_armor.png"
+    },
+    {
+      "id": "kitty_crown",
+      "name": "Kitty Crown",
+      "type": "armor",
+      "img": "kitty_crown.png"
+    },
+    {
+      "id": "fuzzy_armguards",
+      "name": "Fuzzy Armguards",
+      "type": "armor",
+      "img": "fuzzy_armguards.png"
+    },
+    {
+      "id": "cow_leather_jacket",
+      "name": "Cow Leather Jacket",
+      "type": "armor",
+      "img": "cow_leather_jacket.png"
+    },
+    {
+      "id": "honey_helmet",
+      "name": "Honey Helmet",
+      "type": "armor",
+      "img": "honey_helmet.png"
+    },
+    {
+      "id": "vacuum_armor",
+      "name": "Vacuum Armor",
+      "type": "armor",
+      "img": "vacuum_armor.png"
+    },
+    {
+      "id": "crystal_boots",
+      "name": "Crystal Boots",
+      "type": "armor",
+      "img": "crystal_boots.png"
+    },
+    {
+      "id": "stained_glass_shield",
+      "name": "Stained Glass Shield",
+      "type": "armor",
+      "img": "stained_glass_shield.png"
+    },
+    {
+      "id": "jesters_cap",
+      "name": "Jester's Cap",
+      "type": "armor",
+      "img": "jesters_cap.png"
+    },
+    {
+      "id": "colorful_quilted_tunic",
+      "name": "Colorful Quilted Tunic",
+      "type": "armor",
+      "img": "colorful_quilted_tunic.png"
+    },
+    {
+      "id": "feathered_boots",
+      "name": "Feathered Boots",
+      "type": "armor",
+      "img": "feathered_boots.png"
+    },
+    {
+      "id": "bamboo_armor",
+      "name": "Bamboo Armor",
+      "type": "armor",
+      "img": "bamboo_armor.png"
+    },
+    {
+      "id": "colander_helm",
+      "name": "Colander Helm",
+      "type": "armor",
+      "img": "colander_helm.png"
+    },
+    {
+      "id": "fox_helmet",
+      "name": "Fox Helmet",
+      "type": "armor",
+      "img": "fox_helmet.png"
+    },
+    {
+      "id": "metal_mittens",
+      "name": "Metal Mittens",
+      "type": "armor",
+      "img": "metal_mittens.png"
+    },
+    {
+      "id": "snail_shell_helmet",
+      "name": "Snail Shell Helmet",
+      "type": "armor",
+      "img": "snail_shell_helmet.png"
+    },
+    {
+      "id": "oven_armor",
+      "name": "Oven Armor",
+      "type": "armor",
+      "img": "oven_armor.png"
+    },
+    {
+      "id": "exploding_pie",
+      "name": "Exploding Pie",
+      "type": "weapon",
+      "img": "exploding_pie.png"
+    },
+    {
+      "id": "flaming_tuba",
+      "name": "Flaming Tuba",
+      "type": "weapon",
+      "img": "flaming_tuba.png"
+    },
+    {
+      "id": "glass_hammer",
+      "name": "Glass Hammer",
+      "type": "weapon",
+      "img": "glass_hammer.png"
+    },
+    {
+      "id": "octopus_launcher",
+      "name": "Octopus Launcher",
+      "type": "weapon",
+      "img": "octopus_launcher.png"
+    },
+    {
+      "id": "gummy_bear_mace",
+      "name": "Gummy Bear Mace",
+      "type": "weapon",
+      "img": "gummy_bear_mace.png"
+    },
+    {
+      "id": "mud_shotgun",
+      "name": "Mud Shotgun",
+      "type": "weapon",
+      "img": "mud_shotgun.png"
+    },
+    {
+      "id": "whacky_wizard_staff",
+      "name": "Whacky Wizard Staff",
+      "type": "weapon",
+      "img": "whacky_wizard_staff.png"
+    },
+    {
+      "id": "bagpipe_cannon",
+      "name": "Bagpipe Cannon",
+      "type": "weapon",
+      "img": "bagpipe_cannon.png"
+    },
+    {
+      "id": "piranha_on_a_stick",
+      "name": "Piranha on a Stick",
+      "type": "weapon",
+      "img": "piranha_on_a_stick.png"
+    },
+    {
+      "id": "scorpion_tail_spear",
+      "name": "Scorpion tail Spear",
+      "type": "weapon",
+      "img": "scorpion_tail_spear.png"
+    },
+    {
+      "id": "box_of_tiny_lion",
+      "name": "Box of Tiny Lion",
+      "type": "weapon",
+      "img": "box_of_tiny_lion.png"
+    },
+    {
+      "id": "danger_noodle_whip",
+      "name": "Danger Noodle Whip",
+      "type": "weapon",
+      "img": "danger_noodle_whip.png"
+    },
+    {
+      "id": "giggle_daggers",
+      "name": "Giggle Daggers",
+      "type": "weapon",
+      "img": "giggle_daggers.png"
+    },
+    {
+      "id": "rubber_chicken_axe",
+      "name": "Rubber Chicken Axe",
+      "type": "weapon",
+      "img": "rubber_chicken_axe.png"
+    },
+    {
+      "id": "shark_head_hammer",
+      "name": "Shark Head Hammer",
+      "type": "weapon",
+      "img": "shark_head_hammer.png"
+    },
+    {
+      "id": "roaring_great_sword",
+      "name": "Roaring Great Sword",
+      "type": "weapon",
+      "img": "roaring_great_sword.png"
+    },
+    {
+      "id": "wild_whirl_scythe",
+      "name": "Wild Whirl Scythe",
+      "type": "weapon",
+      "img": "wild_whirl_scythe.png"
+    },
+    {
+      "id": "crazy_cat_launcher",
+      "name": "Crazy Cat Launcher",
+      "type": "weapon",
+      "img": "crazy_cat_launcher.png"
+    },
+    {
+      "id": "wooden_buckler",
+      "name": "Wooden Buckler",
+      "type": "armor",
+      "img": "wooden_buckler.png"
+    },
+    {
+      "id": "barrel_lid_shield",
+      "name": "Barrel Lid Shield",
+      "type": "armor",
+      "img": "barrel_lid_shield.png"
+    },
+    {
+      "id": "feather_helmet",
+      "name": "Feather Helmet",
+      "type": "armor",
+      "img": "feather_helmet.png"
+    },
+    {
+      "id": "plant_shield",
+      "name": "Plant Shield",
+      "type": "armor",
+      "img": "plant_shield.png"
+    },
+    {
+      "id": "sturdy_fish_shield",
+      "name": "Sturdy Fish Shield",
+      "type": "armor",
+      "img": "sturdy_fish_shield.png"
+    },
+    {
+      "id": "vortex_cape",
+      "name": "Vortex Cape",
+      "type": "armor",
+      "img": "vortex_cape.png"
+    },
+    {
+      "id": "clock_shield",
+      "name": "Clock Shield",
+      "type": "armor",
+      "img": "clock_shield.png"
+    },
+    {
+      "id": "spider_silk_gloves",
+      "name": "Spider Silk Gloves",
+      "type": "armor",
+      "img": "spider_silk_gloves.png"
+    },
+    {
+      "id": "lightning_shield",
+      "name": "Lightning Shield",
+      "type": "armor",
+      "img": "lightning_shield.png"
+    },
+    {
+      "id": "chicken_shield",
+      "name": "Chicken Shield",
+      "type": "armor",
+      "img": "chicken_shield.png"
+    },
+    {
+      "id": "guardian_shield",
+      "name": "Guardian Shield",
+      "type": "armor",
+      "img": "guardian_shield.png"
+    },
+    {
+      "id": "superhero_shield",
+      "name": "Superhero Shield",
+      "type": "armor",
+      "img": "superhero_shield.png"
+    },
+    {
+      "id": "boulder_armor",
+      "name": "Boulder Armor",
+      "type": "armor",
+      "img": "boulder_armor.png"
+    },
+    {
+      "id": "phoenix_cloak",
+      "name": "Phoenix Cloak",
+      "type": "armor",
+      "img": "phoenix_cloak.png"
+    },
+    {
+      "id": "shark_armor",
+      "name": "Shark Armor",
+      "type": "armor",
+      "img": "shark_armor.png"
+    },
+    {
+      "id": "serpent_scale",
+      "name": "Serpent Scale",
+      "type": "armor",
+      "img": "serpent_scale.png"
+    },
+    {
+      "id": "dragon_scale_armor",
+      "name": "Dragon Scale Armor",
+      "type": "armor",
+      "img": "dragon_scale_armor.png"
+    },
+    {
+      "id": "astral_plate_armor",
+      "name": "Astral Plate Armor",
+      "type": "armor",
+      "img": "astral_plate_armor.png"
+    },
+    {
+      "id": "teleport",
+      "name": "Teleport",
+      "effect": "teleport",
+      "img": "teleport.png",
+      "type": "item"
+    },
+    {
+      "id": "small_potion",
+      "name": "Small Health Potion",
+      "effect": "heal_small",
+      "img": "small_potion.png",
+      "type": "item"
+    },
+    {
+      "id": "medium_potion",
+      "name": "Medium Health Potion",
+      "effect": "heal_medium",
+      "img": "medium_potion.png",
+      "type": "item"
+    },
+    {
+      "id": "large_potion",
+      "name": "Large Health Potion",
+      "effect": "heal_large",
+      "img": "large_potion.png",
+      "type": "item"
+    },
+    {
+      "id": "full_potion",
+      "name": "Full Health Potion",
+      "effect": "heal_full",
+      "img": "full_potion.png",
+      "type": "item"
+    },
+    {
+      "id": "extra_heart",
+      "name": "Additional Heart",
+      "effect": "extra_heart",
+      "img": "extra_heart.png",
+      "type": "item"
+    }
+  ],
+  "monsterDefinitions": [
+    {
+      "id": "trollkin",
+      "name": "Trollkin",
+      "biome": "plains,forest",
+      "img": "trollkin.png"
+    },
+    {
+      "id": "bat",
+      "name": "Bat",
+      "biome": "plains,forest",
+      "img": "bat.png"
+    },
+    {
+      "id": "fairy",
+      "name": "Fairy",
+      "biome": "plains,forest",
+      "img": "fairy.png"
+    },
+    {
+      "id": "black_cat",
+      "name": "Black Cat",
+      "biome": "plains,forest",
+      "img": "black_cat.png"
+    },
+    {
+      "id": "goblin",
+      "name": "Goblin",
+      "biome": "plains,forest",
+      "img": "goblin.png"
+    },
+    {
+      "id": "bigfoot",
+      "name": "Bigfoot",
+      "biome": "plains,forest",
+      "img": "bigfoot.png"
+    },
+    {
+      "id": "giant_spider",
+      "name": "Giant Spider",
+      "biome": "plains,forest",
+      "img": "giant_spider.png"
+    },
+    {
+      "id": "ogre",
+      "name": "Ogre",
+      "biome": "plains,forest",
+      "img": "ogre.png"
+    },
+    {
+      "id": "warewolf",
+      "name": "Warewolf",
+      "biome": "plains,forest",
+      "img": "warewolf.png"
+    },
+    {
+      "id": "spiky_lizard",
+      "name": "Spiky Lizard",
+      "biome": "desert",
+      "img": "spiky_lizard.png"
+    },
+    {
+      "id": "scorpion",
+      "name": "Scorpion",
+      "biome": "desert",
+      "img": "scorpion.png"
+    },
+    {
+      "id": "snake",
+      "name": "Snake",
+      "biome": "desert",
+      "img": "snake.png"
+    },
+    {
+      "id": "vulture",
+      "name": "Vulture",
+      "biome": "desert",
+      "img": "vulture.png"
+    },
+    {
+      "id": "harpy",
+      "name": "Harpy",
+      "biome": "desert",
+      "img": "harpy.png"
+    },
+    {
+      "id": "centaur",
+      "name": "Centaur",
+      "biome": "desert",
+      "img": "centaur.png"
+    },
+    {
+      "id": "sand_golem",
+      "name": "Sand Golem",
+      "biome": "desert",
+      "img": "sand_golem.png"
+    },
+    {
+      "id": "pheonix",
+      "name": "Pheonix",
+      "biome": "desert",
+      "img": "pheonix.png"
+    },
+    {
+      "id": "gryphon",
+      "name": "Gryphon",
+      "biome": "desert",
+      "img": "gryphon.png"
+    },
+    {
+      "id": "fire_butterfly",
+      "name": "Fire Butterfly",
+      "biome": "volcano,cave",
+      "img": "fire_butterfly.png"
+    },
+    {
+      "id": "magma_cube",
+      "name": "Magma Cube",
+      "biome": "volcano,cave",
+      "img": "magma_cube.png"
+    },
+    {
+      "id": "ember_imp",
+      "name": "Ember Imp",
+      "biome": "volcano,cave",
+      "img": "ember_imp.png"
+    },
+    {
+      "id": "skeleton",
+      "name": "Skeleton",
+      "biome": "volcano,cave",
+      "img": "skeleton.png"
+    },
+    {
+      "id": "rock_troll",
+      "name": "Rock Troll",
+      "biome": "volcano,cave",
+      "img": "rock_troll.png"
+    },
+    {
+      "id": "medusa",
+      "name": "Medusa",
+      "biome": "volcano,cave",
+      "img": "medusa.png"
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "biome": "volcano,cave",
+      "img": "wizard.png"
+    },
+    {
+      "id": "red_dragon",
+      "name": "Red Dragon",
+      "biome": "volcano,cave",
+      "img": "red_dragon.png"
+    },
+    {
+      "id": "dark_unicorn",
+      "name": "Dark Unicorn",
+      "biome": "volcano,cave",
+      "img": "dark_unicorn.png"
+    }
+  ],
+  "decks": {
+    "forest_encounter": {
+      "deck": "forest_encounter",
+      "cards": [
+        {
+          "kind": "monster",
+          "id": "weak_bat",
+          "name": "Weak Bat",
+          "variant": "weak",
+          "baseId": "bat",
+          "health": 4,
+          "attack": 2,
+          "attackChance": 0.5298,
+          "defense": 0,
+          "defenseChance": 0.2298
+        },
+        {
+          "kind": "monster",
+          "id": "bat",
+          "name": "Bat",
+          "variant": "normal",
+          "baseId": "bat",
+          "health": 5,
+          "attack": 3,
+          "attackChance": 0.6098,
+          "defense": 1,
+          "defenseChance": 0.3098
+        },
+        {
+          "kind": "monster",
+          "id": "strong_bat",
+          "name": "Strong Bat",
+          "variant": "strong",
+          "baseId": "bat",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6898,
+          "defense": 2,
+          "defenseChance": 0.3898
+        },
+        {
+          "kind": "monster",
+          "id": "weak_bigfoot",
+          "name": "Weak Bigfoot",
+          "variant": "weak",
+          "baseId": "bigfoot",
+          "health": 4,
+          "attack": 2,
+          "attackChance": 0.5423,
+          "defense": 0,
+          "defenseChance": 0.2423
+        },
+        {
+          "kind": "monster",
+          "id": "bigfoot",
+          "name": "Bigfoot",
+          "variant": "normal",
+          "baseId": "bigfoot",
+          "health": 5,
+          "attack": 3,
+          "attackChance": 0.6223,
+          "defense": 1,
+          "defenseChance": 0.3223
+        },
+        {
+          "kind": "monster",
+          "id": "strong_bigfoot",
+          "name": "Strong Bigfoot",
+          "variant": "strong",
+          "baseId": "bigfoot",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.7023,
+          "defense": 2,
+          "defenseChance": 0.4023
+        },
+        {
+          "kind": "monster",
+          "id": "weak_black_cat",
+          "name": "Weak Black Cat",
+          "variant": "weak",
+          "baseId": "black_cat",
+          "health": 5,
+          "attack": 3,
+          "attackChance": 0.5548,
+          "defense": 1,
+          "defenseChance": 0.2548
+        },
+        {
+          "kind": "monster",
+          "id": "black_cat",
+          "name": "Black Cat",
+          "variant": "normal",
+          "baseId": "black_cat",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6348,
+          "defense": 2,
+          "defenseChance": 0.3348
+        },
+        {
+          "kind": "monster",
+          "id": "strong_black_cat",
+          "name": "Strong Black Cat",
+          "variant": "strong",
+          "baseId": "black_cat",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.7148,
+          "defense": 3,
+          "defenseChance": 0.4148
+        },
+        {
+          "kind": "monster",
+          "id": "weak_fairy",
+          "name": "Weak Fairy",
+          "variant": "weak",
+          "baseId": "fairy",
+          "health": 5,
+          "attack": 3,
+          "attackChance": 0.5673,
+          "defense": 1,
+          "defenseChance": 0.2673
+        },
+        {
+          "kind": "monster",
+          "id": "fairy",
+          "name": "Fairy",
+          "variant": "normal",
+          "baseId": "fairy",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6473,
+          "defense": 2,
+          "defenseChance": 0.3473
+        },
+        {
+          "kind": "monster",
+          "id": "strong_fairy",
+          "name": "Strong Fairy",
+          "variant": "strong",
+          "baseId": "fairy",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.7273,
+          "defense": 3,
+          "defenseChance": 0.4273
+        },
+        {
+          "kind": "monster",
+          "id": "weak_giant_spider",
+          "name": "Weak Giant Spider",
+          "variant": "weak",
+          "baseId": "giant_spider",
+          "health": 5,
+          "attack": 3,
+          "attackChance": 0.5798,
+          "defense": 1,
+          "defenseChance": 0.2798
+        },
+        {
+          "kind": "monster",
+          "id": "giant_spider",
+          "name": "Giant Spider",
+          "variant": "normal",
+          "baseId": "giant_spider",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6598,
+          "defense": 2,
+          "defenseChance": 0.3598
+        },
+        {
+          "kind": "monster",
+          "id": "strong_giant_spider",
+          "name": "Strong Giant Spider",
+          "variant": "strong",
+          "baseId": "giant_spider",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.7398,
+          "defense": 3,
+          "defenseChance": 0.4398
+        },
+        {
+          "kind": "monster",
+          "id": "weak_goblin",
+          "name": "Weak Goblin",
+          "variant": "weak",
+          "baseId": "goblin",
+          "health": 5,
+          "attack": 3,
+          "attackChance": 0.5923,
+          "defense": 1,
+          "defenseChance": 0.2923
+        },
+        {
+          "kind": "monster",
+          "id": "goblin",
+          "name": "Goblin",
+          "variant": "normal",
+          "baseId": "goblin",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6723,
+          "defense": 2,
+          "defenseChance": 0.3723
+        },
+        {
+          "kind": "monster",
+          "id": "strong_goblin",
+          "name": "Strong Goblin",
+          "variant": "strong",
+          "baseId": "goblin",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.7523,
+          "defense": 3,
+          "defenseChance": 0.4523
+        },
+        {
+          "kind": "monster",
+          "id": "weak_ogre",
+          "name": "Weak Ogre",
+          "variant": "weak",
+          "baseId": "ogre",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6048,
+          "defense": 2,
+          "defenseChance": 0.3048
+        },
+        {
+          "kind": "monster",
+          "id": "ogre",
+          "name": "Ogre",
+          "variant": "normal",
+          "baseId": "ogre",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.6848,
+          "defense": 3,
+          "defenseChance": 0.3848
+        },
+        {
+          "kind": "monster",
+          "id": "strong_ogre",
+          "name": "Strong Ogre",
+          "variant": "strong",
+          "baseId": "ogre",
+          "health": 8,
+          "attack": 6,
+          "attackChance": 0.7648,
+          "defense": 4,
+          "defenseChance": 0.4648
+        },
+        {
+          "kind": "monster",
+          "id": "weak_trollkin",
+          "name": "Weak Trollkin",
+          "variant": "weak",
+          "baseId": "trollkin",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6173,
+          "defense": 2,
+          "defenseChance": 0.3173
+        },
+        {
+          "kind": "monster",
+          "id": "trollkin",
+          "name": "Trollkin",
+          "variant": "normal",
+          "baseId": "trollkin",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.6973,
+          "defense": 3,
+          "defenseChance": 0.3973
+        },
+        {
+          "kind": "monster",
+          "id": "strong_trollkin",
+          "name": "Strong Trollkin",
+          "variant": "strong",
+          "baseId": "trollkin",
+          "health": 8,
+          "attack": 6,
+          "attackChance": 0.7773,
+          "defense": 4,
+          "defenseChance": 0.4773
+        },
+        {
+          "kind": "monster",
+          "id": "weak_warewolf",
+          "name": "Weak Warewolf",
+          "variant": "weak",
+          "baseId": "warewolf",
+          "health": 6,
+          "attack": 4,
+          "attackChance": 0.6298,
+          "defense": 2,
+          "defenseChance": 0.3298
+        },
+        {
+          "kind": "monster",
+          "id": "warewolf",
+          "name": "Warewolf",
+          "variant": "normal",
+          "baseId": "warewolf",
+          "health": 7,
+          "attack": 5,
+          "attackChance": 0.7098,
+          "defense": 3,
+          "defenseChance": 0.4098
+        },
+        {
+          "kind": "monster",
+          "id": "strong_warewolf",
+          "name": "Strong Warewolf",
+          "variant": "strong",
+          "baseId": "warewolf",
+          "health": 8,
+          "attack": 6,
+          "attackChance": 0.7898,
+          "defense": 4,
+          "defenseChance": 0.4898
+        },
+        {
+          "kind": "item",
+          "id": "balloon_launcher",
+          "name": "Balloon Launcher",
+          "variant": "normal",
+          "baseId": "balloon_launcher",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "balloon_sword",
+          "name": "Balloon Sword",
+          "variant": "normal",
+          "baseId": "balloon_sword",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "banana_boomerang",
+          "name": "Banana Boomerang",
+          "variant": "normal",
+          "baseId": "banana_boomerang",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "booger_crown",
+          "name": "Booger Crown",
+          "variant": "normal",
+          "baseId": "booger_crown",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "bouncy_ball_blaster",
+          "name": "Bouncy Ball Blaster",
+          "variant": "normal",
+          "baseId": "bouncy_ball_blaster",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "chest",
+          "id": "forest_chest_1"
+        }
+      ],
+      "consumables": {
+        "teleport": 2,
+        "smallHealthPotion": 2,
+        "mediumHealthPotion": 2,
+        "largeHealthPotion": 2,
+        "fullHealthPotion": 1,
+        "extraHeart": 1
+      }
+    },
+    "forest_loot": {
+      "deck": "forest_loot",
+      "cards": [
+        {
+          "kind": "item",
+          "id": "balloon_launcher",
+          "name": "Balloon Launcher",
+          "variant": "normal",
+          "baseId": "balloon_launcher",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "balloon_sword",
+          "name": "Balloon Sword",
+          "variant": "normal",
+          "baseId": "balloon_sword",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "banana_boomerang",
+          "name": "Banana Boomerang",
+          "variant": "normal",
+          "baseId": "banana_boomerang",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "booger_crown",
+          "name": "Booger Crown",
+          "variant": "normal",
+          "baseId": "booger_crown",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "bouncy_ball_blaster",
+          "name": "Bouncy Ball Blaster",
+          "variant": "normal",
+          "baseId": "bouncy_ball_blaster",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "bubble_wand",
+          "name": "Bubble Wand",
+          "variant": "normal",
+          "baseId": "bubble_wand",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "bubble_wrap_armor",
+          "name": "Bubble Wrap Armor",
+          "variant": "normal",
+          "baseId": "bubble_wrap_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "bubble_wrap_sword",
+          "name": "Bubble Wrap Sword",
+          "variant": "normal",
+          "baseId": "bubble_wrap_sword",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "cardboard_chestplate",
+          "name": "Cardboard Chestplate",
+          "variant": "normal",
+          "baseId": "cardboard_chestplate",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "cardboard_gloves",
+          "name": "Cardboard Gloves",
+          "variant": "normal",
+          "baseId": "cardboard_gloves",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "caterpillar_helmet",
+          "name": "Caterpillar Helmet",
+          "variant": "normal",
+          "baseId": "caterpillar_helmet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "cloud_gloves",
+          "name": "Cloud Gloves",
+          "variant": "normal",
+          "baseId": "cloud_gloves",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "clown_nose_launcher",
+          "name": "Clown Nose Launcher",
+          "variant": "normal",
+          "baseId": "clown_nose_launcher",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "cucumber_sword",
+          "name": "Cucumber Sword",
+          "variant": "normal",
+          "baseId": "cucumber_sword",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "dog_collar_armbands",
+          "name": "Dog Collar Armbands",
+          "variant": "normal",
+          "baseId": "dog_collar_armbands",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "feather_duster",
+          "name": "Feather Duster",
+          "variant": "normal",
+          "baseId": "feather_duster",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "foam_noodle",
+          "name": "Foam Noodle",
+          "variant": "normal",
+          "baseId": "foam_noodle",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "fuzzy_slippers",
+          "name": "Fuzzy Slippers",
+          "variant": "normal",
+          "baseId": "fuzzy_slippers",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "jello_helmet",
+          "name": "Jello Helmet",
+          "variant": "normal",
+          "baseId": "jello_helmet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "leather_undies",
+          "name": "Leather Undies",
+          "variant": "normal",
+          "baseId": "leather_undies",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "patchwork_poncho",
+          "name": "Patchwork Poncho",
+          "variant": "normal",
+          "baseId": "patchwork_poncho",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "pizza_boots",
+          "name": "Pizza Boots",
+          "variant": "normal",
+          "baseId": "pizza_boots",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "pooper_scooper",
+          "name": "Pooper Scooper",
+          "variant": "normal",
+          "baseId": "pooper_scooper",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "popstick_shield",
+          "name": "Popstick Shield",
+          "variant": "normal",
+          "baseId": "popstick_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "rubber_bracelet",
+          "name": "Rubber Bracelet",
+          "variant": "normal",
+          "baseId": "rubber_bracelet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "rubber_chicken",
+          "name": "Rubber Chicken",
+          "variant": "normal",
+          "baseId": "rubber_chicken",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "rusty_spoon",
+          "name": "Rusty Spoon",
+          "variant": "normal",
+          "baseId": "rusty_spoon",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "sausage_nunchucks",
+          "name": "Sausage Nunchucks",
+          "variant": "normal",
+          "baseId": "sausage_nunchucks",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "silly_string_shooter",
+          "name": "Silly String Shooter",
+          "variant": "normal",
+          "baseId": "silly_string_shooter",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "sock_with_a_rock",
+          "name": "Sock with a Rock",
+          "variant": "normal",
+          "baseId": "sock_with_a_rock",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "spaghetti_whip",
+          "name": "Spaghetti Whip",
+          "variant": "normal",
+          "baseId": "spaghetti_whip",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "squirt_gun_blaster",
+          "name": "Squirt Gun Blaster",
+          "variant": "normal",
+          "baseId": "squirt_gun_blaster",
+          "attack": 4,
+          "attackChance": 0.603,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "steel_toeless_boots",
+          "name": "Steel Toeless Boots",
+          "variant": "normal",
+          "baseId": "steel_toeless_boots",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "straw_hat",
+          "name": "Straw Hat",
+          "variant": "normal",
+          "baseId": "straw_hat",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "tin_foil_shield",
+          "name": "Tin Foil Shield",
+          "variant": "normal",
+          "baseId": "tin_foil_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "toilet_seat_shield",
+          "name": "Toilet Seat Shield",
+          "variant": "normal",
+          "baseId": "toilet_seat_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 4,
+          "defenseChance": 0.603
+        },
+        {
+          "kind": "item",
+          "id": "teleport",
+          "name": "Teleport",
+          "variant": "normal",
+          "baseId": "teleport",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "small_potion",
+          "name": "Small Health Potion",
+          "variant": "normal",
+          "baseId": "small_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "medium_potion",
+          "name": "Medium Health Potion",
+          "variant": "normal",
+          "baseId": "medium_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "large_potion",
+          "name": "Large Health Potion",
+          "variant": "normal",
+          "baseId": "large_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "full_potion",
+          "name": "Full Health Potion",
+          "variant": "normal",
+          "baseId": "full_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "extra_heart",
+          "name": "Additional Heart",
+          "variant": "normal",
+          "baseId": "extra_heart",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        }
+      ],
+      "consumables": {
+        "teleport": 1,
+        "smallHealthPotion": 2,
+        "mediumHealthPotion": 2,
+        "largeHealthPotion": 2,
+        "fullHealthPotion": 1,
+        "extraHeart": 2
+      }
+    },
+    "desert_encounter": {
+      "deck": "desert_encounter",
+      "cards": [
+        {
+          "kind": "monster",
+          "id": "weak_centaur",
+          "name": "Weak Centaur",
+          "variant": "weak",
+          "baseId": "centaur",
+          "health": 11,
+          "attack": 3,
+          "attackChance": 0.6498,
+          "defense": 2,
+          "defenseChance": 0.3698
+        },
+        {
+          "kind": "monster",
+          "id": "centaur",
+          "name": "Centaur",
+          "variant": "normal",
+          "baseId": "centaur",
+          "health": 12,
+          "attack": 4,
+          "attackChance": 0.7298,
+          "defense": 3,
+          "defenseChance": 0.4498
+        },
+        {
+          "kind": "monster",
+          "id": "strong_centaur",
+          "name": "Strong Centaur",
+          "variant": "strong",
+          "baseId": "centaur",
+          "health": 13,
+          "attack": 5,
+          "attackChance": 0.8098,
+          "defense": 4,
+          "defenseChance": 0.5298
+        },
+        {
+          "kind": "monster",
+          "id": "weak_gryphon",
+          "name": "Weak Gryphon",
+          "variant": "weak",
+          "baseId": "gryphon",
+          "health": 12,
+          "attack": 3,
+          "attackChance": 0.6623,
+          "defense": 2,
+          "defenseChance": 0.3823
+        },
+        {
+          "kind": "monster",
+          "id": "gryphon",
+          "name": "Gryphon",
+          "variant": "normal",
+          "baseId": "gryphon",
+          "health": 13,
+          "attack": 4,
+          "attackChance": 0.7423,
+          "defense": 3,
+          "defenseChance": 0.4623
+        },
+        {
+          "kind": "monster",
+          "id": "strong_gryphon",
+          "name": "Strong Gryphon",
+          "variant": "strong",
+          "baseId": "gryphon",
+          "health": 14,
+          "attack": 5,
+          "attackChance": 0.8223,
+          "defense": 4,
+          "defenseChance": 0.5423
+        },
+        {
+          "kind": "monster",
+          "id": "weak_harpy",
+          "name": "Weak Harpy",
+          "variant": "weak",
+          "baseId": "harpy",
+          "health": 12,
+          "attack": 4,
+          "attackChance": 0.6748,
+          "defense": 3,
+          "defenseChance": 0.3948
+        },
+        {
+          "kind": "monster",
+          "id": "harpy",
+          "name": "Harpy",
+          "variant": "normal",
+          "baseId": "harpy",
+          "health": 13,
+          "attack": 5,
+          "attackChance": 0.7548,
+          "defense": 4,
+          "defenseChance": 0.4748
+        },
+        {
+          "kind": "monster",
+          "id": "strong_harpy",
+          "name": "Strong Harpy",
+          "variant": "strong",
+          "baseId": "harpy",
+          "health": 14,
+          "attack": 6,
+          "attackChance": 0.8348,
+          "defense": 5,
+          "defenseChance": 0.5548
+        },
+        {
+          "kind": "monster",
+          "id": "weak_pheonix",
+          "name": "Weak Pheonix",
+          "variant": "weak",
+          "baseId": "pheonix",
+          "health": 13,
+          "attack": 4,
+          "attackChance": 0.6873,
+          "defense": 3,
+          "defenseChance": 0.4073
+        },
+        {
+          "kind": "monster",
+          "id": "pheonix",
+          "name": "Pheonix",
+          "variant": "normal",
+          "baseId": "pheonix",
+          "health": 14,
+          "attack": 5,
+          "attackChance": 0.7673,
+          "defense": 4,
+          "defenseChance": 0.4873
+        },
+        {
+          "kind": "monster",
+          "id": "strong_pheonix",
+          "name": "Strong Pheonix",
+          "variant": "strong",
+          "baseId": "pheonix",
+          "health": 15,
+          "attack": 6,
+          "attackChance": 0.8473,
+          "defense": 5,
+          "defenseChance": 0.5673
+        },
+        {
+          "kind": "monster",
+          "id": "weak_sand_golem",
+          "name": "Weak Sand Golem",
+          "variant": "weak",
+          "baseId": "sand_golem",
+          "health": 13,
+          "attack": 4,
+          "attackChance": 0.6998,
+          "defense": 3,
+          "defenseChance": 0.4198
+        },
+        {
+          "kind": "monster",
+          "id": "sand_golem",
+          "name": "Sand Golem",
+          "variant": "normal",
+          "baseId": "sand_golem",
+          "health": 14,
+          "attack": 5,
+          "attackChance": 0.7798,
+          "defense": 4,
+          "defenseChance": 0.4998
+        },
+        {
+          "kind": "monster",
+          "id": "strong_sand_golem",
+          "name": "Strong Sand Golem",
+          "variant": "strong",
+          "baseId": "sand_golem",
+          "health": 15,
+          "attack": 6,
+          "attackChance": 0.8598,
+          "defense": 5,
+          "defenseChance": 0.5798
+        },
+        {
+          "kind": "monster",
+          "id": "weak_scorpion",
+          "name": "Weak Scorpion",
+          "variant": "weak",
+          "baseId": "scorpion",
+          "health": 14,
+          "attack": 4,
+          "attackChance": 0.7123,
+          "defense": 3,
+          "defenseChance": 0.4323
+        },
+        {
+          "kind": "monster",
+          "id": "scorpion",
+          "name": "Scorpion",
+          "variant": "normal",
+          "baseId": "scorpion",
+          "health": 15,
+          "attack": 5,
+          "attackChance": 0.7923,
+          "defense": 4,
+          "defenseChance": 0.5123
+        },
+        {
+          "kind": "monster",
+          "id": "strong_scorpion",
+          "name": "Strong Scorpion",
+          "variant": "strong",
+          "baseId": "scorpion",
+          "health": 16,
+          "attack": 6,
+          "attackChance": 0.8723,
+          "defense": 5,
+          "defenseChance": 0.5923
+        },
+        {
+          "kind": "monster",
+          "id": "weak_snake",
+          "name": "Weak Snake",
+          "variant": "weak",
+          "baseId": "snake",
+          "health": 14,
+          "attack": 5,
+          "attackChance": 0.7248,
+          "defense": 4,
+          "defenseChance": 0.4448
+        },
+        {
+          "kind": "monster",
+          "id": "snake",
+          "name": "Snake",
+          "variant": "normal",
+          "baseId": "snake",
+          "health": 15,
+          "attack": 6,
+          "attackChance": 0.8048,
+          "defense": 5,
+          "defenseChance": 0.5248
+        },
+        {
+          "kind": "monster",
+          "id": "strong_snake",
+          "name": "Strong Snake",
+          "variant": "strong",
+          "baseId": "snake",
+          "health": 16,
+          "attack": 7,
+          "attackChance": 0.8848,
+          "defense": 6,
+          "defenseChance": 0.6048
+        },
+        {
+          "kind": "monster",
+          "id": "weak_spiky_lizard",
+          "name": "Weak Spiky Lizard",
+          "variant": "weak",
+          "baseId": "spiky_lizard",
+          "health": 15,
+          "attack": 5,
+          "attackChance": 0.7373,
+          "defense": 4,
+          "defenseChance": 0.4573
+        },
+        {
+          "kind": "monster",
+          "id": "spiky_lizard",
+          "name": "Spiky Lizard",
+          "variant": "normal",
+          "baseId": "spiky_lizard",
+          "health": 16,
+          "attack": 6,
+          "attackChance": 0.8173,
+          "defense": 5,
+          "defenseChance": 0.5373
+        },
+        {
+          "kind": "monster",
+          "id": "strong_spiky_lizard",
+          "name": "Strong Spiky Lizard",
+          "variant": "strong",
+          "baseId": "spiky_lizard",
+          "health": 17,
+          "attack": 7,
+          "attackChance": 0.8973,
+          "defense": 6,
+          "defenseChance": 0.6173
+        },
+        {
+          "kind": "monster",
+          "id": "weak_vulture",
+          "name": "Weak Vulture",
+          "variant": "weak",
+          "baseId": "vulture",
+          "health": 15,
+          "attack": 5,
+          "attackChance": 0.7498,
+          "defense": 4,
+          "defenseChance": 0.4698
+        },
+        {
+          "kind": "monster",
+          "id": "vulture",
+          "name": "Vulture",
+          "variant": "normal",
+          "baseId": "vulture",
+          "health": 16,
+          "attack": 6,
+          "attackChance": 0.8298,
+          "defense": 5,
+          "defenseChance": 0.5498
+        },
+        {
+          "kind": "monster",
+          "id": "strong_vulture",
+          "name": "Strong Vulture",
+          "variant": "strong",
+          "baseId": "vulture",
+          "health": 17,
+          "attack": 7,
+          "attackChance": 0.9098,
+          "defense": 6,
+          "defenseChance": 0.6298
+        },
+        {
+          "kind": "item",
+          "id": "baguette_sword",
+          "name": "Baguette Sword",
+          "variant": "normal",
+          "baseId": "baguette_sword",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "bamboo_armor",
+          "name": "Bamboo Armor",
+          "variant": "normal",
+          "baseId": "bamboo_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "banana_slingshot",
+          "name": "Banana Slingshot",
+          "variant": "normal",
+          "baseId": "banana_slingshot",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "cola_bomb",
+          "name": "Cola Bomb",
+          "variant": "normal",
+          "baseId": "cola_bomb",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "colander_helm",
+          "name": "Colander Helm",
+          "variant": "normal",
+          "baseId": "colander_helm",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "colorful_quilted_tunic",
+          "name": "Colorful Quilted Tunic",
+          "variant": "normal",
+          "baseId": "colorful_quilted_tunic",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "confetti_cannon",
+          "name": "Confetti Cannon",
+          "variant": "normal",
+          "baseId": "confetti_cannon",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "cow_leather_jacket",
+          "name": "Cow Leather Jacket",
+          "variant": "normal",
+          "baseId": "cow_leather_jacket",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "chest",
+          "id": "desert_chest_1"
+        }
+      ],
+      "consumables": {
+        "teleport": 2,
+        "smallHealthPotion": 2,
+        "mediumHealthPotion": 2,
+        "largeHealthPotion": 2,
+        "fullHealthPotion": 2,
+        "extraHeart": 1
+      }
+    },
+    "desert_loot": {
+      "deck": "desert_loot",
+      "cards": [
+        {
+          "kind": "item",
+          "id": "baguette_sword",
+          "name": "Baguette Sword",
+          "variant": "normal",
+          "baseId": "baguette_sword",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "bamboo_armor",
+          "name": "Bamboo Armor",
+          "variant": "normal",
+          "baseId": "bamboo_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "banana_slingshot",
+          "name": "Banana Slingshot",
+          "variant": "normal",
+          "baseId": "banana_slingshot",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "cola_bomb",
+          "name": "Cola Bomb",
+          "variant": "normal",
+          "baseId": "cola_bomb",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "colander_helm",
+          "name": "Colander Helm",
+          "variant": "normal",
+          "baseId": "colander_helm",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "colorful_quilted_tunic",
+          "name": "Colorful Quilted Tunic",
+          "variant": "normal",
+          "baseId": "colorful_quilted_tunic",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "confetti_cannon",
+          "name": "Confetti Cannon",
+          "variant": "normal",
+          "baseId": "confetti_cannon",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "cow_leather_jacket",
+          "name": "Cow Leather Jacket",
+          "variant": "normal",
+          "baseId": "cow_leather_jacket",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "crystal_boots",
+          "name": "Crystal Boots",
+          "variant": "normal",
+          "baseId": "crystal_boots",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "exploding_ice_cream",
+          "name": "Exploding Ice Cream",
+          "variant": "normal",
+          "baseId": "exploding_ice_cream",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "fart_bomb",
+          "name": "Fart Bomb",
+          "variant": "normal",
+          "baseId": "fart_bomb",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "feather_boomerang",
+          "name": "Feather Boomerang",
+          "variant": "normal",
+          "baseId": "feather_boomerang",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "feathered_boots",
+          "name": "Feathered Boots",
+          "variant": "normal",
+          "baseId": "feathered_boots",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "fox_helmet",
+          "name": "Fox Helmet",
+          "variant": "normal",
+          "baseId": "fox_helmet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "fuzzy_armguards",
+          "name": "Fuzzy Armguards",
+          "variant": "normal",
+          "baseId": "fuzzy_armguards",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "glue_shooter",
+          "name": "Glue Shooter",
+          "variant": "normal",
+          "baseId": "glue_shooter",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "honey_helmet",
+          "name": "Honey Helmet",
+          "variant": "normal",
+          "baseId": "honey_helmet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "ice_cream_armor",
+          "name": "Ice Cream Armor",
+          "variant": "normal",
+          "baseId": "ice_cream_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "jelly_bean_gun",
+          "name": "Jelly Bean Gun",
+          "variant": "normal",
+          "baseId": "jelly_bean_gun",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "jesters_cap",
+          "name": "Jester's Cap",
+          "variant": "normal",
+          "baseId": "jesters_cap",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "jesters_scepter",
+          "name": "Jester's Scepter",
+          "variant": "normal",
+          "baseId": "jesters_scepter",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "kitty_crown",
+          "name": "Kitty Crown",
+          "variant": "normal",
+          "baseId": "kitty_crown",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "knittted_armor",
+          "name": "Knittted Armor",
+          "variant": "normal",
+          "baseId": "knittted_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "mallow_catapult",
+          "name": "Mallow Catapult",
+          "variant": "normal",
+          "baseId": "mallow_catapult",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "metal_mittens",
+          "name": "Metal Mittens",
+          "variant": "normal",
+          "baseId": "metal_mittens",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "oven_armor",
+          "name": "Oven Armor",
+          "variant": "normal",
+          "baseId": "oven_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "paper_fan",
+          "name": "Paper Fan",
+          "variant": "normal",
+          "baseId": "paper_fan",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "plunger_bow",
+          "name": "Plunger Bow",
+          "variant": "normal",
+          "baseId": "plunger_bow",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "pogo_stick_lance",
+          "name": "Pogo Stick Lance",
+          "variant": "normal",
+          "baseId": "pogo_stick_lance",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "red_licorice_whip",
+          "name": "Red Licorice Whip",
+          "variant": "normal",
+          "baseId": "red_licorice_whip",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "rolling_pin_hammer",
+          "name": "Rolling Pin Hammer",
+          "variant": "normal",
+          "baseId": "rolling_pin_hammer",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "sharp_candy_cane",
+          "name": "Sharp Candy Cane",
+          "variant": "normal",
+          "baseId": "sharp_candy_cane",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "snail_shell_helmet",
+          "name": "Snail Shell Helmet",
+          "variant": "normal",
+          "baseId": "snail_shell_helmet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "spitwad_blowpipe",
+          "name": "Spitwad Blowpipe",
+          "variant": "normal",
+          "baseId": "spitwad_blowpipe",
+          "attack": 12,
+          "attackChance": 0.723,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "stained_glass_shield",
+          "name": "Stained Glass Shield",
+          "variant": "normal",
+          "baseId": "stained_glass_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "vacuum_armor",
+          "name": "Vacuum Armor",
+          "variant": "normal",
+          "baseId": "vacuum_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 12,
+          "defenseChance": 0.723
+        },
+        {
+          "kind": "item",
+          "id": "teleport",
+          "name": "Teleport",
+          "variant": "normal",
+          "baseId": "teleport",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "small_potion",
+          "name": "Small Health Potion",
+          "variant": "normal",
+          "baseId": "small_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "medium_potion",
+          "name": "Medium Health Potion",
+          "variant": "normal",
+          "baseId": "medium_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "large_potion",
+          "name": "Large Health Potion",
+          "variant": "normal",
+          "baseId": "large_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "full_potion",
+          "name": "Full Health Potion",
+          "variant": "normal",
+          "baseId": "full_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "extra_heart",
+          "name": "Additional Heart",
+          "variant": "normal",
+          "baseId": "extra_heart",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        }
+      ],
+      "consumables": {
+        "teleport": 1,
+        "smallHealthPotion": 2,
+        "mediumHealthPotion": 1,
+        "largeHealthPotion": 1,
+        "fullHealthPotion": 1,
+        "extraHeart": 4
+      }
+    },
+    "volcano_encounter": {
+      "deck": "volcano_encounter",
+      "cards": [
+        {
+          "kind": "monster",
+          "id": "weak_dark_unicorn",
+          "name": "Weak Dark Unicorn",
+          "variant": "weak",
+          "baseId": "dark_unicorn",
+          "health": 22,
+          "attack": 6,
+          "attackChance": 0.7698,
+          "defense": 4,
+          "defenseChance": 0.5298
+        },
+        {
+          "kind": "monster",
+          "id": "dark_unicorn",
+          "name": "Dark Unicorn",
+          "variant": "normal",
+          "baseId": "dark_unicorn",
+          "health": 23,
+          "attack": 7,
+          "attackChance": 0.8498,
+          "defense": 5,
+          "defenseChance": 0.6098
+        },
+        {
+          "kind": "monster",
+          "id": "strong_dark_unicorn",
+          "name": "Strong Dark Unicorn",
+          "variant": "strong",
+          "baseId": "dark_unicorn",
+          "health": 24,
+          "attack": 8,
+          "attackChance": 0.9298,
+          "defense": 6,
+          "defenseChance": 0.6898
+        },
+        {
+          "kind": "monster",
+          "id": "weak_ember_imp",
+          "name": "Weak Ember Imp",
+          "variant": "weak",
+          "baseId": "ember_imp",
+          "health": 23,
+          "attack": 6,
+          "attackChance": 0.7798,
+          "defense": 4,
+          "defenseChance": 0.5398
+        },
+        {
+          "kind": "monster",
+          "id": "ember_imp",
+          "name": "Ember Imp",
+          "variant": "normal",
+          "baseId": "ember_imp",
+          "health": 24,
+          "attack": 7,
+          "attackChance": 0.8598,
+          "defense": 5,
+          "defenseChance": 0.6198
+        },
+        {
+          "kind": "monster",
+          "id": "strong_ember_imp",
+          "name": "Strong Ember Imp",
+          "variant": "strong",
+          "baseId": "ember_imp",
+          "health": 25,
+          "attack": 8,
+          "attackChance": 0.9398,
+          "defense": 6,
+          "defenseChance": 0.6998
+        },
+        {
+          "kind": "monster",
+          "id": "weak_fire_butterfly",
+          "name": "Weak Fire Butterfly",
+          "variant": "weak",
+          "baseId": "fire_butterfly",
+          "health": 23,
+          "attack": 7,
+          "attackChance": 0.7899,
+          "defense": 5,
+          "defenseChance": 0.5499
+        },
+        {
+          "kind": "monster",
+          "id": "fire_butterfly",
+          "name": "Fire Butterfly",
+          "variant": "normal",
+          "baseId": "fire_butterfly",
+          "health": 24,
+          "attack": 8,
+          "attackChance": 0.8699,
+          "defense": 6,
+          "defenseChance": 0.6299
+        },
+        {
+          "kind": "monster",
+          "id": "strong_fire_butterfly",
+          "name": "Strong Fire Butterfly",
+          "variant": "strong",
+          "baseId": "fire_butterfly",
+          "health": 25,
+          "attack": 9,
+          "attackChance": 0.9499,
+          "defense": 7,
+          "defenseChance": 0.7099
+        },
+        {
+          "kind": "monster",
+          "id": "weak_magma_cube",
+          "name": "Weak Magma Cube",
+          "variant": "weak",
+          "baseId": "magma_cube",
+          "health": 24,
+          "attack": 7,
+          "attackChance": 0.7999,
+          "defense": 5,
+          "defenseChance": 0.5599
+        },
+        {
+          "kind": "monster",
+          "id": "magma_cube",
+          "name": "Magma Cube",
+          "variant": "normal",
+          "baseId": "magma_cube",
+          "health": 25,
+          "attack": 8,
+          "attackChance": 0.8799,
+          "defense": 6,
+          "defenseChance": 0.6399
+        },
+        {
+          "kind": "monster",
+          "id": "strong_magma_cube",
+          "name": "Strong Magma Cube",
+          "variant": "strong",
+          "baseId": "magma_cube",
+          "health": 26,
+          "attack": 9,
+          "attackChance": 0.95,
+          "defense": 7,
+          "defenseChance": 0.7199
+        },
+        {
+          "kind": "monster",
+          "id": "weak_medusa",
+          "name": "Weak Medusa",
+          "variant": "weak",
+          "baseId": "medusa",
+          "health": 24,
+          "attack": 7,
+          "attackChance": 0.8099,
+          "defense": 5,
+          "defenseChance": 0.5699
+        },
+        {
+          "kind": "monster",
+          "id": "medusa",
+          "name": "Medusa",
+          "variant": "normal",
+          "baseId": "medusa",
+          "health": 25,
+          "attack": 8,
+          "attackChance": 0.8899,
+          "defense": 6,
+          "defenseChance": 0.6499
+        },
+        {
+          "kind": "monster",
+          "id": "strong_medusa",
+          "name": "Strong Medusa",
+          "variant": "strong",
+          "baseId": "medusa",
+          "health": 26,
+          "attack": 9,
+          "attackChance": 0.95,
+          "defense": 7,
+          "defenseChance": 0.7299
+        },
+        {
+          "kind": "monster",
+          "id": "weak_red_dragon",
+          "name": "Weak Red Dragon",
+          "variant": "weak",
+          "baseId": "red_dragon",
+          "health": 25,
+          "attack": 7,
+          "attackChance": 0.8199,
+          "defense": 5,
+          "defenseChance": 0.5799
+        },
+        {
+          "kind": "monster",
+          "id": "red_dragon",
+          "name": "Red Dragon",
+          "variant": "normal",
+          "baseId": "red_dragon",
+          "health": 26,
+          "attack": 8,
+          "attackChance": 0.8999,
+          "defense": 6,
+          "defenseChance": 0.6599
+        },
+        {
+          "kind": "monster",
+          "id": "strong_red_dragon",
+          "name": "Strong Red Dragon",
+          "variant": "strong",
+          "baseId": "red_dragon",
+          "health": 27,
+          "attack": 9,
+          "attackChance": 0.95,
+          "defense": 7,
+          "defenseChance": 0.7399
+        },
+        {
+          "kind": "monster",
+          "id": "weak_rock_troll",
+          "name": "Weak Rock Troll",
+          "variant": "weak",
+          "baseId": "rock_troll",
+          "health": 25,
+          "attack": 8,
+          "attackChance": 0.83,
+          "defense": 6,
+          "defenseChance": 0.5899
+        },
+        {
+          "kind": "monster",
+          "id": "rock_troll",
+          "name": "Rock Troll",
+          "variant": "normal",
+          "baseId": "rock_troll",
+          "health": 26,
+          "attack": 9,
+          "attackChance": 0.91,
+          "defense": 7,
+          "defenseChance": 0.6699
+        },
+        {
+          "kind": "monster",
+          "id": "strong_rock_troll",
+          "name": "Strong Rock Troll",
+          "variant": "strong",
+          "baseId": "rock_troll",
+          "health": 27,
+          "attack": 10,
+          "attackChance": 0.95,
+          "defense": 8,
+          "defenseChance": 0.7499
+        },
+        {
+          "kind": "monster",
+          "id": "weak_skeleton",
+          "name": "Weak Skeleton",
+          "variant": "weak",
+          "baseId": "skeleton",
+          "health": 26,
+          "attack": 8,
+          "attackChance": 0.84,
+          "defense": 6,
+          "defenseChance": 0.6
+        },
+        {
+          "kind": "monster",
+          "id": "skeleton",
+          "name": "Skeleton",
+          "variant": "normal",
+          "baseId": "skeleton",
+          "health": 27,
+          "attack": 9,
+          "attackChance": 0.92,
+          "defense": 7,
+          "defenseChance": 0.68
+        },
+        {
+          "kind": "monster",
+          "id": "strong_skeleton",
+          "name": "Strong Skeleton",
+          "variant": "strong",
+          "baseId": "skeleton",
+          "health": 28,
+          "attack": 10,
+          "attackChance": 0.95,
+          "defense": 8,
+          "defenseChance": 0.76
+        },
+        {
+          "kind": "monster",
+          "id": "weak_wizard",
+          "name": "Weak Wizard",
+          "variant": "weak",
+          "baseId": "wizard",
+          "health": 26,
+          "attack": 8,
+          "attackChance": 0.85,
+          "defense": 6,
+          "defenseChance": 0.61
+        },
+        {
+          "kind": "monster",
+          "id": "wizard",
+          "name": "Wizard",
+          "variant": "normal",
+          "baseId": "wizard",
+          "health": 27,
+          "attack": 9,
+          "attackChance": 0.93,
+          "defense": 7,
+          "defenseChance": 0.69
+        },
+        {
+          "kind": "monster",
+          "id": "strong_wizard",
+          "name": "Strong Wizard",
+          "variant": "strong",
+          "baseId": "wizard",
+          "health": 28,
+          "attack": 10,
+          "attackChance": 0.95,
+          "defense": 8,
+          "defenseChance": 0.77
+        },
+        {
+          "kind": "item",
+          "id": "astral_plate_armor",
+          "name": "Astral Plate Armor",
+          "variant": "normal",
+          "baseId": "astral_plate_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "bagpipe_cannon",
+          "name": "Bagpipe Cannon",
+          "variant": "normal",
+          "baseId": "bagpipe_cannon",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "barrel_lid_shield",
+          "name": "Barrel Lid Shield",
+          "variant": "normal",
+          "baseId": "barrel_lid_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "boulder_armor",
+          "name": "Boulder Armor",
+          "variant": "normal",
+          "baseId": "boulder_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "box_of_tiny_lion",
+          "name": "Box of Tiny Lion",
+          "variant": "normal",
+          "baseId": "box_of_tiny_lion",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "chicken_shield",
+          "name": "Chicken Shield",
+          "variant": "normal",
+          "baseId": "chicken_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "clock_shield",
+          "name": "Clock Shield",
+          "variant": "normal",
+          "baseId": "clock_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "chest",
+          "id": "volcano_chest_1"
+        }
+      ],
+      "consumables": {
+        "teleport": 1,
+        "smallHealthPotion": 2,
+        "mediumHealthPotion": 2,
+        "largeHealthPotion": 1,
+        "fullHealthPotion": 1,
+        "extraHeart": 2
+      }
+    },
+    "volcano_loot": {
+      "deck": "volcano_loot",
+      "cards": [
+        {
+          "kind": "item",
+          "id": "astral_plate_armor",
+          "name": "Astral Plate Armor",
+          "variant": "normal",
+          "baseId": "astral_plate_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "bagpipe_cannon",
+          "name": "Bagpipe Cannon",
+          "variant": "normal",
+          "baseId": "bagpipe_cannon",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "barrel_lid_shield",
+          "name": "Barrel Lid Shield",
+          "variant": "normal",
+          "baseId": "barrel_lid_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "boulder_armor",
+          "name": "Boulder Armor",
+          "variant": "normal",
+          "baseId": "boulder_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "box_of_tiny_lion",
+          "name": "Box of Tiny Lion",
+          "variant": "normal",
+          "baseId": "box_of_tiny_lion",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "chicken_shield",
+          "name": "Chicken Shield",
+          "variant": "normal",
+          "baseId": "chicken_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "clock_shield",
+          "name": "Clock Shield",
+          "variant": "normal",
+          "baseId": "clock_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "crazy_cat_launcher",
+          "name": "Crazy Cat Launcher",
+          "variant": "normal",
+          "baseId": "crazy_cat_launcher",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "danger_noodle_whip",
+          "name": "Danger Noodle Whip",
+          "variant": "normal",
+          "baseId": "danger_noodle_whip",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "dragon_scale_armor",
+          "name": "Dragon Scale Armor",
+          "variant": "normal",
+          "baseId": "dragon_scale_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "exploding_pie",
+          "name": "Exploding Pie",
+          "variant": "normal",
+          "baseId": "exploding_pie",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "feather_helmet",
+          "name": "Feather Helmet",
+          "variant": "normal",
+          "baseId": "feather_helmet",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "flaming_tuba",
+          "name": "Flaming Tuba",
+          "variant": "normal",
+          "baseId": "flaming_tuba",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "giggle_daggers",
+          "name": "Giggle Daggers",
+          "variant": "normal",
+          "baseId": "giggle_daggers",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "glass_hammer",
+          "name": "Glass Hammer",
+          "variant": "normal",
+          "baseId": "glass_hammer",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "guardian_shield",
+          "name": "Guardian Shield",
+          "variant": "normal",
+          "baseId": "guardian_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "gummy_bear_mace",
+          "name": "Gummy Bear Mace",
+          "variant": "normal",
+          "baseId": "gummy_bear_mace",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "lightning_shield",
+          "name": "Lightning Shield",
+          "variant": "normal",
+          "baseId": "lightning_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "mud_shotgun",
+          "name": "Mud Shotgun",
+          "variant": "normal",
+          "baseId": "mud_shotgun",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "octopus_launcher",
+          "name": "Octopus Launcher",
+          "variant": "normal",
+          "baseId": "octopus_launcher",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "phoenix_cloak",
+          "name": "Phoenix Cloak",
+          "variant": "normal",
+          "baseId": "phoenix_cloak",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "piranha_on_a_stick",
+          "name": "Piranha on a Stick",
+          "variant": "normal",
+          "baseId": "piranha_on_a_stick",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "plant_shield",
+          "name": "Plant Shield",
+          "variant": "normal",
+          "baseId": "plant_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "roaring_great_sword",
+          "name": "Roaring Great Sword",
+          "variant": "normal",
+          "baseId": "roaring_great_sword",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "rubber_chicken_axe",
+          "name": "Rubber Chicken Axe",
+          "variant": "normal",
+          "baseId": "rubber_chicken_axe",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "scorpion_tail_spear",
+          "name": "Scorpion tail Spear",
+          "variant": "normal",
+          "baseId": "scorpion_tail_spear",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "serpent_scale",
+          "name": "Serpent Scale",
+          "variant": "normal",
+          "baseId": "serpent_scale",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "shark_armor",
+          "name": "Shark Armor",
+          "variant": "normal",
+          "baseId": "shark_armor",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "shark_head_hammer",
+          "name": "Shark Head Hammer",
+          "variant": "normal",
+          "baseId": "shark_head_hammer",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "spider_silk_gloves",
+          "name": "Spider Silk Gloves",
+          "variant": "normal",
+          "baseId": "spider_silk_gloves",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "sturdy_fish_shield",
+          "name": "Sturdy Fish Shield",
+          "variant": "normal",
+          "baseId": "sturdy_fish_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "superhero_shield",
+          "name": "Superhero Shield",
+          "variant": "normal",
+          "baseId": "superhero_shield",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "vortex_cape",
+          "name": "Vortex Cape",
+          "variant": "normal",
+          "baseId": "vortex_cape",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "whacky_wizard_staff",
+          "name": "Whacky Wizard Staff",
+          "variant": "normal",
+          "baseId": "whacky_wizard_staff",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "wild_whirl_scythe",
+          "name": "Wild Whirl Scythe",
+          "variant": "normal",
+          "baseId": "wild_whirl_scythe",
+          "attack": 17,
+          "attackChance": 0.823,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "wooden_buckler",
+          "name": "Wooden Buckler",
+          "variant": "normal",
+          "baseId": "wooden_buckler",
+          "attack": null,
+          "attackChance": null,
+          "defense": 17,
+          "defenseChance": 0.823
+        },
+        {
+          "kind": "item",
+          "id": "teleport",
+          "name": "Teleport",
+          "variant": "normal",
+          "baseId": "teleport",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "small_potion",
+          "name": "Small Health Potion",
+          "variant": "normal",
+          "baseId": "small_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "medium_potion",
+          "name": "Medium Health Potion",
+          "variant": "normal",
+          "baseId": "medium_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "large_potion",
+          "name": "Large Health Potion",
+          "variant": "normal",
+          "baseId": "large_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "full_potion",
+          "name": "Full Health Potion",
+          "variant": "normal",
+          "baseId": "full_potion",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        },
+        {
+          "kind": "item",
+          "id": "extra_heart",
+          "name": "Additional Heart",
+          "variant": "normal",
+          "baseId": "extra_heart",
+          "attack": null,
+          "attackChance": null,
+          "defense": null,
+          "defenseChance": null
+        }
+      ],
+      "consumables": {
+        "teleport": 1,
+        "smallHealthPotion": 2,
+        "mediumHealthPotion": 1,
+        "largeHealthPotion": 1,
+        "fullHealthPotion": 1,
+        "extraHeart": 1
+      }
+    }
+  },
+  "meta": {
+    "deckBiomes": {
+      "forest": [
+        "plains",
+        "forest"
+      ],
+      "desert": [
+        "desert"
+      ],
+      "volcano": [
+        "cave",
+        "volcano"
+      ]
+    }
+  }
+}

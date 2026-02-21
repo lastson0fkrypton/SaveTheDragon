@@ -118,10 +118,18 @@ const AdminPage: React.FC<AdminPageProps> = observer(() => {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const sortedAdminItems = [...state.adminItems].sort((a, b) => {
-    if (a.type !== b.type) return a.type.localeCompare(b.type);
-    return a.name.localeCompare(b.name);
-  });
+  const groupedAdminItems = state.adminItems.reduce<Record<string, typeof state.adminItems>>((groups, item) => {
+    if (!groups[item.group]) {
+      groups[item.group] = [];
+    }
+    groups[item.group].push(item);
+    return groups;
+  }, {});
+
+  const sortedGroupNames = Object.keys(groupedAdminItems).sort((a, b) => a.localeCompare(b));
+  for (const groupName of sortedGroupNames) {
+    groupedAdminItems[groupName].sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   if (!state.adminLoggedIn) {
     return (
@@ -200,11 +208,15 @@ const AdminPage: React.FC<AdminPageProps> = observer(() => {
                   onChange={e => setSelectedItemByPlayerId(prev => ({ ...prev, [player.id]: e.target.value }))}
                   style={{ minWidth: 330 }}
                 >
-                  <option value="">Select item (all tiers)</option>
-                  {sortedAdminItems.map(item => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} ({item.type})
-                    </option>
+                  <option value="">Select deck card</option>
+                  {sortedGroupNames.map(groupName => (
+                    <optgroup key={groupName} label={groupedAdminItems[groupName][0]?.groupLabel || groupName}>
+                      {groupedAdminItems[groupName].map(item => (
+                        <option key={`${groupName}:${item.id}`} value={item.id}>
+                          {item.name} ({item.type})
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
                 <button

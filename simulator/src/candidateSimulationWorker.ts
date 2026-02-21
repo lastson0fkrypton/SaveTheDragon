@@ -15,8 +15,8 @@ function parseArgs(argv: string[]): SimOptions {
 		gridSizeX: Math.max(10, Number(pairs.get('gridSizeX') || 20)),
 		gridSizeY: Math.max(10, Number(pairs.get('gridSizeY') || 20)),
 		playerName: pairs.get('playerName') || 'WorkerBot',
-		biomeDeckConfigPath: pairs.get('biomeDeckConfigPath') || undefined,
-		gameBalanceConfigPath: pairs.get('gameBalanceConfigPath') || undefined,
+		deckDefinitionsConfigPath: pairs.get('deckDefinitionsConfigPath') || undefined,
+		balanceConfigPath: pairs.get('balanceConfigPath') || undefined,
 	};
 }
 

@@ -2,9 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { spawn } from 'node:child_process';
-import { createSeededRandom } from '../utils/random.js';
-import type { BiomeDeckConfig, PlayBiome } from '../config/biomeDeckConfig.js';
-import type { GameBalanceConfig } from '../config/gameBalanceConfig.js';
+import { createSeededRandom } from './random.js';
 import { runApiSimulation, type AggregateResult, type SimOptions } from './deckBalanceSimulator.js';
 
 type Genome = {
@@ -17,17 +15,50 @@ type Genome = {
 	lootHeartScale: number;
 	strongWeightScale: number;
 	weakWeightScale: number;
-	monsterStatScale: number;
-	itemStatScale: number;
 	consumableHealScale: number;
+};
+
+type BalanceDeck = 'forest' | 'desert' | 'volcano';
+
+type BalanceJsonConfig = {
+	weapons: Record<BalanceDeck, { minAttack: number; maxAttack: number; minChance: number; maxChance: number }>;
+	armors: Record<BalanceDeck, { minDefense: number; maxDefense: number; minChance: number; maxChance: number }>;
+	itemVariance: {
+		cracked: { valueDelta: number; chanceDelta: number };
+		normal: { valueDelta: number; chanceDelta: number };
+		enchanted: { valueDelta: number; chanceDelta: number };
+	};
+	consumables: {
+		smallPotionHeal: number;
+		mediumPotionHeal: number;
+		largePotionHeal: number;
+	};
+	monsters: Record<
+		BalanceDeck,
+		{
+			minHealth: number;
+			maxHealth: number;
+			minAttack: number;
+			maxAttack: number;
+			minAttackChance: number;
+			maxAttackChance: number;
+			minDefense: number;
+			maxDefense: number;
+			minDefenseChance: number;
+			maxDefenseChance: number;
+		}
+	>;
+	monsterVariance: {
+		weak: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
+		normal: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
+		strong: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
+	};
 };
 
 type Candidate = {
 	genome: Genome;
 	fitness: number;
 	aggregate: AggregateResult;
-	deckConfig: BiomeDeckConfig;
-	balanceConfig: GameBalanceConfig;
 };
 
 type WorkerSimulationResult = {
@@ -54,8 +85,7 @@ type Args = {
 	maxTurnsPenaltyWeight: number;
 	artifactDir: string;
 	runName: string;
-	baseDeckPath: string;
-	baseBalancePath: string;
+	baseDeckDefinitionsPath: string;
 };
 
 function parseArgs(argv: string[]): Record<string, string> {
@@ -97,8 +127,8 @@ function parseRuntimeArgs(raw: Record<string, string>): Args {
 		maxTurnsPenaltyWeight: Math.max(0, Number(raw.maxTurnsPenaltyWeight || 1.1)),
 		artifactDir,
 		runName,
-		baseDeckPath: raw.baseDeckPath || path.resolve(process.cwd(), 'config', 'biome-decks.json'),
-		baseBalancePath: raw.baseBalancePath || path.resolve(process.cwd(), 'config', 'game-balance.json'),
+		baseDeckDefinitionsPath:
+			raw.baseDeckDefinitionsPath || raw.baseDeckPath || path.resolve(process.cwd(), '..', 'server', 'config', 'deck-definitions.json'),
 	};
 }
 
@@ -111,12 +141,110 @@ function normalizeWeights(weights: { weak: number; normal: number; strong: numbe
 	};
 }
 
+function toCount(value: number): number {
+	return Math.max(0, Math.round(value));
+}
+
 function clampChance(value: number): number {
 	return clamp(Number(value.toFixed(4)), 0.05, 0.95);
 }
 
-function toCount(value: number): number {
-	return Math.max(0, Math.round(value));
+function createBalanceConfigFromGenome(genome: Genome): BalanceJsonConfig {
+	const weaponScale = clamp(genome.itemEncounterScale, 0.6, 1.8);
+	const monsterScale = clamp(genome.monsterEncounterScale, 0.6, 1.8);
+	const consumableScale = clamp(genome.consumableHealScale, 0.5, 2.0);
+
+	const weakStrong = normalizeWeights({
+		weak: genome.weakWeightScale,
+		normal: 1,
+		strong: genome.strongWeightScale,
+	});
+
+	const weakFactor = clamp(0.5 + weakStrong.weak, 0.6, 1.4);
+	const strongFactor = clamp(0.5 + weakStrong.strong, 0.6, 1.4);
+
+	const scaleWeapon = (minAttack: number, maxAttack: number, minChance: number, maxChance: number) => ({
+		minAttack: Math.max(1, Math.round(minAttack * weaponScale)),
+		maxAttack: Math.max(1, Math.round(maxAttack * weaponScale)),
+		minChance: clampChance(minChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
+		maxChance: clampChance(maxChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
+	});
+
+	const scaleArmor = (minDefense: number, maxDefense: number, minChance: number, maxChance: number) => ({
+		minDefense: Math.max(1, Math.round(minDefense * weaponScale)),
+		maxDefense: Math.max(1, Math.round(maxDefense * weaponScale)),
+		minChance: clampChance(minChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
+		maxChance: clampChance(maxChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
+	});
+
+	const scaleMonsterRange = (
+		minHealth: number,
+		maxHealth: number,
+		minAttack: number,
+		maxAttack: number,
+		minAttackChance: number,
+		maxAttackChance: number,
+		minDefense: number,
+		maxDefense: number,
+		minDefenseChance: number,
+		maxDefenseChance: number,
+	) => ({
+		minHealth: Math.max(1, Math.round(minHealth * monsterScale)),
+		maxHealth: Math.max(1, Math.round(maxHealth * monsterScale)),
+		minAttack: Math.max(1, Math.round(minAttack * monsterScale)),
+		maxAttack: Math.max(1, Math.round(maxAttack * monsterScale)),
+		minAttackChance: clampChance(minAttackChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
+		maxAttackChance: clampChance(maxAttackChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
+		minDefense: Math.max(0, Math.round(minDefense * monsterScale)),
+		maxDefense: Math.max(0, Math.round(maxDefense * monsterScale)),
+		minDefenseChance: clampChance(minDefenseChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
+		maxDefenseChance: clampChance(maxDefenseChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
+	});
+
+	return {
+		weapons: {
+			forest: scaleWeapon(1, 4, 0.5, 0.6),
+			desert: scaleWeapon(9, 12, 0.65, 0.75),
+			volcano: scaleWeapon(14, 17, 0.75, 0.85),
+		},
+		armors: {
+			forest: scaleArmor(4, 4, 0.603, 0.603),
+			desert: scaleArmor(12, 12, 0.723, 0.723),
+			volcano: scaleArmor(17, 17, 0.823, 0.823),
+		},
+		itemVariance: {
+			cracked: { valueDelta: -1, chanceDelta: -0.0596 },
+			normal: { valueDelta: 0, chanceDelta: 0 },
+			enchanted: { valueDelta: 1, chanceDelta: 0.0596 },
+		},
+		consumables: {
+			smallPotionHeal: Math.max(1, toCount(3 * consumableScale)),
+			mediumPotionHeal: Math.max(1, toCount(5 * consumableScale)),
+			largePotionHeal: Math.max(1, toCount(7 * consumableScale)),
+		},
+		monsters: {
+			forest: scaleMonsterRange(5, 7, 3, 5, 0.6098, 0.7098, 1, 3, 0.3098, 0.4098),
+			desert: scaleMonsterRange(12, 16, 4, 6, 0.7298, 0.8298, 3, 5, 0.4498, 0.5498),
+			volcano: scaleMonsterRange(23, 27, 7, 9, 0.8498, 0.93, 5, 7, 0.6098, 0.69),
+		},
+		monsterVariance: {
+			weak: {
+				healthDelta: -Math.max(1, Math.round(weakFactor)),
+				attackDelta: -Math.max(1, Math.round(weakFactor)),
+				attackChanceDelta: -Number((0.08 * weakFactor).toFixed(4)),
+				defenseDelta: -Math.max(1, Math.round(weakFactor)),
+				defenseChanceDelta: -Number((0.08 * weakFactor).toFixed(4)),
+			},
+			normal: { healthDelta: 0, attackDelta: 0, attackChanceDelta: 0, defenseDelta: 0, defenseChanceDelta: 0 },
+			strong: {
+				healthDelta: Math.max(1, Math.round(strongFactor)),
+				attackDelta: Math.max(1, Math.round(strongFactor)),
+				attackChanceDelta: Number((0.08 * strongFactor).toFixed(4)),
+				defenseDelta: Math.max(1, Math.round(strongFactor)),
+				defenseChanceDelta: Number((0.08 * strongFactor).toFixed(4)),
+			},
+		},
+	};
 }
 
 function buildRandomGenome(rand: () => number): Genome {
@@ -130,8 +258,6 @@ function buildRandomGenome(rand: () => number): Genome {
 		lootHeartScale: 0.3 + rand() * 1.6,
 		strongWeightScale: 0.6 + rand() * 1.1,
 		weakWeightScale: 0.6 + rand() * 1.1,
-		monsterStatScale: 0.75 + rand() * 0.7,
-		itemStatScale: 0.75 + rand() * 0.7,
 		consumableHealScale: 0.7 + rand() * 1.1,
 	};
 }
@@ -148,8 +274,6 @@ function crossover(a: Genome, b: Genome, rand: () => number): Genome {
 		lootHeartScale: mix(a.lootHeartScale, b.lootHeartScale),
 		strongWeightScale: mix(a.strongWeightScale, b.strongWeightScale),
 		weakWeightScale: mix(a.weakWeightScale, b.weakWeightScale),
-		monsterStatScale: mix(a.monsterStatScale, b.monsterStatScale),
-		itemStatScale: mix(a.itemStatScale, b.itemStatScale),
 		consumableHealScale: mix(a.consumableHealScale, b.consumableHealScale),
 	};
 }
@@ -169,88 +293,8 @@ function mutate(genome: Genome, mutationRate: number, rand: () => number): Genom
 		lootHeartScale: maybeMutate(genome.lootHeartScale, 0.3, 0.1, 2.8),
 		strongWeightScale: maybeMutate(genome.strongWeightScale, 0.2, 0.2, 2.0),
 		weakWeightScale: maybeMutate(genome.weakWeightScale, 0.2, 0.2, 2.0),
-		monsterStatScale: maybeMutate(genome.monsterStatScale, 0.16, 0.6, 1.7),
-		itemStatScale: maybeMutate(genome.itemStatScale, 0.16, 0.6, 1.7),
 		consumableHealScale: maybeMutate(genome.consumableHealScale, 0.2, 0.4, 2.0),
 	};
-}
-
-function applyGenome(
-	baseDeck: BiomeDeckConfig,
-	baseBalance: GameBalanceConfig,
-	genome: Genome
-): { deckConfig: BiomeDeckConfig; balanceConfig: GameBalanceConfig } {
-	const deckConfig: BiomeDeckConfig = structuredClone(baseDeck);
-	const balanceConfig: GameBalanceConfig = structuredClone(baseBalance);
-	const biomeOrder: PlayBiome[] = ['plains', 'forest', 'desert', 'cave', 'volcano'];
-
-	for (const biome of biomeOrder) {
-		const template = deckConfig.BIOME_DECKS[biome];
-		template.encounterComposition.monster = toCount(template.encounterComposition.monster * genome.monsterEncounterScale);
-		template.encounterComposition.item = toCount(template.encounterComposition.item * genome.itemEncounterScale);
-		template.encounterComposition.consumable = toCount(template.encounterComposition.consumable * genome.consumableEncounterScale);
-		template.encounterComposition.heart = toCount(template.encounterComposition.heart * genome.heartEncounterScale);
-
-		template.lootComposition.item = toCount(template.lootComposition.item * genome.lootItemScale);
-		template.lootComposition.consumable = toCount(template.lootComposition.consumable * genome.lootConsumableScale);
-		template.lootComposition.heart = toCount(template.lootComposition.heart * genome.lootHeartScale);
-
-		const totalEncounter =
-			template.encounterComposition.monster +
-			template.encounterComposition.item +
-			template.encounterComposition.consumable +
-			template.encounterComposition.heart;
-		if (totalEncounter <= 0) {
-			template.encounterComposition.monster = 1;
-		}
-
-		const nonMonsterEncounter =
-			template.encounterComposition.item +
-			template.encounterComposition.consumable +
-			template.encounterComposition.heart;
-		if (template.encounterComposition.monster <= nonMonsterEncounter) {
-			template.encounterComposition.monster = nonMonsterEncounter + 1;
-		}
-
-		const totalLoot = template.lootComposition.item + template.lootComposition.consumable + template.lootComposition.heart;
-		if (totalLoot <= 0) {
-			template.lootComposition.item = 1;
-		}
-
-		const scaledWeights = normalizeWeights({
-			weak: template.monsterVariantWeights.weak * genome.weakWeightScale,
-			normal: template.monsterVariantWeights.normal,
-			strong: template.monsterVariantWeights.strong * genome.strongWeightScale,
-		});
-		template.monsterVariantWeights = scaledWeights;
-	}
-
-	for (const biome of ['plains', 'forest', 'desert', 'cave', 'volcano'] as const) {
-		const monsterBase = balanceConfig.BIOME_TIER_BASE_STATS[biome];
-		monsterBase.health = Math.max(1, Math.round(monsterBase.health * genome.monsterStatScale));
-		monsterBase.attack = Math.max(1, Math.round(monsterBase.attack * genome.monsterStatScale));
-		monsterBase.defense = Math.max(0, Math.round(monsterBase.defense * genome.monsterStatScale));
-		monsterBase.attackChance = clampChance(monsterBase.attackChance + (genome.monsterStatScale - 1) * 0.08);
-		monsterBase.defenseChance = clampChance(monsterBase.defenseChance + (genome.monsterStatScale - 1) * 0.08);
-
-		const weaponBase = balanceConfig.ITEM_TIER_BASE.weapon[biome];
-		weaponBase.attack = Math.max(1, Math.round(weaponBase.attack * genome.itemStatScale));
-		weaponBase.attackChance = clampChance(weaponBase.attackChance + (genome.itemStatScale - 1) * 0.06);
-
-		const armorBase = balanceConfig.ITEM_TIER_BASE.armor[biome];
-		armorBase.defense = Math.max(0, Math.round(armorBase.defense * genome.itemStatScale));
-		armorBase.defenseChance = clampChance(armorBase.defenseChance + (genome.itemStatScale - 1) * 0.06);
-	}
-
-	balanceConfig.CONSUMABLES.smallPotionHeal = Math.max(1, Math.round(balanceConfig.CONSUMABLES.smallPotionHeal * genome.consumableHealScale));
-	balanceConfig.CONSUMABLES.mediumPotionHeal = Math.max(1, Math.round(balanceConfig.CONSUMABLES.mediumPotionHeal * genome.consumableHealScale));
-	balanceConfig.CONSUMABLES.largePotionHeal = Math.max(1, Math.round(balanceConfig.CONSUMABLES.largePotionHeal * genome.consumableHealScale));
-	balanceConfig.CONSUMABLES.fullPotionHeal = Math.max(
-		balanceConfig.CONSUMABLES.largePotionHeal + 1,
-		Math.round(balanceConfig.CONSUMABLES.fullPotionHeal * clamp(genome.consumableHealScale, 0.9, 1.4))
-	);
-
-	return { deckConfig, balanceConfig };
 }
 
 function getTsxBinPath(): string {
@@ -258,7 +302,7 @@ function getTsxBinPath(): string {
 }
 
 async function runSimulationWorker(simOptions: SimOptions): Promise<WorkerSimulationResult> {
-	const workerScript = path.resolve(process.cwd(), 'simulation', 'candidateSimulationWorker.ts');
+	const workerScript = path.resolve(process.cwd(), 'src', 'candidateSimulationWorker.ts');
 	const tsxLoader = getTsxBinPath();
 	const args = [
 		'--import',
@@ -270,8 +314,8 @@ async function runSimulationWorker(simOptions: SimOptions): Promise<WorkerSimula
 		`--gridSizeX=${simOptions.gridSizeX}`,
 		`--gridSizeY=${simOptions.gridSizeY}`,
 		`--playerName=${simOptions.playerName}`,
-		`--biomeDeckConfigPath=${simOptions.biomeDeckConfigPath || ''}`,
-		`--gameBalanceConfigPath=${simOptions.gameBalanceConfigPath || ''}`,
+		`--deckDefinitionsConfigPath=${simOptions.deckDefinitionsConfigPath || ''}`,
+		`--balanceConfigPath=${simOptions.balanceConfigPath || ''}`,
 	];
 
 	return await new Promise<WorkerSimulationResult>((resolve, reject) => {
@@ -329,20 +373,17 @@ async function runSimulationWorker(simOptions: SimOptions): Promise<WorkerSimula
 }
 
 async function evaluateCandidate(
-	baseDeck: BiomeDeckConfig,
-	baseBalance: GameBalanceConfig,
 	genome: Genome,
 	args: Args,
 	seedSuffix: string
 ): Promise<Candidate> {
-	const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dragon-ga-'));
-	const deckPath = path.join(tempDir, 'biome-decks.json');
-	const balancePath = path.join(tempDir, 'game-balance.json');
-	const { deckConfig, balanceConfig } = applyGenome(baseDeck, baseBalance, genome);
-	await fs.writeFile(deckPath, JSON.stringify(deckConfig, null, 2), 'utf8');
-	await fs.writeFile(balancePath, JSON.stringify(balanceConfig, null, 2), 'utf8');
+	const _tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dragon-ga-'));
 
 	try {
+		const balanceConfig = createBalanceConfigFromGenome(genome);
+		const balanceConfigPath = path.join(_tempDir, 'balance.json');
+		await fs.writeFile(balanceConfigPath, JSON.stringify(balanceConfig, null, 2), 'utf8');
+
 		const simOptions: SimOptions = {
 			games: args.games,
 			maxTurns: args.maxTurns,
@@ -350,8 +391,8 @@ async function evaluateCandidate(
 			gridSizeX: args.gridSizeX,
 			gridSizeY: args.gridSizeY,
 			playerName: 'AutoBalanceBot',
-			biomeDeckConfigPath: deckPath,
-			gameBalanceConfigPath: balancePath,
+			deckDefinitionsConfigPath: args.baseDeckDefinitionsPath,
+			balanceConfigPath,
 		};
 
 		const output = await runSimulationWorker(simOptions);
@@ -382,17 +423,13 @@ async function evaluateCandidate(
 			genome,
 			fitness,
 			aggregate: output.aggregate,
-			deckConfig,
-			balanceConfig,
 		};
 	} finally {
-		await fs.rm(tempDir, { recursive: true, force: true });
+		await fs.rm(_tempDir, { recursive: true, force: true });
 	}
 }
 
 async function evaluateCandidateWithRetry(
-	baseDeck: BiomeDeckConfig,
-	baseBalance: GameBalanceConfig,
 	genome: Genome,
 	args: Args,
 	seedSuffix: string
@@ -400,7 +437,7 @@ async function evaluateCandidateWithRetry(
 	let lastError: unknown;
 	for (let attempt = 1; attempt <= 3; attempt += 1) {
 		try {
-			return await evaluateCandidate(baseDeck, baseBalance, genome, args, `${seedSuffix}-a${attempt}`);
+			return await evaluateCandidate(genome, args, `${seedSuffix}-a${attempt}`);
 		} catch (error) {
 			lastError = error;
 			if (attempt < 3) {
@@ -413,8 +450,6 @@ async function evaluateCandidateWithRetry(
 
 async function evaluatePopulation(
 	population: Genome[],
-	baseDeck: BiomeDeckConfig,
-	baseBalance: GameBalanceConfig,
 	args: Args,
 	generation: number
 ): Promise<Candidate[]> {
@@ -429,8 +464,6 @@ async function evaluatePopulation(
 			if (index >= population.length) break;
 			try {
 				const candidate = await evaluateCandidateWithRetry(
-					baseDeck,
-					baseBalance,
 					population[index],
 					args,
 					`g${generation + 1}-c${index + 1}`
@@ -441,8 +474,6 @@ async function evaluatePopulation(
 				);
 			} catch (error) {
 				const fallback = await evaluateCandidateWithRetry(
-					baseDeck,
-					baseBalance,
 					buildRandomGenome(createSeededRandom(`${args.seed}-fallback-${generation + 1}-${index + 1}`)),
 					args,
 					`g${generation + 1}-fallback-c${index + 1}`
@@ -469,9 +500,6 @@ async function main() {
 		`[autobalance] seed=${args.seed} generations=${args.generations} population=${args.population} games=${args.games} maxTurns=${args.maxTurns}`
 	);
 
-	const baseDeck = JSON.parse(await fs.readFile(args.baseDeckPath, 'utf8')) as BiomeDeckConfig;
-	const baseBalance = JSON.parse(await fs.readFile(args.baseBalancePath, 'utf8')) as GameBalanceConfig;
-
 	const runFolder = `${args.runName}`
 		.trim()
 		.toLowerCase()
@@ -495,7 +523,7 @@ async function main() {
 
 	for (let generation = 0; generation < args.generations; generation += 1) {
 		console.error(`[autobalance] generation ${generation + 1}/${args.generations} started`);
-		const evaluated = await evaluatePopulation(population, baseDeck, baseBalance, args, generation);
+		const evaluated = await evaluatePopulation(population, args, generation);
 		evaluated.sort((left, right) => right.fitness - left.fitness);
 		const generationBest = evaluated[0];
 		if (!best || generationBest.fitness > best.fitness) {
@@ -528,10 +556,10 @@ async function main() {
 		throw new Error('No candidate evaluated');
 	}
 
-	const bestDeckPath = path.join(artifactDir, 'best-biome-decks.json');
-	const bestBalancePath = path.join(artifactDir, 'best-game-balance.json');
-	await fs.writeFile(bestDeckPath, JSON.stringify(best.deckConfig, null, 2), 'utf8');
-	await fs.writeFile(bestBalancePath, JSON.stringify(best.balanceConfig, null, 2), 'utf8');
+	const bestBalancePath = path.join(artifactDir, 'best-balance.json');
+	await fs.writeFile(bestBalancePath, JSON.stringify(createBalanceConfigFromGenome(best.genome), null, 2), 'utf8');
+
+	const bestDeckDefinitionsPath = args.baseDeckDefinitionsPath;
 
 	const baselineSummary = await runApiSimulation(
 		{
@@ -541,8 +569,7 @@ async function main() {
 			gridSizeX: args.gridSizeX,
 			gridSizeY: args.gridSizeY,
 			playerName: 'AutoBalanceBot',
-			biomeDeckConfigPath: args.baseDeckPath,
-			gameBalanceConfigPath: args.baseBalancePath,
+			deckDefinitionsConfigPath: args.baseDeckDefinitionsPath,
 		},
 		{ writeArtifacts: true, artifactRoot: path.join(args.artifactDir, runFolder), runName: 'baseline-report' }
 	);
@@ -555,8 +582,8 @@ async function main() {
 			gridSizeX: args.gridSizeX,
 			gridSizeY: args.gridSizeY,
 			playerName: 'AutoBalanceBot',
-			biomeDeckConfigPath: bestDeckPath,
-			gameBalanceConfigPath: bestBalancePath,
+			deckDefinitionsConfigPath: bestDeckDefinitionsPath,
+			balanceConfigPath: bestBalancePath,
 		},
 		{ writeArtifacts: true, artifactRoot: path.join(args.artifactDir, runFolder), runName: 'best-report' }
 	);
@@ -586,7 +613,7 @@ async function main() {
 			bossDefeatRate: best.aggregate.successRate,
 			aggregate: best.aggregate,
 			genome: best.genome,
-			bestDeckPath,
+			bestDeckDefinitionsPath,
 			bestBalancePath,
 		},
 		baselineAggregate: baselineSummary.aggregate,

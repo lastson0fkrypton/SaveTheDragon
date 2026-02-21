@@ -1,5 +1,5 @@
-import { getItemDefs } from '../constants/items.js';
-import type { PlayBiome } from '../config/biomeDeckConfig.js';
+import { getHealingAmountDefinition, getItemDefinitionById } from '../config/deckDefinitionsConfig.js';
+import type { PlayBiome } from '../config/biomeTypes.js';
 import {
 	createBiomeDeckRuntime,
 	drawLootCard,
@@ -115,7 +115,7 @@ function movePlayerToNearestTown(gameState, playerState) {
 }
 
 function findItem(itemId) {
-	return getItemDefs().find(i => i.id === itemId);
+	return getItemDefinitionById(itemId);
 }
 
 function getExtraHeartItemRequired() {
@@ -250,16 +250,26 @@ async function useBattleItem(gameId, playerId, itemId) {
 
 	const item = findItem(itemId);
 	if (!item || item.type !== 'item') throw serviceError(400, 'Invalid item');
+	const healingAmount = getHealingAmountDefinition();
+	const effectHeal =
+		item.effect === 'heal_small'
+			? healingAmount.smallHealthPotion
+			: item.effect === 'heal_medium'
+				? healingAmount.mediumHealthPotion
+				: item.effect === 'heal_large'
+					? healingAmount.largeHealthPotion
+					: 0;
 
 	const log = battle.battleLog || [];
 	let consumed = false;
 
-	if (typeof item.heal === 'number' && item.heal > 0) {
-		battle.playerHealth = Math.min(playerState.maxHearts || 5, battle.playerHealth + item.heal);
+	if ((typeof item.heal === 'number' && item.heal > 0) || effectHeal > 0) {
+		const healValue = typeof item.heal === 'number' && item.heal > 0 ? item.heal : effectHeal;
+		battle.playerHealth = Math.min(playerState.maxHearts || 5, battle.playerHealth + healValue);
 		playerState.damage = Math.max(0, (playerState.maxHearts || 5) - battle.playerHealth);
-		log.push(`${playerRow.name || 'Player'} used ${item.name} and recovered ${item.heal} health.`);
+		log.push(`${playerRow.name || 'Player'} used ${item.name} and recovered ${healValue} health.`);
 		consumed = true;
-	} else if (item.effect === 'full_heal') {
+	} else if (item.effect === 'heal_full') {
 		battle.playerHealth = playerState.maxHearts || 5;
 		playerState.damage = 0;
 		log.push(`${playerRow.name || 'Player'} used ${item.name} and fully healed.`);
@@ -349,7 +359,7 @@ async function collectBattleLoot(gameId, playerId) {
 		return { success: true, reward: null };
 	}
 
-	const battleBiome = battle.biome || battle.monster?.biome?.split(',')[0] || 'plains';
+	const battleBiome = battle.biome || 'plains';
 	let reward: LootCard | null = null;
 	if (isDeckBiome(battleBiome)) {
 		const deckState = ensureBiomeDeckState(gameState);

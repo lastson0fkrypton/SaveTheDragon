@@ -1,4 +1,4 @@
-import { getItemDefs } from '../constants/items.js';
+import { getAllItemDefinitions } from '../config/deckDefinitionsConfig.js';
 import type {
 	BiomeGrid,
 	GameRow,
@@ -10,7 +10,7 @@ import type {
 } from '../types.js';
 import { random, randomChoice, randomInt } from './random.js';
 
-type ItemDefFromConstants = ReturnType<typeof getItemDefs>[number];
+type ItemDefFromConstants = ReturnType<typeof getAllItemDefinitions>[number];
 
 // Helper: serialize a game from DB rows
 function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows: ValidMoveRow[]) {
@@ -39,7 +39,7 @@ function serializeGame(gameRow: GameRow, playerRows: PlayerRow[], validMoveRows:
 	if (gameState.recentlyFoundItem && gameState.recentlyFoundItem.item?.id) {
 		allItemIds.add(gameState.recentlyFoundItem.item.id);
 	}
-	const itemDefs = getItemDefs();
+	const itemDefs = getAllItemDefinitions();
 	const itemMeta: Record<string, ItemDefFromConstants> = {};
 	itemDefs.forEach(def => {
 		if (allItemIds.has(def.id)) itemMeta[def.id] = def;

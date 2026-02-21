@@ -12,7 +12,6 @@ export interface ItemDef {
 	heal?: number | null;
 	effect?: string | null;
 	img?: string | null;
-	noRandom?: boolean | null;
 }
 
 export interface MonsterDef {

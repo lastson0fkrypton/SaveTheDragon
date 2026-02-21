@@ -1,5 +1,5 @@
 import { CHARACTERS } from '../constants/characters.js';
-import { getItemDefs } from '../constants/items.js';
+import { getHealingAmountDefinition, getItemDefinitionById } from '../config/deckDefinitionsConfig.js';
 import {
 	getGameById,
 	getPlayerByIdAndGameId,
@@ -20,7 +20,7 @@ function parseJson(text, fallback = {}) {
 }
 
 function findItem(itemId) {
-	return getItemDefs().find(item => item.id === itemId);
+	return getItemDefinitionById(itemId);
 }
 
 function nearestTownPosition(biomeGrid, positionX, positionY) {
@@ -100,11 +100,21 @@ async function useItem(gameId, playerId, itemId) {
 	}
 
 	let used = false;
-	if (item.heal) {
-		playerState.damage = Math.max(0, (playerState.damage || 0) - item.heal);
-		used = true;
-	} else if (item.effect === 'full_heal') {
+	const healingAmount = getHealingAmountDefinition();
+	const effectHeal =
+		item.effect === 'heal_small'
+			? healingAmount.smallHealthPotion
+			: item.effect === 'heal_medium'
+				? healingAmount.mediumHealthPotion
+				: item.effect === 'heal_large'
+					? healingAmount.largeHealthPotion
+					: 0;
+	if (item.effect === 'heal_full') {
 		playerState.damage = 0;
+		used = true;
+	} else if ((typeof item.heal === 'number' && item.heal > 0) || effectHeal > 0) {
+		const healValue = typeof item.heal === 'number' && item.heal > 0 ? item.heal : effectHeal;
+		playerState.damage = Math.max(0, (playerState.damage || 0) - healValue);
 		used = true;
 	} else if (item.effect === 'extra_heart') {
 		playerState.maxHearts = Math.min((playerState.maxHearts || 5) + 1, 20);

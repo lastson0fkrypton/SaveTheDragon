@@ -7,8 +7,8 @@ import battleRoutes from './routes/battleRoutes.js';
 import playerRoutes from './routes/playerRoutes.js';
 import lastPoll from './lastPoll.js';
 import { clearGameDataById, getAllGames } from './repositories/gameRepository.js';
-import { initializeGameBalanceConfig } from './config/gameBalanceConfig.js';
-import { initializeBiomeDeckConfig } from './config/biomeDeckConfig.js';
+import { initializeDeckDefinitionsConfig } from './config/deckDefinitionsConfig.js';
+import { assertRequiredGameItems } from './services/gameService.js';
 
 type StartServerOptions = {
 	port?: number;
@@ -69,8 +69,8 @@ function waitForListening(server: Server): Promise<void> {
 export async function startServer(options: StartServerOptions = {}) {
 	const port = options.port ?? 3000;
 	initDb();
-	initializeGameBalanceConfig(process.env.GAME_BALANCE_CONFIG_PATH);
-	initializeBiomeDeckConfig(process.env.BIOME_DECK_CONFIG_PATH);
+	initializeDeckDefinitionsConfig(process.env.DECK_DEFINITIONS_CONFIG_PATH);
+	assertRequiredGameItems();
 
 	const app = createApp();
 	const server = app.listen(port);

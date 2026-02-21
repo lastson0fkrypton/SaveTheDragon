@@ -1,8 +1,11 @@
 import { CHARACTERS } from '../constants/characters.js';
-import { getItemDefs } from '../constants/items.js';
-import { EVIL_PRINCESS_MONSTER } from '../constants/monsters.js';
-import type { PlayBiome } from '../config/biomeDeckConfig.js';
-import { createBiomeDeckRuntime, drawEncounterCard, type BiomeDeckRuntime } from './biomeDeckService.js';
+import {
+	getFinalBossDefinition,
+	getItemDefinitionById,
+	getStartingItemsDefinition,
+} from '../config/deckDefinitionsConfig.js';
+import type { PlayBiome } from '../config/biomeTypes.js';
+import { createBiomeDeckRuntime, drawEncounterCard, drawLootCard, type BiomeDeckRuntime } from './biomeDeckService.js';
 import {
 	createGame,
 	createPlayer,
@@ -35,7 +38,7 @@ function ensureBiomeDeckState(gameState): BiomeDeckRuntime {
 
 function ensureInventory(playerState): void {
 	if (!playerState.inventory) {
-		playerState.inventory = { weapons: [], armor: [], items: [], equippedWeaponId: 'fist', equippedArmorId: null };
+		playerState.inventory = { weapons: [], armor: [], items: [], equippedWeaponId: null, equippedArmorId: null };
 	}
 	if (!Array.isArray(playerState.inventory.weapons)) playerState.inventory.weapons = [];
 	if (!Array.isArray(playerState.inventory.armor)) playerState.inventory.armor = [];
@@ -62,17 +65,31 @@ function grantItemToPlayer(playerState, item): void {
 }
 
 function getExtraHeartItem() {
-	return getItemDefs().find(item => item.id === REQUIRED_EXTRA_HEART_ITEM_ID) || null;
+	return getItemDefinitionById(REQUIRED_EXTRA_HEART_ITEM_ID);
 }
 
-export function assertRequiredGameItems(itemDefs = getItemDefs()): void {
-	const hasExtraHeart = itemDefs.some(item => item.id === REQUIRED_EXTRA_HEART_ITEM_ID);
+function getRequiredFinalBoss() {
+	const boss = getFinalBossDefinition();
+	if (!boss) {
+		throw new Error('Missing required final-boss definition in deck-definitions.json');
+	}
+	return boss;
+}
+
+function getRequiredStartingItems() {
+	const startingItems = getStartingItemsDefinition();
+	if (!startingItems?.weapon?.id) {
+		throw new Error('Missing required startingItems.weapon definition in deck-definitions.json');
+	}
+	return startingItems;
+}
+
+export function assertRequiredGameItems(): void {
+	const hasExtraHeart = Boolean(getItemDefinitionById(REQUIRED_EXTRA_HEART_ITEM_ID));
 	if (!hasExtraHeart) {
 		throw new Error(`Missing required item definition: ${REQUIRED_EXTRA_HEART_ITEM_ID}`);
 	}
 }
-
-assertRequiredGameItems();
 
 function buildGameState(gameRow, playerRows, validMoveRows) {
 	return serializeGame(gameRow, playerRows, validMoveRows);
@@ -117,11 +134,12 @@ function getGameState(gameRow) {
 }
 
 function ensureRaidBossState(gameState) {
+	const finalBoss = getRequiredFinalBoss();
 	if (!gameState.raidBoss) {
 		gameState.raidBoss = {
-			...EVIL_PRINCESS_MONSTER,
-			maxHealth: EVIL_PRINCESS_MONSTER.health,
-			currentHealth: EVIL_PRINCESS_MONSTER.health,
+			...finalBoss,
+			maxHealth: finalBoss.health,
+			currentHealth: finalBoss.health,
 			defeated: false,
 		};
 	}
@@ -231,9 +249,9 @@ async function createNewGame(gridSizeX, gridSizeY) {
 		biomeGrid,
 		biomeDecks: createBiomeDeckRuntime(),
 		raidBoss: {
-			...EVIL_PRINCESS_MONSTER,
-			maxHealth: EVIL_PRINCESS_MONSTER.health,
-			currentHealth: EVIL_PRINCESS_MONSTER.health,
+			...getRequiredFinalBoss(),
+			maxHealth: getRequiredFinalBoss().health,
+			currentHealth: getRequiredFinalBoss().health,
 			defeated: false,
 		},
 		gameCompletion: { completed: false },
@@ -281,10 +299,10 @@ async function joinExistingGame(gameId, playerName) {
 		damage: 0,
 		characterId: randomCharacterId,
 		inventory: {
-			weapons: ['fist'],
+			weapons: [getRequiredStartingItems().weapon.id],
 			armor: [],
 			items: [],
-			equippedWeaponId: 'fist',
+			equippedWeaponId: getRequiredStartingItems().weapon.id,
 			equippedArmorId: null,
 		},
 	};
@@ -362,6 +380,36 @@ function startEncounterIfNeeded(gameState, playerRows, playerId, playerState, bi
 	const encounterCard = drawEncounterCard(deckState, biome);
 
 	if (encounterCard.kind !== 'monster') {
+		if (encounterCard.kind === 'chest') {
+			const reward = drawLootCard(deckState, biome);
+			if (reward.kind === 'heart') {
+				const extraHeartItem = getExtraHeartItem();
+				if (!extraHeartItem) {
+					throw serviceError(500, `Missing required item definition: ${REQUIRED_EXTRA_HEART_ITEM_ID}`);
+				}
+				grantItemToPlayer(playerState, extraHeartItem);
+				gameState.recentlyFoundItem = { playerId, item: extraHeartItem, ts: Date.now() };
+				addRecentAction(
+					gameState,
+					'find-item',
+					playerRows.find(p => p.id === playerId)?.name || 'Player',
+					extraHeartItem.name || 'Additional Heart'
+				);
+			} else {
+				grantItemToPlayer(playerState, reward.item);
+				gameState.recentlyFoundItem = { playerId, item: reward.item, ts: Date.now() };
+				addRecentAction(
+					gameState,
+					'find-item',
+					playerRows.find(p => p.id === playerId)?.name || 'Player',
+					reward.item.name || 'Item'
+				);
+			}
+
+			gameState.currentBattle = null;
+			return false;
+		}
+
 		if (encounterCard.kind === 'heart') {
 			const extraHeartItem = getExtraHeartItem();
 			if (!extraHeartItem) {
