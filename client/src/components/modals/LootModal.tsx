@@ -94,7 +94,7 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 								<div className="card-desc">
 									{loot.item.heal
 										? `Heals ${loot.item.heal} hearts`
-										: loot.item.effect === 'full_heal'
+										: loot.item.effect === 'full_heal' || loot.item.effect === 'heal_full'
 										? 'Heals all hearts'
 										: loot.item.effect === 'extra_heart'
 										? 'Increases max hearts by 1'

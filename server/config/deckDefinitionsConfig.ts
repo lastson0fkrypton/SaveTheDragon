@@ -5,22 +5,16 @@ import type { ItemDef, MonsterDef } from '../types.js';
 
 export type DeckKind = 'encounter' | 'loot';
 export type DeckId =
-	| 'forest_encounter'
-	| 'forest_loot'
-	| 'desert_encounter'
-	| 'desert_loot'
-	| 'volcano_encounter'
-	| 'volcano_loot';
+	| 'easy_encounter'
+	| 'easy_loot'
+	| 'medium_encounter'
+	| 'medium_loot'
+	| 'hard_encounter'
+	| 'hard_loot';
 
-export type EncounterDeckCardDef =
-	| { kind: 'monster'; id: string }
-	| { kind: 'item'; id: string }
-	| { kind: 'heart'; id: string; hearts?: number }
-	| { kind: 'chest'; id: string };
+export type EncounterDeckCardDef = { kind: 'monster'; id: string };
 
-export type LootDeckCardDef =
-	| { kind: 'item'; id: string }
-	| { kind: 'heart'; id: string; hearts?: number };
+export type LootDeckCardDef = { kind: 'item'; id: string };
 
 export type DeckConsumableCounts = {
 	teleport: number;
@@ -55,17 +49,72 @@ export type DeckDefinitionsConfig = {
 };
 
 const REQUIRED_DECK_IDS: DeckId[] = [
-	'forest_encounter',
-	'forest_loot',
-	'desert_encounter',
-	'desert_loot',
-	'volcano_encounter',
-	'volcano_loot',
+	'easy_encounter',
+	'easy_loot',
+	'medium_encounter',
+	'medium_loot',
+	'hard_encounter',
+	'hard_loot',
 ];
 
 let activeDeckDefinitionsConfig: DeckDefinitionsConfig | null = null;
 let activeItemDefinitions: Record<string, ItemDef> = {};
 let activeMonsterDefinitions: Record<string, MonsterDef> = {};
+let activeLootDeckTypesByItemId: Record<string, DeckType[]> = {};
+
+const DEFAULT_HEALING_AMOUNT = {
+	smallHealthPotion: 3,
+	mediumHealthPotion: 5,
+	largeHealthPotion: 7,
+};
+
+const CONSUMABLE_ITEM_BY_KEY: Record<
+	keyof DeckConsumableCounts,
+	(itemHealing: { smallHealthPotion: number; mediumHealthPotion: number; largeHealthPotion: number }) => ItemDef | null
+> = {
+	teleport: () => ({ id: 'teleport', name: 'Teleport', type: 'item', img: 'teleport.png', effect: 'teleport', heal: null }),
+	smallHealthPotion: healing => ({
+		id: 'small_potion',
+		name: 'Small Health Potion',
+		type: 'item',
+		img: 'small_potion.png',
+		effect: 'heal_small',
+		heal: healing.smallHealthPotion,
+	}),
+	mediumHealthPotion: healing => ({
+		id: 'medium_potion',
+		name: 'Medium Health Potion',
+		type: 'item',
+		img: 'medium_potion.png',
+		effect: 'heal_medium',
+		heal: healing.mediumHealthPotion,
+	}),
+	largeHealthPotion: healing => ({
+		id: 'large_potion',
+		name: 'Large Health Potion',
+		type: 'item',
+		img: 'large_potion.png',
+		effect: 'heal_large',
+		heal: healing.largeHealthPotion,
+	}),
+	fullHealthPotion: () => ({
+		id: 'full_potion',
+		name: 'Full Health Potion',
+		type: 'item',
+		img: 'full_potion.png',
+		effect: 'heal_full',
+		heal: null,
+	}),
+	extraHeart: () => ({
+		id: 'extra_heart',
+		name: 'Additional Heart',
+		type: 'item',
+		img: 'extra_heart.png',
+		effect: 'extra_heart',
+		heal: null,
+	}),
+	chest: () => null,
+};
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -90,7 +139,6 @@ function validateItemDef(rawItem: unknown, label: string): ItemDef {
 		id: rawItem.id,
 		name: rawItem.name,
 		type: rawItem.type,
-		biome: typeof rawItem.biome === 'string' ? rawItem.biome : undefined,
 		attack: typeof rawItem.attack === 'number' ? rawItem.attack : null,
 		attackChance: typeof rawItem.attackChance === 'number' ? rawItem.attackChance : null,
 		defense: typeof rawItem.defense === 'number' ? rawItem.defense : null,
@@ -114,10 +162,6 @@ function validateMonsterDef(rawMonster: unknown, label: string): MonsterDef {
 	if (typeof rawMonster.name !== 'string' || rawMonster.name.length === 0) {
 		throw new Error(`Invalid monster definition '${label}': missing name`);
 	}
-	if (typeof rawMonster.biome !== 'string' || rawMonster.biome.length === 0) {
-		throw new Error(`Invalid monster definition '${label}': missing biome`);
-	}
-
 	for (const field of ['health', 'attack', 'attackChance', 'defense', 'defenseChance'] as const) {
 		if (typeof rawMonster[field] !== 'number' || !Number.isFinite(rawMonster[field])) {
 			throw new Error(`Invalid monster definition '${label}': missing ${field}`);
@@ -133,7 +177,6 @@ function validateMonsterDef(rawMonster: unknown, label: string): MonsterDef {
 	return {
 		id: rawMonster.id,
 		name: rawMonster.name,
-		biome: rawMonster.biome,
 		health,
 		attack,
 		attackChance,
@@ -201,7 +244,23 @@ function validateHealingAmount(rawHealingAmount: unknown): DeckDefinitionsConfig
 	};
 }
 
-function validateCard(rawCard: unknown, deckId: DeckId, index: number): EncounterDeckCardDef | LootDeckCardDef {
+function getHealingAmountFromConfig(config: DeckDefinitionsConfig): {
+	smallHealthPotion: number;
+	mediumHealthPotion: number;
+	largeHealthPotion: number;
+} {
+	if (!config.healingAmount) {
+		return DEFAULT_HEALING_AMOUNT;
+	}
+	return config.healingAmount;
+}
+
+function validateCard(
+	rawCard: unknown,
+	deckId: DeckId,
+	deckKind: DeckKind,
+	index: number
+): EncounterDeckCardDef | LootDeckCardDef {
 	if (!isPlainObject(rawCard)) {
 		throw new Error(`Invalid card at ${deckId}[${index}]: expected object`);
 	}
@@ -217,12 +276,19 @@ function validateCard(rawCard: unknown, deckId: DeckId, index: number): Encounte
 		throw new Error(`Invalid card at ${deckId}[${index}]: missing id`);
 	}
 
-	if (kind === 'heart') {
-		if (hearts !== undefined && (typeof hearts !== 'number' || !Number.isFinite(hearts) || hearts <= 0)) {
-			throw new Error(`Invalid card at ${deckId}[${index}]: heart cards require hearts > 0 when provided`);
+	if (deckKind === 'encounter' && kind !== 'monster') {
+		throw new Error(`Invalid card at ${deckId}[${index}]: encounter deck cards must be kind 'monster'`);
+	}
+
+	if (deckKind === 'loot' && kind !== 'item') {
+		throw new Error(`Invalid card at ${deckId}[${index}]: loot deck cards must be kind 'item'`);
+	}
+
+	if (deckKind === 'loot') {
+		const cardType = rawCard.type;
+		if (cardType !== 'weapon' && cardType !== 'armor') {
+			throw new Error(`Invalid card at ${deckId}[${index}]: loot deck cards must be type 'weapon' or 'armor'`);
 		}
-		const normalizedHearts = typeof hearts === 'number' ? Math.floor(hearts) : 1;
-		return { ...rawCard, kind: 'heart', id, hearts: normalizedHearts } as EncounterDeckCardDef | LootDeckCardDef;
 	}
 
 	if (kind === 'monster' || kind === 'item' || kind === 'chest') {
@@ -266,7 +332,8 @@ function validateDeck(rawDeck: unknown, deckId: DeckId): DeckDefinition {
 		throw new Error(`Invalid deck '${deckId}': cards must be an array`);
 	}
 
-	const cards = rawDeck.cards.map((card, index) => validateCard(card, deckId, index));
+	const deckKind: DeckKind = deckId.endsWith('_encounter') ? 'encounter' : 'loot';
+	const cards = rawDeck.cards.map((card, index) => validateCard(card, deckId, deckKind, index));
 	const consumables = validateConsumables(rawDeck.consumables, deckId);
 	return {
 		deck: deckId,
@@ -341,7 +408,6 @@ function buildItemDefinitions(config: DeckDefinitionsConfig): Record<string, Ite
 					id: card.id,
 					name: rawCard.name,
 					type: resolvedType,
-					biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
 					img: rawCard.img,
 					effect: typeof rawCard.effect === 'string' ? rawCard.effect : null,
 					heal: typeof rawCard.heal === 'number' ? rawCard.heal : null,
@@ -352,6 +418,21 @@ function buildItemDefinitions(config: DeckDefinitionsConfig): Record<string, Ite
 					defenseChance:
 						typeof rawCard.defenseChance === 'number' ? rawCard.defenseChance : null,
 				};
+			}
+		}
+	}
+
+	const healing = getHealingAmountFromConfig(config);
+	for (const deck of Object.values(config.decks)) {
+		for (const [consumableKey, countRaw] of Object.entries(deck.consumables) as Array<[keyof DeckConsumableCounts, number]>) {
+			const count = Math.max(0, Math.floor(countRaw || 0));
+			if (count <= 0) continue;
+			const buildItem = CONSUMABLE_ITEM_BY_KEY[consumableKey];
+			if (!buildItem) continue;
+			const consumableItem = buildItem(healing);
+			if (!consumableItem) continue;
+			if (!items[consumableItem.id]) {
+				items[consumableItem.id] = consumableItem;
 			}
 		}
 	}
@@ -371,7 +452,6 @@ function buildMonsterDefinitions(config: DeckDefinitionsConfig): Record<string, 
 			if (!monsters[card.id]) {
 				if (
 					typeof rawCard.name !== 'string' ||
-					typeof rawCard.biome !== 'string' ||
 					typeof rawCard.img !== 'string' ||
 					typeof rawCard.health !== 'number' ||
 					typeof rawCard.attack !== 'number' ||
@@ -384,7 +464,6 @@ function buildMonsterDefinitions(config: DeckDefinitionsConfig): Record<string, 
 				monsters[card.id] = {
 					id: card.id,
 					name: rawCard.name,
-					biome: rawCard.biome,
 					health: rawCard.health,
 					attack: rawCard.attack,
 					attackChance: rawCard.attackChance,
@@ -397,6 +476,43 @@ function buildMonsterDefinitions(config: DeckDefinitionsConfig): Record<string, 
 	}
 
 	return monsters;
+}
+
+function buildLootDeckTypesByItemId(config: DeckDefinitionsConfig): Record<string, DeckType[]> {
+	const byItemId = new Map<string, Set<DeckType>>();
+	for (const [deckId, deck] of Object.entries(config.decks) as Array<[DeckId, DeckDefinition]>) {
+		if (!deckId.endsWith('_loot')) continue;
+		const deckType = getDeckTypeFromDeckId(deckId);
+		for (const card of deck.cards) {
+			if (card.kind !== 'item') continue;
+			const existing = byItemId.get(card.id) ?? new Set<DeckType>();
+			existing.add(deckType);
+			byItemId.set(card.id, existing);
+		}
+
+		const healing = getHealingAmountFromConfig(config);
+		for (const [consumableKey, countRaw] of Object.entries(deck.consumables) as Array<[keyof DeckConsumableCounts, number]>) {
+			const count = Math.max(0, Math.floor(countRaw || 0));
+			if (count <= 0) continue;
+			const buildItem = CONSUMABLE_ITEM_BY_KEY[consumableKey];
+			if (!buildItem) continue;
+			const item = buildItem(healing);
+			if (!item) continue;
+			const existing = byItemId.get(item.id) ?? new Set<DeckType>();
+			existing.add(deckType);
+			byItemId.set(item.id, existing);
+		}
+	}
+
+	return Object.fromEntries(
+		Array.from(byItemId.entries()).map(([itemId, deckTypes]) => [itemId, Array.from(deckTypes)])
+	) as Record<string, DeckType[]>;
+}
+
+function getDeckTypeFromDeckId(deckId: DeckId): DeckType {
+	if (deckId.startsWith('easy_')) return 'easy';
+	if (deckId.startsWith('medium_')) return 'medium';
+	return 'hard';
 }
 
 function toDeckId(deckType: DeckType, kind: DeckKind): DeckId {
@@ -415,12 +531,14 @@ export function resetDeckDefinitionsConfig(): void {
 	activeDeckDefinitionsConfig = null;
 	activeItemDefinitions = {};
 	activeMonsterDefinitions = {};
+	activeLootDeckTypesByItemId = {};
 }
 
 export function setDeckDefinitionsConfig(config: unknown): DeckDefinitionsConfig {
 	activeDeckDefinitionsConfig = normalizeConfig(config);
 	activeItemDefinitions = buildItemDefinitions(activeDeckDefinitionsConfig);
 	activeMonsterDefinitions = buildMonsterDefinitions(activeDeckDefinitionsConfig);
+	activeLootDeckTypesByItemId = buildLootDeckTypesByItemId(activeDeckDefinitionsConfig);
 	return activeDeckDefinitionsConfig;
 }
 
@@ -468,11 +586,7 @@ export function getHealingAmountDefinition(): {
 	largeHealthPotion: number;
 } {
 	if (!activeDeckDefinitionsConfig?.healingAmount) {
-		return {
-			smallHealthPotion: 3,
-			mediumHealthPotion: 5,
-			largeHealthPotion: 7,
-		};
+		return DEFAULT_HEALING_AMOUNT;
 	}
 	return activeDeckDefinitionsConfig.healingAmount;
 }
@@ -491,4 +605,8 @@ export function getAllItemDefinitions(): ItemDef[] {
 
 export function getAllMonsterDefinitions(): MonsterDef[] {
 	return Object.values(activeMonsterDefinitions);
+}
+
+export function getLootDeckTypesForItemId(itemId: string): DeckType[] {
+	return activeLootDeckTypesByItemId[itemId] ?? [];
 }

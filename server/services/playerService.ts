@@ -1,5 +1,11 @@
 import { CHARACTERS } from '../constants/characters.js';
-import { getHealingAmountDefinition, getItemDefinitionById } from '../config/deckDefinitionsConfig.js';
+import { getHealingAmountDefinition, getItemDefinitionById, getLootDeckTypesForItemId } from '../config/deckDefinitionsConfig.js';
+import { getDeckTypeForBiome, type DeckType, type PlayBiome } from '../config/biomeTypes.js';
+import {
+	createBiomeDeckRuntime,
+	type BiomeDeckRuntime,
+	type LootCard,
+} from './biomeDeckService.js';
 import {
 	getGameById,
 	getPlayerByIdAndGameId,
@@ -21,6 +27,69 @@ function parseJson(text, fallback = {}) {
 
 function findItem(itemId) {
 	return getItemDefinitionById(itemId);
+}
+
+function isFullHealEffect(effect: unknown): boolean {
+	return effect === 'heal_full' || effect === 'full_heal';
+}
+
+function ensureBiomeDeckState(gameState): BiomeDeckRuntime {
+	if (!gameState.biomeDecks) {
+		gameState.biomeDecks = createBiomeDeckRuntime();
+	}
+	return gameState.biomeDecks as BiomeDeckRuntime;
+}
+
+function toPlayBiome(value: unknown): PlayBiome | null {
+	if (value === 'plains' || value === 'forest' || value === 'desert' || value === 'cave' || value === 'volcano') {
+		return value;
+	}
+	return null;
+}
+
+function resolveDeckTypeForDiscard(itemId: string, gameState, playerState): DeckType | null {
+	const configuredDeckTypes = getLootDeckTypesForItemId(itemId);
+	if (configuredDeckTypes.length === 1) {
+		return configuredDeckTypes[0];
+	}
+
+	const grid = gameState?.biomeGrid;
+	const x = playerState?.positionX;
+	const y = playerState?.positionY;
+	if (
+		Array.isArray(grid) &&
+		typeof x === 'number' &&
+		typeof y === 'number' &&
+		grid[y] &&
+		typeof grid[y][x] === 'string'
+	) {
+		const biome = toPlayBiome(grid[y][x]);
+		if (!biome) return null;
+		const deckType = getDeckTypeForBiome(biome);
+		if (configuredDeckTypes.length === 0 || configuredDeckTypes.includes(deckType)) {
+			return deckType;
+		}
+	}
+
+	return configuredDeckTypes[0] ?? null;
+}
+
+function pushDiscardedItemToDeck(gameState, deckType: DeckType, item): void {
+	const runtime = ensureBiomeDeckState(gameState);
+	const deckState = runtime[deckType];
+	if (!deckState) {
+		throw serviceError(500, `Missing deck state for deck type '${deckType}'`);
+	}
+
+	const card: LootCard =
+		item.type === 'item'
+			? { kind: 'consumable', item }
+			: { kind: 'item', item };
+
+	if (!Array.isArray(deckState.lootDiscard)) {
+		deckState.lootDiscard = [];
+	}
+	deckState.lootDiscard.push(card);
 }
 
 function nearestTownPosition(biomeGrid, positionX, positionY) {
@@ -109,7 +178,7 @@ async function useItem(gameId, playerId, itemId) {
 				: item.effect === 'heal_large'
 					? healingAmount.largeHealthPotion
 					: 0;
-	if (item.effect === 'heal_full') {
+	if (isFullHealEffect(item.effect)) {
 		playerState.damage = 0;
 		used = true;
 	} else if ((typeof item.heal === 'number' && item.heal > 0) || effectHeal > 0) {
@@ -141,4 +210,67 @@ async function useItem(gameId, playerId, itemId) {
 	return { success: true };
 }
 
-export { listCharacters, updateCharacter, equipItem, useItem };
+async function discardItem(gameId, playerId, itemId) {
+	const [playerRow, gameRow] = await Promise.all([
+		getPlayerByIdAndGameId(playerId, gameId),
+		getGameById(gameId),
+	]);
+	if (!playerRow) throw serviceError(404, 'Player not found');
+	if (!gameRow) throw serviceError(404, 'Game not found');
+
+	const playerState = parseJson(playerRow.playerStateJson);
+	if (!playerState.inventory) {
+		throw serviceError(400, 'Inventory not available');
+	}
+
+	const item = findItem(itemId);
+	if (!item) throw serviceError(400, 'Invalid item');
+	if (itemId === 'fist') throw serviceError(400, 'Cannot discard fist');
+	if (playerState.inventory.equippedWeaponId === itemId || playerState.inventory.equippedArmorId === itemId) {
+		throw serviceError(400, 'Cannot discard equipped item');
+	}
+
+	const gameState = parseJson(gameRow.gameStateJson);
+	let removed = false;
+
+	if (item.type === 'weapon' && Array.isArray(playerState.inventory.weapons)) {
+		const index = playerState.inventory.weapons.indexOf(itemId);
+		if (index >= 0) {
+			playerState.inventory.weapons.splice(index, 1);
+			removed = true;
+		}
+	} else if (item.type === 'armor' && Array.isArray(playerState.inventory.armor)) {
+		const index = playerState.inventory.armor.indexOf(itemId);
+		if (index >= 0) {
+			playerState.inventory.armor.splice(index, 1);
+			removed = true;
+		}
+	} else if (item.type === 'item' && Array.isArray(playerState.inventory.items)) {
+		const index = playerState.inventory.items.indexOf(itemId);
+		if (index >= 0) {
+			playerState.inventory.items.splice(index, 1);
+			removed = true;
+		}
+	}
+
+	if (!removed) {
+		throw serviceError(400, 'Item not in inventory');
+	}
+
+	const deckType = resolveDeckTypeForDiscard(item.id, gameState, playerState);
+	if (!deckType) {
+		throw serviceError(400, 'This item cannot be discarded to a loot deck');
+	}
+
+	pushDiscardedItemToDeck(gameState, deckType, item);
+	addRecentAction(gameState, 'discard-item', playerRow.name, item.name || item.id);
+
+	await Promise.all([
+		updatePlayerStateById(playerId, JSON.stringify(playerState)),
+		updateGameStateJson(gameId, JSON.stringify(gameState)),
+	]);
+
+	return { success: true };
+}
+
+export { listCharacters, updateCharacter, equipItem, useItem, discardItem };

@@ -118,6 +118,10 @@ function findItem(itemId) {
 	return getItemDefinitionById(itemId);
 }
 
+function isFullHealEffect(effect: unknown): boolean {
+	return effect === 'heal_full' || effect === 'full_heal';
+}
+
 function getExtraHeartItemRequired() {
 	const item = findItem('extra_heart');
 	if (!item) {
@@ -269,7 +273,7 @@ async function useBattleItem(gameId, playerId, itemId) {
 		playerState.damage = Math.max(0, (playerState.maxHearts || 5) - battle.playerHealth);
 		log.push(`${playerRow.name || 'Player'} used ${item.name} and recovered ${healValue} health.`);
 		consumed = true;
-	} else if (item.effect === 'heal_full') {
+	} else if (isFullHealEffect(item.effect)) {
 		battle.playerHealth = playerState.maxHearts || 5;
 		playerState.damage = 0;
 		log.push(`${playerRow.name || 'Player'} used ${item.name} and fully healed.`);

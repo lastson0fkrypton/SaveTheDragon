@@ -33,6 +33,17 @@ type BalanceJsonConfig = {
 		mediumPotionHeal: number;
 		largePotionHeal: number;
 	};
+	itemConsumables: Record<
+		BalanceDeck,
+		{
+			teleport: number;
+			smallHealthPotion: number;
+			mediumHealthPotion: number;
+			largeHealthPotion: number;
+			fullHealthPotion: number;
+			extraHeart: number;
+		}
+	>;
 	monsters: Record<
 		BalanceDeck,
 		{
@@ -53,6 +64,18 @@ type BalanceJsonConfig = {
 		normal: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
 		strong: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
 	};
+	monsterConsumables: Record<
+		BalanceDeck,
+		{
+			teleport: number;
+			smallHealthPotion: number;
+			mediumHealthPotion: number;
+			largeHealthPotion: number;
+			fullHealthPotion: number;
+			extraHeart: number;
+			chest: number;
+		}
+	>;
 };
 
 type Candidate = {
@@ -222,6 +245,32 @@ function createBalanceConfigFromGenome(genome: Genome): BalanceJsonConfig {
 			mediumPotionHeal: Math.max(1, toCount(5 * consumableScale)),
 			largePotionHeal: Math.max(1, toCount(7 * consumableScale)),
 		},
+		itemConsumables: {
+			forest: {
+				teleport: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				extraHeart: Math.max(0, toCount(1 * clamp(genome.lootHeartScale, 0, 3))),
+			},
+			desert: {
+				teleport: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				extraHeart: Math.max(0, toCount(1 * clamp(genome.lootHeartScale, 0, 3))),
+			},
+			volcano: {
+				teleport: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
+				extraHeart: Math.max(0, toCount(1 * clamp(genome.lootHeartScale, 0, 3))),
+			},
+		},
 		monsters: {
 			forest: scaleMonsterRange(5, 7, 3, 5, 0.6098, 0.7098, 1, 3, 0.3098, 0.4098),
 			desert: scaleMonsterRange(12, 16, 4, 6, 0.7298, 0.8298, 3, 5, 0.4498, 0.5498),
@@ -242,6 +291,35 @@ function createBalanceConfigFromGenome(genome: Genome): BalanceJsonConfig {
 				attackChanceDelta: Number((0.08 * strongFactor).toFixed(4)),
 				defenseDelta: Math.max(1, Math.round(strongFactor)),
 				defenseChanceDelta: Number((0.08 * strongFactor).toFixed(4)),
+			},
+		},
+		monsterConsumables: {
+			forest: {
+				teleport: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				extraHeart: Math.max(0, toCount(1 * clamp(genome.heartEncounterScale, 0, 3))),
+				chest: Math.max(0, toCount(10 * clamp(genome.consumableEncounterScale, 0, 3))),
+			},
+			desert: {
+				teleport: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				extraHeart: Math.max(0, toCount(1 * clamp(genome.heartEncounterScale, 0, 3))),
+				chest: Math.max(0, toCount(10 * clamp(genome.consumableEncounterScale, 0, 3))),
+			},
+			volcano: {
+				teleport: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
+				extraHeart: Math.max(0, toCount(1 * clamp(genome.heartEncounterScale, 0, 3))),
+				chest: Math.max(0, toCount(10 * clamp(genome.consumableEncounterScale, 0, 3))),
 			},
 		},
 	};

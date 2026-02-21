@@ -14,7 +14,7 @@ export interface ItemDef {
 	img?: string | null;
 }
 
-export type ItemTierDeck = 'forest' | 'desert' | 'volcano';
+export type ItemTierDeck = 'easy' | 'medium' | 'hard';
 export type ItemVariant = 'cracked' | 'normal' | 'enchanted';
 
 export type WeaponDeckBalanceRange = {
@@ -29,6 +29,15 @@ export type ArmorDeckBalanceRange = {
 	maxDefense: number;
 	minChance: number;
 	maxChance: number;
+};
+
+export type ItemConsumableBalanceRange = {
+	teleport: number;
+	smallHealthPotion: number;
+	mediumHealthPotion: number;
+	largeHealthPotion: number;
+	fullHealthPotion: number;
+	extraHeart: number;
 };
 
 

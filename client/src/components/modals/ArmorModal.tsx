@@ -23,34 +23,48 @@ const ArmorModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => 
 				<div className="inventory inventory-scroll-area">
 					{inventory.armor.map(id => {
 						const eqArmor = gameState.itemMeta?.[id];
+						const isEquipped = id === inventory.equippedArmorId;
+						const canDiscard = !isEquipped;
 						return (
-							<button
-								key={id}
-								className={'armor-panel card ' + (id === inventory.equippedArmorId ? 'equipped' : '')}
-								onClick={() => {
-									if (id !== inventory.equippedArmorId) {
-										service.equipItem(id, 'armor');
-									}
-									onClose();
-								}}
-							>
-								<CachedImage
-									src={eqArmor?.img ? `/items/${eqArmor.img}` : '/items/nothing.png'}
-									alt={eqArmor?.id}
-									className="armor-icon card-image"
-								/>
-								<div className="card-overlay">
-									<div className="stat defense">
-										<span className="stroke">{eqArmor?.defense || 0}</span>
-										<span className="fill">{eqArmor?.defense || 0}</span>
+							<div key={id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+								<button
+									className={'armor-panel card ' + (isEquipped ? 'equipped' : '')}
+									onClick={() => {
+										if (!isEquipped) {
+											service.equipItem(id, 'armor');
+										}
+										onClose();
+									}}
+								>
+									<CachedImage
+										src={eqArmor?.img ? `/items/${eqArmor.img}` : '/items/nothing.png'}
+										alt={eqArmor?.id}
+										className="armor-icon card-image"
+									/>
+									<div className="card-overlay">
+										<div className="stat defense">
+											<span className="stroke">{eqArmor?.defense || 0}</span>
+											<span className="fill">{eqArmor?.defense || 0}</span>
+										</div>
+										<div className="stat defensechance chance" style={getChanceStyle(eqArmor?.defenseChance || 0)}>
+											<div>block</div>
+											<div>hit</div>
+										</div>
+										<div className="card-name">{eqArmor?.name || 'None'}</div>
 									</div>
-									<div className="stat defensechance chance" style={getChanceStyle(eqArmor?.defenseChance || 0)}>
-										<div>block</div>
-										<div>hit</div>
-									</div>
-									<div className="card-name">{eqArmor?.name || 'None'}</div>
-								</div>
-							</button>
+								</button>
+								<button
+									onClick={async () => {
+										if (!canDiscard) return;
+										await service.discardItem(id);
+										onClose();
+									}}
+									disabled={!canDiscard}
+									style={{ padding: '6px 10px' }}
+								>
+									Discard
+								</button>
+							</div>
 						);
 					})}
 				</div>

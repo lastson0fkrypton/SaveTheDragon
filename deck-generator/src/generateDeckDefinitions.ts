@@ -4,14 +4,15 @@ import path from 'node:path';
 import {
 	DEFAULT_ARMOR_DECK_BALANCE,
 	DEFAULT_HEALING_AMOUNT,
+	DEFAULT_ITEM_CONSUMABLE_BALANCE,
 	DEFAULT_ITEM_VARIANT_MODIFIERS,
 	DEFAULT_MONSTER_DECK_BALANCE,
+	DEFAULT_MONSTER_DECK_CONSUMABLES,
 	DEFAULT_MONSTER_VARIANT_MODIFIERS,
 	DEFAULT_PLAYER_STATE,
  	DEFAULT_WEAPON_DECK_BALANCE,
 } from './catalog/deck.js';
 import {
-	CONSUMABLE_ITEM_CATALOG,
 	DESERT_ITEM_CATALOG,
 	FIST_ITEM,
 	FOREST_ITEM_CATALOG,
@@ -23,8 +24,14 @@ import {
 	FOREST_MONSTER_CATALOG,
 	VOLCANO_MONSTER_CATALOG,
 } from './catalog/monsters.js';
-import type { ItemCatalogSourceEntry, ItemDef, ItemTierDeck, ItemVariant } from './models/itemTypes.js';
-import type { MonsterDef, MonsterTierDeck, MonsterVariant } from './models/monsterTypes.js';
+import type {
+	ItemCatalogSourceEntry,
+	ItemConsumableBalanceRange,
+	ItemDef,
+	ItemTierDeck,
+	ItemVariant,
+} from './models/itemTypes.js';
+import type { MonsterConsumableBalanceRange, MonsterDef, MonsterTierDeck, MonsterVariant } from './models/monsterTypes.js';
 
 const DEFAULT_ITEM_TIER_BASE = {
 	weapon: DEFAULT_WEAPON_DECK_BALANCE,
@@ -47,6 +54,8 @@ type BalanceJsonConfig = {
 		mediumPotionHeal?: number;
 		largePotionHeal?: number;
 	};
+	itemConsumables?: Partial<Record<DeckType, Partial<ItemConsumableBalanceRange>>>;
+	monsterConsumables?: Partial<Record<DeckType, Partial<MonsterConsumableBalanceRange>>>;
 	monsters?: Partial<Record<DeckType, {
 		minHealth?: number;
 		maxHealth?: number;
@@ -94,11 +103,13 @@ type ItemBalanceProfile = {
 		mediumPotionHeal: number;
 		largePotionHeal: number;
 	};
+	deckConsumables: Record<DeckType, ItemConsumableBalanceRange>;
 };
 
 type MonsterBalanceProfile = {
 	biomeTierBaseStats: typeof DEFAULT_MONSTER_TIER_BASE_STATS;
 	variantModifiers: typeof DEFAULT_MONSTER_VARIANT_MODIFIERS;
+	deckConsumables: Record<DeckType, MonsterConsumableBalanceRange>;
 };
 
 type DeckConsumableCounts = {
@@ -121,7 +132,6 @@ type DeckCard = {
 	img?: string | null;
 	effect?: string | null;
 	heal?: number | null;
-	biome?: string;
 	health?: number | null;
 	attack?: number | null;
 	attackChance?: number | null;
@@ -135,47 +145,33 @@ type GeneratedDeck = {
 	consumables: DeckConsumableCounts;
 };
 
-const DECK_ORDER: DeckType[] = ['forest', 'desert', 'volcano'];
+const DECK_ORDER: DeckType[] = ['easy', 'medium', 'hard'];
 const ITEM_VARIANTS: ItemVariant[] = ['cracked', 'normal', 'enchanted'];
 const MONSTER_VARIANTS: MonsterVariant[] = ['weak', 'normal', 'strong'];
 
-const BIOME_TAG_BY_DECK: Record<DeckType, string> = {
-	forest: 'plains,forest',
-	desert: 'desert',
-	volcano: 'volcano,cave',
-};
-
 const PLAY_BIOMES_BY_DECK_TYPE: Record<DeckType, PlayBiome[]> = {
-	forest: ['plains', 'forest'],
-	desert: ['desert'],
-	volcano: ['cave', 'volcano'],
+	easy: ['plains', 'forest'],
+	medium: ['desert'],
+	hard: ['cave', 'volcano'],
 };
 
 const GENERATION_TEMPLATE: Record<DeckType, {
 	encounter: { item: number; consumable: number; heart: number; chest: number };
 	loot: { consumable: number; heart: number };
 }> = {
-	forest: {
+	easy: {
 		encounter: { item: 5, consumable: 4, heart: 1, chest: 1 },
 		loot: { consumable: 3, heart: 2 },
 	},
-	desert: {
+	medium: {
 		encounter: { item: 8, consumable: 5, heart: 1, chest: 1 },
 		loot: { consumable: 1, heart: 4 },
 	},
-	volcano: {
+	hard: {
 		encounter: { item: 7, consumable: 2, heart: 2, chest: 1 },
 		loot: { consumable: 1, heart: 1 },
 	},
 };
-
-const CONSUMABLE_ROTATION: Array<keyof Omit<DeckConsumableCounts, 'extraHeart'>> = [
-	'smallHealthPotion',
-	'mediumHealthPotion',
-	'largeHealthPotion',
-	'teleport',
-	'fullHealthPotion',
-];
 
 function clamp(value: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, value));
@@ -372,6 +368,7 @@ function getDefaultItemProfile(): ItemBalanceProfile {
 			mediumPotionHeal: DEFAULT_HEALING_AMOUNT.mediumHealthPotion,
 			largePotionHeal: DEFAULT_HEALING_AMOUNT.largeHealthPotion,
 		},
+		deckConsumables: structuredClone(DEFAULT_ITEM_CONSUMABLE_BALANCE),
 	};
 }
 
@@ -379,6 +376,7 @@ function getDefaultMonsterProfile(): MonsterBalanceProfile {
 	return {
 		biomeTierBaseStats: structuredClone(DEFAULT_MONSTER_TIER_BASE_STATS),
 		variantModifiers: structuredClone(DEFAULT_MONSTER_VARIANT_MODIFIERS),
+		deckConsumables: structuredClone(DEFAULT_MONSTER_DECK_CONSUMABLES),
 	};
 }
 
@@ -421,6 +419,15 @@ function applyBalanceOverrides(
 		};
 	}
 
+	if (balance.itemConsumables) {
+		for (const deck of DECK_ORDER) {
+			itemProfile.deckConsumables[deck] = {
+				...itemProfile.deckConsumables[deck],
+				...(balance.itemConsumables[deck] ?? {}),
+			};
+		}
+	}
+
 	if (balance.monsters) {
 		for (const deck of DECK_ORDER) {
 			monsterProfile.biomeTierBaseStats[deck] = {
@@ -446,6 +453,15 @@ function applyBalanceOverrides(
 			};
 		}
 	}
+
+	if (balance.monsterConsumables) {
+		for (const deck of DECK_ORDER) {
+			monsterProfile.deckConsumables[deck] = {
+				...monsterProfile.deckConsumables[deck],
+				...(balance.monsterConsumables[deck] ?? {}),
+			};
+		}
+	}
 }
 
 function toItemCard(item: ItemDef, variant?: ItemVariant): DeckCard {
@@ -458,7 +474,6 @@ function toItemCard(item: ItemDef, variant?: ItemVariant): DeckCard {
 		img: item.img ?? null,
 		effect: item.effect ?? null,
 		heal: item.heal ?? null,
-		biome: item.biome,
 		attack: item.attack ?? null,
 		attackChance: item.attackChance ?? null,
 		defense: item.defense ?? null,
@@ -473,7 +488,6 @@ function toMonsterCard(monster: MonsterDef, variant: MonsterVariant): DeckCard {
 		name: monster.name,
 		variant,
 		img: monster.img,
-		biome: monster.biome,
 		health: monster.health,
 		attack: monster.attack,
 		attackChance: monster.attackChance,
@@ -482,24 +496,18 @@ function toMonsterCard(monster: MonsterDef, variant: MonsterVariant): DeckCard {
 	};
 }
 
-function addRotationCounts(consumables: DeckConsumableCounts, count: number): void {
-	for (let index = 0; index < count; index += 1) {
-		const key = CONSUMABLE_ROTATION[index % CONSUMABLE_ROTATION.length];
-		consumables[key] += 1;
-	}
-}
-
-function buildConsumableCounts(consumableSlots: number, extraHeartCount: number): DeckConsumableCounts {
+function buildConsumableCounts(base: ItemConsumableBalanceRange | MonsterConsumableBalanceRange): DeckConsumableCounts {
 	const counts: DeckConsumableCounts = {
-		teleport: 1,
-		smallHealthPotion: 1,
-		mediumHealthPotion: 1,
-		largeHealthPotion: 1,
-		fullHealthPotion: 1,
-		extraHeart: Math.max(1, extraHeartCount),
+		teleport: Math.max(0, Math.floor(base.teleport)),
+		smallHealthPotion: Math.max(0, Math.floor(base.smallHealthPotion)),
+		mediumHealthPotion: Math.max(0, Math.floor(base.mediumHealthPotion)),
+		largeHealthPotion: Math.max(0, Math.floor(base.largeHealthPotion)),
+		fullHealthPotion: Math.max(0, Math.floor(base.fullHealthPotion)),
+		extraHeart: Math.max(0, Math.floor(base.extraHeart)),
 	};
-
-	addRotationCounts(counts, Math.max(0, consumableSlots));
+	if ('chest' in base && typeof base.chest === 'number') {
+		counts.chest = Math.max(0, Math.floor(base.chest));
+	}
 	return counts;
 }
 
@@ -508,9 +516,9 @@ function buildDeckItemDefs(
 	profile: ItemBalanceProfile
 ): { all: ItemDef[]; normalOnly: ItemDef[] } {
 	const sourceByDeck = {
-		forest: FOREST_ITEM_CATALOG,
-		desert: DESERT_ITEM_CATALOG,
-		volcano: VOLCANO_ITEM_CATALOG,
+		easy: FOREST_ITEM_CATALOG,
+		medium: DESERT_ITEM_CATALOG,
+		hard: VOLCANO_ITEM_CATALOG,
 	};
 	const source = [...sourceByDeck[deck]];
 	const weapons = source.filter(isWeaponCatalogEntry);
@@ -525,7 +533,6 @@ function buildDeckItemDefs(
 		ratio: number
 	): ItemDef => {
 		const mods = profile.variantModifiers[variant];
-		const biome = BIOME_TAG_BY_DECK[deck];
 		if (entry.type === 'weapon') {
 			const base = profile.biomeTierBase.weapon[deck];
 			const attack = Math.max(2, Math.round(interpolate(base.minAttack, base.maxAttack, ratio)) + mods.valueDelta);
@@ -534,7 +541,6 @@ function buildDeckItemDefs(
 				id: toVariantId(entry.id, variant),
 				name: toVariantName(entry.name, variant),
 				type: 'weapon',
-				biome,
 				img: entry.img,
 				attack,
 				attackChance,
@@ -547,7 +553,6 @@ function buildDeckItemDefs(
 			id: toVariantId(entry.id, variant),
 			name: toVariantName(entry.name, variant),
 			type: 'armor',
-			biome,
 			img: entry.img,
 			defense,
 			defenseChance,
@@ -580,29 +585,11 @@ function buildDeckItemDefs(
 	};
 }
 
-function buildConsumableDefs(profile: ItemBalanceProfile): ItemDef[] {
-	return CONSUMABLE_ITEM_CATALOG.map(entry => {
-		if (entry.id === 'small_potion') {
-			return { id: entry.id, name: entry.name, type: 'item', effect: entry.effect, img: entry.img, heal: profile.consumables.smallPotionHeal };
-		}
-		if (entry.id === 'medium_potion') {
-			return { id: entry.id, name: entry.name, type: 'item', effect: entry.effect, img: entry.img, heal: profile.consumables.mediumPotionHeal };
-		}
-		if (entry.id === 'large_potion') {
-			return { id: entry.id, name: entry.name, type: 'item', effect: entry.effect, img: entry.img, heal: profile.consumables.largePotionHeal };
-		}
-		if (entry.id === 'full_potion') {
-			return { id: entry.id, name: entry.name, type: 'item', effect: entry.effect, img: entry.img };
-		}
-		return { id: entry.id, name: entry.name, type: 'item', effect: entry.effect, img: entry.img };
-	});
-}
-
 function buildDeckMonsterDefs(deck: MonsterTierDeck, profile: MonsterBalanceProfile): MonsterDef[] {
 	const sourceByDeck = {
-		forest: FOREST_MONSTER_CATALOG,
-		desert: DESERT_MONSTER_CATALOG,
-		volcano: VOLCANO_MONSTER_CATALOG,
+		easy: FOREST_MONSTER_CATALOG,
+		medium: DESERT_MONSTER_CATALOG,
+		hard: VOLCANO_MONSTER_CATALOG,
 	};
 	const source = [...sourceByDeck[deck]].sort((left, right) => left.id.localeCompare(right.id));
 	const base = profile.biomeTierBaseStats[deck];
@@ -636,41 +623,42 @@ function buildDeckMonsterDefs(deck: MonsterTierDeck, profile: MonsterBalanceProf
 	return out;
 }
 
-function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: MonsterBalanceProfile) {
+function buildDeckDefinitions(
+	itemProfile: ItemBalanceProfile,
+	monsterProfile: MonsterBalanceProfile
+) {
 	const deckData: Record<DeckType, {
 		itemsAll: ItemDef[];
 		itemsNormal: ItemDef[];
 		monsters: MonsterDef[];
 	}> = {
-		forest: {
+		easy: {
 			...(() => {
-				const items = buildDeckItemDefs('forest', itemProfile);
-				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('forest', monsterProfile) };
+				const items = buildDeckItemDefs('easy', itemProfile);
+				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('easy', monsterProfile) };
 			})(),
 		},
-		desert: {
+		medium: {
 			...(() => {
-				const items = buildDeckItemDefs('desert', itemProfile);
-				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('desert', monsterProfile) };
+				const items = buildDeckItemDefs('medium', itemProfile);
+				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('medium', monsterProfile) };
 			})(),
 		},
-		volcano: {
+		hard: {
 			...(() => {
-				const items = buildDeckItemDefs('volcano', itemProfile);
-				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('volcano', monsterProfile) };
+				const items = buildDeckItemDefs('hard', itemProfile);
+				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('hard', monsterProfile) };
 			})(),
 		},
 	};
 
-	const consumables = buildConsumableDefs(itemProfile);
 	const decks: Record<string, GeneratedDeck> = {};
 	for (const deck of DECK_ORDER) {
 		const template = GENERATION_TEMPLATE[deck];
 		const deckNameEncounter = `${deck}_encounter`;
 		const deckNameLoot = `${deck}_loot`;
 		const monsters = deckData[deck].monsters;
-		const encounterItems = deckData[deck].itemsAll.slice(0, Math.max(1, template.encounter.item));
-		const lootItems = deck === 'forest' ? deckData[deck].itemsAll : deckData[deck].itemsNormal;
+		const lootItems = deckData[deck].itemsAll;
 
 		const encounterCards: DeckCard[] = [
 			...monsters.map(monster => {
@@ -681,30 +669,18 @@ function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: M
 						: 'normal';
 				return toMonsterCard(monster, variant);
 			}),
-			...(deck === 'forest'
-				? []
-				: encounterItems.map(item => {
-					const { variant } = toItemVariantMeta(item.id);
-					return toItemCard(item, variant);
-				})),
-			...Array.from({ length: Math.max(0, template.encounter.chest) }, (_, index) => ({
-				kind: 'chest' as const,
-				id: `${deck}_chest_${index + 1}`,
-			})),
 		];
 
 		const lootCards: DeckCard[] = [
-			...lootItems.map(item => {
+			...lootItems
+				.filter(item => item.type === 'weapon' || item.type === 'armor')
+				.map(item => {
 				const { variant } = toItemVariantMeta(item.id);
 				return toItemCard(item, variant);
 			}),
-			...consumables.map(item => toItemCard(item, 'normal')),
 		];
 
-		const encounterConsumables = buildConsumableCounts(template.encounter.consumable, template.encounter.heart);
-		if (deck === 'forest') {
-			encounterConsumables.chest = 10;
-		}
+		const encounterConsumables = buildConsumableCounts(monsterProfile.deckConsumables[deck]);
 
 		decks[deckNameEncounter] = {
 			deck: deckNameEncounter,
@@ -714,15 +690,32 @@ function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: M
 		decks[deckNameLoot] = {
 			deck: deckNameLoot,
 			cards: lootCards,
-			consumables: buildConsumableCounts(template.loot.consumable, template.loot.heart),
+			consumables: buildConsumableCounts(itemProfile.deckConsumables[deck]),
 		};
 	}
 
 	const startingWeapon = {
-		...FIST_ITEM,
-		biome: 'any',
+		id: FIST_ITEM.id,
+		name: FIST_ITEM.name,
+		type: FIST_ITEM.type,
+		img: FIST_ITEM.img,
+		effect: FIST_ITEM.effect ?? null,
+		heal: FIST_ITEM.heal ?? null,
+		defense: FIST_ITEM.defense ?? null,
+		defenseChance: FIST_ITEM.defenseChance ?? null,
 		attack: 1,
 		attackChance: 0.5,
+	};
+
+	const finalBoss = {
+		id: EVIL_PRINCESS_MONSTER.id,
+		name: EVIL_PRINCESS_MONSTER.name,
+		health: EVIL_PRINCESS_MONSTER.health,
+		attack: EVIL_PRINCESS_MONSTER.attack,
+		attackChance: EVIL_PRINCESS_MONSTER.attackChance,
+		defense: EVIL_PRINCESS_MONSTER.defense,
+		defenseChance: EVIL_PRINCESS_MONSTER.defenseChance,
+		img: EVIL_PRINCESS_MONSTER.img,
 	};
 
 	return {
@@ -737,7 +730,7 @@ function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: M
 			mediumHealthPotion: itemProfile.consumables.mediumPotionHeal,
 			largeHealthPotion: itemProfile.consumables.largePotionHeal,
 		},
-		'final-boss': EVIL_PRINCESS_MONSTER,
+		'final-boss': finalBoss,
 		decks,
 		meta: {
 			deckBiomes: PLAY_BIOMES_BY_DECK_TYPE,

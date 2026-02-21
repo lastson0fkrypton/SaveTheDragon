@@ -1,5 +1,5 @@
 
-import type { ItemTierDeck } from './itemTypes.js';
+import type { ItemConsumableBalanceRange, ItemTierDeck } from './itemTypes.js';
 
 export type MonsterTierDeck = ItemTierDeck;
 export type MonsterVariant = 'weak' | 'normal' | 'strong';
@@ -28,6 +28,10 @@ export type MonsterDeckBalanceRange = {
 	maxDefense: number;
 	minDefenseChance: number;
 	maxDefenseChance: number;
+};
+
+export type MonsterConsumableBalanceRange = ItemConsumableBalanceRange & {
+	chest?: number;
 };
 
 export type MonsterCatalogSourceEntry = {

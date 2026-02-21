@@ -4,7 +4,6 @@ export interface ItemDef {
 	id: string;
 	name: string;
 	type: ItemType;
-	biome?: string;
 	attack?: number | null;
 	attackChance?: number | null;
 	defense?: number | null;
@@ -17,7 +16,6 @@ export interface ItemDef {
 export interface MonsterDef {
 	id: string;
 	name: string;
-	biome: string;
 	health: number;
 	attack: number;
 	attackChance: number;

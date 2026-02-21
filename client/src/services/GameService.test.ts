@@ -51,7 +51,10 @@ describe('GameService', () => {
 
 		await service.fetchAdminGames('pw');
 
-		expect(fetch).toHaveBeenCalledWith('/api/admin/games?password=pw');
+		expect(fetch).toHaveBeenCalledWith(
+			expect.stringMatching(/^\/api\/admin\/games\?password=pw&_ts=\d+$/),
+			expect.objectContaining({ cache: 'no-store' })
+		);
 		expect(store.setAdminError).toHaveBeenCalledWith('');
 		expect(store.setAdminLoggedIn).toHaveBeenCalledWith(true);
 		expect(store.setAdminPassword).toHaveBeenCalledWith('pw');

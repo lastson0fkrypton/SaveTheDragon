@@ -1,5 +1,5 @@
 import express from 'express';
-import { equipItem, listCharacters, updateCharacter, useItem } from '../services/playerService.js';
+import { discardItem, equipItem, listCharacters, updateCharacter, useItem } from '../services/playerService.js';
 
 const router = express.Router();
 
@@ -53,6 +53,17 @@ router.post('/games/:gameId/player/:playerId/use-item', async (req, res) => {
 		const { gameId, playerId } = req.params;
 		const { itemId } = req.body;
 		const result = await useItem(gameId, playerId, itemId);
+		return res.json(result);
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.post('/games/:gameId/player/:playerId/discard', async (req, res) => {
+	try {
+		const { gameId, playerId } = req.params;
+		const { itemId } = req.body;
+		const result = await discardItem(gameId, playerId, itemId);
 		return res.json(result);
 	} catch (error) {
 		return handleError(res, error);

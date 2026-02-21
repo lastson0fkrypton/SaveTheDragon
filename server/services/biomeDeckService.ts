@@ -1,28 +1,28 @@
 import {
 	type DeckConsumableCounts,
 	getDeckDefinition,
+	getItemDefinitionById,
 } from '../config/deckDefinitionsConfig.js';
 import {
 	type DeckType,
 	type MonsterVariant,
 	type PlayBiome,
 	getDeckTypeForBiome,
-	getTemplateBiomeForDeckType,
 } from '../config/biomeTypes.js';
 import type { ItemDef, MonsterDef } from '../types.js';
 import { randomInt } from '../utils/random.js';
 
 export type EncounterCard =
-	| { kind: 'monster'; biome: PlayBiome; monster: MonsterDef; monsterVariant: MonsterVariant }
-	| { kind: 'item'; biome: PlayBiome; item: ItemDef }
-	| { kind: 'consumable'; biome: PlayBiome; item: ItemDef }
-	| { kind: 'heart'; biome: PlayBiome; hearts: number }
-	| { kind: 'chest'; biome: PlayBiome; id: string };
+	| { kind: 'monster'; monster: MonsterDef; monsterVariant: MonsterVariant }
+	| { kind: 'item'; item: ItemDef }
+	| { kind: 'consumable'; item: ItemDef }
+	| { kind: 'heart'; hearts: number }
+	| { kind: 'chest'; id: string };
 
 export type LootCard =
-	| { kind: 'item'; biome: PlayBiome; item: ItemDef }
-	| { kind: 'consumable'; biome: PlayBiome; item: ItemDef }
-	| { kind: 'heart'; biome: PlayBiome; hearts: number };
+	| { kind: 'item'; item: ItemDef }
+	| { kind: 'consumable'; item: ItemDef }
+	| { kind: 'heart'; hearts: number };
 
 type DeckState = {
 	encounter: EncounterCard[];
@@ -31,7 +31,7 @@ type DeckState = {
 	lootDiscard: LootCard[];
 };
 
-export type BiomeDeckRuntime = Record<PlayBiome, DeckState>;
+export type BiomeDeckRuntime = Record<DeckType, DeckState>;
 
 type DeckPair = {
 	encounter: EncounterCard[];
@@ -63,8 +63,13 @@ function inferMonsterVariant(monsterId: string): MonsterVariant {
 	return 'normal';
 }
 
+function getDefaultBiomeForDeckType(deckType: DeckType): PlayBiome {
+	if (deckType === 'easy') return 'forest';
+	if (deckType === 'medium') return 'desert';
+	return 'volcano';
+}
+
 function resolveEncounterCardFromDefinition(
-	templateBiome: PlayBiome,
 	card: { kind: string; id: string; hearts?: number }
 ): EncounterCard {
 	const rawCard = card as Record<string, unknown>;
@@ -81,7 +86,6 @@ function resolveEncounterCardFromDefinition(
 		const monster: MonsterDef = {
 			id: card.id,
 			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
-			biome: typeof rawCard.biome === 'string' ? rawCard.biome : templateBiome,
 			health: rawCard.health,
 			attack: rawCard.attack,
 			attackChance: rawCard.attackChance,
@@ -91,7 +95,6 @@ function resolveEncounterCardFromDefinition(
 		};
 		return {
 			kind: 'monster',
-			biome: templateBiome,
 			monster,
 			monsterVariant: inferMonsterVariant(monster.id),
 		};
@@ -107,7 +110,6 @@ function resolveEncounterCardFromDefinition(
 			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
 			type: cardType,
 			img: typeof rawCard.img === 'string' ? rawCard.img : null,
-			biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
 			attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
 			attackChance: typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
 			defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
@@ -117,7 +119,6 @@ function resolveEncounterCardFromDefinition(
 		};
 		return {
 			kind: 'item',
-			biome: templateBiome,
 			item,
 		};
 	}
@@ -125,7 +126,6 @@ function resolveEncounterCardFromDefinition(
 	if (card.kind === 'heart') {
 		return {
 			kind: 'heart',
-			biome: templateBiome,
 			hearts: Math.max(1, Math.floor(card.hearts ?? 1)),
 		};
 	}
@@ -133,7 +133,6 @@ function resolveEncounterCardFromDefinition(
 	if (card.kind === 'chest') {
 		return {
 			kind: 'chest',
-			biome: templateBiome,
 			id: card.id,
 		};
 	}
@@ -142,7 +141,6 @@ function resolveEncounterCardFromDefinition(
 }
 
 function resolveLootCardFromDefinition(
-	templateBiome: PlayBiome,
 	card: { kind: string; id: string; hearts?: number }
 ): LootCard {
 	const rawCard = card as Record<string, unknown>;
@@ -156,7 +154,6 @@ function resolveLootCardFromDefinition(
 			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
 			type: cardType,
 			img: typeof rawCard.img === 'string' ? rawCard.img : null,
-			biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
 			attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
 			attackChance: typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
 			defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
@@ -167,7 +164,6 @@ function resolveLootCardFromDefinition(
 		if (item.type === 'item') {
 			return {
 				kind: 'consumable',
-				biome: templateBiome,
 				item,
 			};
 		}
@@ -176,7 +172,6 @@ function resolveLootCardFromDefinition(
 		}
 		return {
 			kind: 'item',
-			biome: templateBiome,
 			item,
 		};
 	}
@@ -184,7 +179,6 @@ function resolveLootCardFromDefinition(
 	if (card.kind === 'heart') {
 		return {
 			kind: 'heart',
-			biome: templateBiome,
 			hearts: Math.max(1, Math.floor(card.hearts ?? 1)),
 		};
 	}
@@ -195,25 +189,33 @@ function resolveLootCardFromDefinition(
 function expandEncounterConsumables(
 	templateBiome: PlayBiome,
 	consumables: DeckConsumableCounts,
-	itemById: Map<string, ItemDef>
+	itemById: Map<string, ItemDef>,
+	includeChestCards: boolean
 ): EncounterCard[] {
 	const cards: EncounterCard[] = [];
 
 	for (const [key, itemId] of Object.entries(CONSUMABLE_ID_BY_KEY) as Array<[keyof typeof CONSUMABLE_ID_BY_KEY, string]>) {
 		const count = Math.max(0, Math.floor(consumables[key] || 0));
 		if (count <= 0) continue;
-		const item = itemById.get(itemId);
+		const item = itemById.get(itemId) || getItemDefinitionById(itemId);
 		if (!item || item.type !== 'item') {
 			throw new Error(`Missing consumable item definition for '${String(key)}' -> '${itemId}'`);
 		}
 		for (let index = 0; index < count; index += 1) {
-			cards.push({ kind: 'consumable', biome: templateBiome, item });
+			cards.push({ kind: 'consumable', item });
 		}
 	}
 
 	const extraHeartCount = Math.max(0, Math.floor(consumables.extraHeart || 0));
 	for (let index = 0; index < extraHeartCount; index += 1) {
-		cards.push({ kind: 'heart', biome: templateBiome, hearts: 1 });
+		cards.push({ kind: 'heart', hearts: 1 });
+	}
+
+	if (includeChestCards) {
+		const chestCount = Math.max(0, Math.floor(consumables.chest || 0));
+		for (let index = 0; index < chestCount; index += 1) {
+			cards.push({ kind: 'chest', id: `${templateBiome}_consumable_chest_${index + 1}` });
+		}
 	}
 
 	return cards;
@@ -229,18 +231,18 @@ function expandLootConsumables(
 	for (const [key, itemId] of Object.entries(CONSUMABLE_ID_BY_KEY) as Array<[keyof typeof CONSUMABLE_ID_BY_KEY, string]>) {
 		const count = Math.max(0, Math.floor(consumables[key] || 0));
 		if (count <= 0) continue;
-		const item = itemById.get(itemId);
+		const item = itemById.get(itemId) || getItemDefinitionById(itemId);
 		if (!item || item.type !== 'item') {
 			throw new Error(`Missing consumable item definition for '${String(key)}' -> '${itemId}'`);
 		}
 		for (let index = 0; index < count; index += 1) {
-			cards.push({ kind: 'consumable', biome: templateBiome, item });
+			cards.push({ kind: 'consumable', item });
 		}
 	}
 
 	const extraHeartCount = Math.max(0, Math.floor(consumables.extraHeart || 0));
 	for (let index = 0; index < extraHeartCount; index += 1) {
-		cards.push({ kind: 'heart', biome: templateBiome, hearts: 1 });
+		cards.push({ kind: 'heart', hearts: 1 });
 	}
 
 	return cards;
@@ -253,7 +255,7 @@ function buildDecksFromDefinitions(deckType: DeckType): DeckPair {
 		throw new Error(`Missing required explicit deck definitions for deck type '${deckType}'`);
 	}
 
-	const templateBiome = getTemplateBiomeForDeckType(deckType);
+	const templateBiome = getDefaultBiomeForDeckType(deckType);
 	const itemById = new Map<string, ItemDef>();
 	for (const card of [...encounterDefinition.cards, ...lootDefinition.cards]) {
 		if (card.kind !== 'item') continue;
@@ -265,7 +267,6 @@ function buildDecksFromDefinitions(deckType: DeckType): DeckPair {
 			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
 			type: cardType,
 			img: typeof rawCard.img === 'string' ? rawCard.img : null,
-			biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
 			attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
 			attackChance: typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
 			defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
@@ -276,12 +277,18 @@ function buildDecksFromDefinitions(deckType: DeckType): DeckPair {
 	}
 
 	const encounterCards = encounterDefinition.cards.map(card =>
-		resolveEncounterCardFromDefinition(templateBiome, card as { kind: string; id: string; hearts?: number })
+		resolveEncounterCardFromDefinition(card as { kind: string; id: string; hearts?: number })
 	);
-	const encounterConsumables = expandEncounterConsumables(templateBiome, encounterDefinition.consumables, itemById);
+	const hasExplicitChestCards = encounterCards.some(card => card.kind === 'chest');
+	const encounterConsumables = expandEncounterConsumables(
+		templateBiome,
+		encounterDefinition.consumables,
+		itemById,
+		!hasExplicitChestCards
+	);
 
 	const lootCards = lootDefinition.cards.map(card =>
-		resolveLootCardFromDefinition(templateBiome, card as { kind: string; id: string; hearts?: number })
+		resolveLootCardFromDefinition(card as { kind: string; id: string; hearts?: number })
 	);
 	const lootConsumables = expandLootConsumables(templateBiome, lootDefinition.consumables, itemById);
 
@@ -291,8 +298,24 @@ function buildDecksFromDefinitions(deckType: DeckType): DeckPair {
 	};
 }
 
+function getDeckState(runtime: BiomeDeckRuntime, biome: PlayBiome): DeckState {
+	const deckType = getDeckTypeForBiome(biome);
+	const byDeckType = runtime[deckType];
+	if (byDeckType) return byDeckType;
+
+	const explicit = buildDecksFromDefinitions(deckType);
+	const created: DeckState = {
+		encounter: explicit.encounter,
+		encounterDiscard: [],
+		loot: explicit.loot,
+		lootDiscard: [],
+	};
+	runtime[deckType] = created;
+	return created;
+}
+
 function rebuildEncounterDeck(runtime: BiomeDeckRuntime, biome: PlayBiome): void {
-	const deck = runtime[biome];
+	const deck = getDeckState(runtime, biome);
 	if (deck.encounterDiscard.length > 0) {
 		deck.encounter = shuffle(deck.encounterDiscard);
 		deck.encounterDiscard = [];
@@ -305,7 +328,7 @@ function rebuildEncounterDeck(runtime: BiomeDeckRuntime, biome: PlayBiome): void
 }
 
 function rebuildLootDeck(runtime: BiomeDeckRuntime, biome: PlayBiome): void {
-	const deck = runtime[biome];
+	const deck = getDeckState(runtime, biome);
 	if (deck.lootDiscard.length > 0) {
 		deck.loot = shuffle(deck.lootDiscard);
 		deck.lootDiscard = [];
@@ -319,51 +342,52 @@ function rebuildLootDeck(runtime: BiomeDeckRuntime, biome: PlayBiome): void {
 
 export function createBiomeDeckRuntime(): BiomeDeckRuntime {
 	const stateByDeckType = {
-		forest: (() => {
-			const explicit = buildDecksFromDefinitions('forest');
+		easy: (() => {
+			const explicit = buildDecksFromDefinitions('easy');
 			return { encounter: explicit.encounter, encounterDiscard: [], loot: explicit.loot, lootDiscard: [] };
 		})(),
-		desert: (() => {
-			const explicit = buildDecksFromDefinitions('desert');
+		medium: (() => {
+			const explicit = buildDecksFromDefinitions('medium');
 			return { encounter: explicit.encounter, encounterDiscard: [], loot: explicit.loot, lootDiscard: [] };
 		})(),
-		volcano: (() => {
-			const explicit = buildDecksFromDefinitions('volcano');
+		hard: (() => {
+			const explicit = buildDecksFromDefinitions('hard');
 			return { encounter: explicit.encounter, encounterDiscard: [], loot: explicit.loot, lootDiscard: [] };
 		})(),
 	};
 
 	return {
-		plains: stateByDeckType.forest,
-		forest: stateByDeckType.forest,
-		desert: stateByDeckType.desert,
-		cave: stateByDeckType.volcano,
-		volcano: stateByDeckType.volcano,
+		easy: stateByDeckType.easy,
+		medium: stateByDeckType.medium,
+		hard: stateByDeckType.hard,
 	};
 }
 
 export function drawEncounterCard(runtime: BiomeDeckRuntime, biome: PlayBiome): EncounterCard {
-	if (!runtime[biome] || runtime[biome].encounter.length === 0) {
+	const deck = getDeckState(runtime, biome);
+	if (deck.encounter.length === 0) {
 		rebuildEncounterDeck(runtime, biome);
 	}
-	const card = runtime[biome].encounter.pop();
+	const nextDeck = getDeckState(runtime, biome);
+	const card = nextDeck.encounter.pop();
 	if (!card) {
 		rebuildEncounterDeck(runtime, biome);
 		return drawEncounterCard(runtime, biome);
 	}
-	runtime[biome].encounterDiscard.push(card);
+	nextDeck.encounterDiscard.push(card);
 	return card;
 }
 
 export function drawLootCard(runtime: BiomeDeckRuntime, biome: PlayBiome): LootCard {
-	if (!runtime[biome] || runtime[biome].loot.length === 0) {
+	const deck = getDeckState(runtime, biome);
+	if (deck.loot.length === 0) {
 		rebuildLootDeck(runtime, biome);
 	}
-	const card = runtime[biome].loot.pop();
+	const nextDeck = getDeckState(runtime, biome);
+	const card = nextDeck.loot.pop();
 	if (!card) {
 		rebuildLootDeck(runtime, biome);
 		return drawLootCard(runtime, biome);
 	}
-	runtime[biome].lootDiscard.push(card);
 	return card;
 }

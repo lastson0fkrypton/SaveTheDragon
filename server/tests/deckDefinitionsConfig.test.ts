@@ -67,8 +67,8 @@ function makeValidConfig() {
 			playerArmor: '',
 		},
 		decks: {
-			forest_encounter: {
-				deck: 'forest_encounter',
+			easy_encounter: {
+				deck: 'easy_encounter',
 				cards: [
 					monster('weak_trollkin', 'Weak Trollkin', 'forest', 'trollkin.png', 18, 5, 0.45, 2, 0.25),
 					monster('trollkin', 'Trollkin', 'forest', 'trollkin.png', 26, 7, 0.55, 3, 0.3),
@@ -76,28 +76,28 @@ function makeValidConfig() {
 				],
 				consumables,
 			},
-			forest_loot: {
-				deck: 'forest_loot',
+			easy_loot: {
+				deck: 'easy_loot',
 				cards: [{ kind: 'item', id: 'rusty_spoon', name: 'Rusty Spoon', type: 'weapon', img: 'rusty_spoon.png', attack: 4, attackChance: 0.6, defense: null, defenseChance: null }],
 				consumables,
 			},
-			desert_encounter: {
-				deck: 'desert_encounter',
+			medium_encounter: {
+				deck: 'medium_encounter',
 				cards: [monster('weak_scorpion', 'Weak Scorpion', 'desert', 'scorpion.png', 20, 6, 0.5, 2, 0.25)],
 				consumables,
 			},
-			desert_loot: {
-				deck: 'desert_loot',
+			medium_loot: {
+				deck: 'medium_loot',
 				cards: [{ kind: 'item', id: 'cola_bomb', name: 'Cola Bomb', type: 'weapon', img: 'cola_bomb.png', attack: 12, attackChance: 0.72, defense: null, defenseChance: null }],
 				consumables,
 			},
-			volcano_encounter: {
-				deck: 'volcano_encounter',
+			hard_encounter: {
+				deck: 'hard_encounter',
 				cards: [monster('weak_skeleton', 'Weak Skeleton', 'volcano', 'skeleton.png', 24, 8, 0.55, 3, 0.3)],
 				consumables,
 			},
-			volcano_loot: {
-				deck: 'volcano_loot',
+			hard_loot: {
+				deck: 'hard_loot',
 				cards: [{ kind: 'item', id: 'magma_blade', name: 'Magma Blade', type: 'weapon', img: 'magma_blade.png', attack: 17, attackChance: 0.82, defense: null, defenseChance: null }],
 				consumables,
 			},
@@ -112,32 +112,52 @@ describe('deckDefinitionsConfig', () => {
 
 	it('accepts valid explicit deck definitions', () => {
 		const next = setDeckDefinitionsConfig(makeValidConfig());
-		expect(next.decks.forest_encounter.cards.length).toBe(3);
+		expect(next.decks.easy_encounter.cards.length).toBe(3);
 		expect(getDeckDefinitionsConfig()).not.toBeNull();
-		expect(getDeckDefinition('forest', 'encounter')?.deck).toBe('forest_encounter');
+		expect(getDeckDefinition('easy', 'encounter')?.deck).toBe('easy_encounter');
 	});
 
 	it('throws when a required deck is missing', () => {
 		const invalid = makeValidConfig();
-		delete (invalid.decks as any).volcano_loot;
-		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/volcano_loot/i);
+		delete (invalid.decks as any).hard_loot;
+		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/hard_loot/i);
 	});
 
 	it('throws on unsupported card kind', () => {
 		const invalid = makeValidConfig();
-		(invalid.decks.forest_encounter.cards as any[]).push({ kind: 'mystery', id: 'forest_mystery' });
-		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/unsupported kind/i);
+		(invalid.decks.easy_encounter.cards as any[]).push({ kind: 'mystery', id: 'forest_mystery' });
+		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/encounter deck cards must be kind 'monster'/i);
 	});
 
-	it('accepts chest cards in encounter decks', () => {
-		const valid = makeValidConfig();
-		(valid.decks.forest_encounter.cards as any[]).push({ kind: 'chest', id: 'forest_chest' });
-		expect(() => setDeckDefinitionsConfig(valid)).not.toThrow();
+	it('rejects chest cards in encounter decks', () => {
+		const invalid = makeValidConfig();
+		(invalid.decks.easy_encounter.cards as any[]).push({ kind: 'chest', id: 'forest_chest' });
+		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/encounter deck cards must be kind 'monster'/i);
+	});
+
+	it('rejects heart cards in loot decks', () => {
+		const invalid = makeValidConfig();
+		(invalid.decks.easy_loot.cards as any[]).push({ kind: 'heart', id: 'bonus_heart', hearts: 1 });
+		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/loot deck cards must be kind 'item'/i);
+	});
+
+	it('rejects consumable item cards in loot decks', () => {
+		const invalid = makeValidConfig();
+		(invalid.decks.easy_loot.cards as any[]).push({
+			kind: 'item',
+			id: 'full_potion',
+			name: 'Full Health Potion',
+			type: 'item',
+			img: 'full_potion.png',
+			effect: 'heal_full',
+			heal: null,
+		});
+		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/loot deck cards must be type 'weapon' or 'armor'/i);
 	});
 
 	it('throws when consumables section is missing', () => {
 		const invalid = makeValidConfig();
-		delete (invalid.decks.forest_loot as any).consumables;
+		delete (invalid.decks.easy_loot as any).consumables;
 		expect(() => setDeckDefinitionsConfig(invalid)).toThrow(/consumables/i);
 	});
 });

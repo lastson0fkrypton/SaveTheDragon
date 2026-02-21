@@ -30,7 +30,9 @@ class GameService {
 	//admin API methods
 	async fetchAdminGames(pw: string) {
 		this.store.setAdminError('');
-		const res = await fetch(`/api/admin/games?password=${encodeURIComponent(pw)}`);
+		const res = await fetch(`/api/admin/games?password=${encodeURIComponent(pw)}&_ts=${Date.now()}`, {
+			cache: 'no-store',
+		});
 		if (!res.ok) {
 			this.store.setAdminError('Incorrect password or forbidden');
 			return;
@@ -40,7 +42,9 @@ class GameService {
 		this.store.setAdminGames(await res.json());
 	}
 	async fetchAdminItems(password: string): Promise<AdminItem[]> {
-		const res = await fetch(`/api/admin/items?password=${encodeURIComponent(password)}`);
+		const res = await fetch(`/api/admin/items?password=${encodeURIComponent(password)}&_ts=${Date.now()}`, {
+			cache: 'no-store',
+		});
 		if (!res.ok) {
 			return [];
 		}
@@ -181,6 +185,20 @@ class GameService {
 		});
 		if (!response.ok) {
 			console.error('Failed to use item');
+			return;
+		}
+		await this.refreshCurrentGameState();
+	}
+
+	async discardItem(itemId: string) {
+		if (!this.store.gameId || !this.store.playerId) return;
+		const response = await fetch(`/api/games/${this.store.gameId}/player/${this.store.playerId}/discard`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ playerId: this.store.playerId, itemId }),
+		});
+		if (!response.ok) {
+			console.error('Failed to discard item');
 			return;
 		}
 		await this.refreshCurrentGameState();

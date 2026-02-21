@@ -18,7 +18,7 @@ const ItemModal: React.FC<{ onClose: () => void; battleMode?: boolean }> = obser
 	const isBattleUsableItem = (item: ItemMeta | undefined): boolean => {
 		if (!item) return false;
 		if (typeof item.heal === 'number' && item.heal > 0) return true;
-		return item.effect === 'full_heal' || item.effect === 'extra_heart' || item.effect === 'teleport';
+		return item.effect === 'full_heal' || item.effect === 'heal_full' || item.effect === 'extra_heart' || item.effect === 'teleport';
 	};
 
 	const availableItemIds = battleMode
@@ -29,7 +29,7 @@ const ItemModal: React.FC<{ onClose: () => void; battleMode?: boolean }> = obser
 		if (eqItem?.heal) {
 			return `Heals ${eqItem.heal} hearts`;
 		}
-		if (eqItem?.effect === 'full_heal') {
+		if (eqItem?.effect === 'full_heal' || eqItem?.effect === 'heal_full') {
 			return 'Heals all hearts';
 		}
 		if (eqItem?.effect === 'extra_heart') {

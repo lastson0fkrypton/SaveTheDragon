@@ -82,7 +82,6 @@ export interface GameCompletionState {
 export interface MonsterMeta {
 	id: string;
 	name: string;
-	biome: string;
 	health: number;
 	attack: number;
 	attackChance: number;
@@ -116,10 +115,71 @@ export interface GameState {
 
 export interface AdminGame {
 	gameId: string;
-	players: { id: string; name: string }[];
+	players: AdminPlayerSummary[];
 	currentTurn: string | null;
 	currentDiceRoll: number | null;
 	preventExpiry: boolean;
+	deckSnapshots?: Record<string, AdminDeckSnapshot>;
+	discardSnapshots?: Record<string, AdminDiscardSnapshot>;
+}
+
+export interface AdminDeckSnapshotCard {
+	source: 'card' | 'consumable' | 'encounter-discard' | 'loot-discard';
+	repeat: number;
+	kind: 'monster' | 'item' | 'heart' | 'chest';
+	id: string;
+	name: string;
+	variant?: string | null;
+	type?: 'weapon' | 'armor' | 'item' | null;
+	health?: number | null;
+	attack?: number | null;
+	attackChance?: number | null;
+	defense?: number | null;
+	defenseChance?: number | null;
+	heal?: number | null;
+	effect?: string | null;
+	hearts?: number | null;
+}
+
+export interface AdminDeckSnapshot {
+	deckId: string;
+	explicitCount: number;
+	consumableCount: number;
+	totalCount: number;
+	cards: AdminDeckSnapshotCard[];
+}
+
+export interface AdminPlayerOwnedCard {
+	id: string;
+	name: string;
+	type: 'weapon' | 'armor' | 'item' | null;
+	attack: number | null;
+	attackChance: number | null;
+	defense: number | null;
+	defenseChance: number | null;
+	heal: number | null;
+	effect: string | null;
+	equipped?: boolean;
+}
+
+export interface AdminPlayerSummary {
+	id: string;
+	name: string;
+	equippedWeaponId?: string | null;
+	equippedArmorId?: string | null;
+	cards?: {
+		weapons: AdminPlayerOwnedCard[];
+		armor: AdminPlayerOwnedCard[];
+		items: AdminPlayerOwnedCard[];
+	};
+}
+
+export interface AdminDiscardSnapshot {
+	deckId: string;
+	encounterDiscardCount: number;
+	lootDiscardCount: number;
+	encounterDiscard: AdminDeckSnapshotCard[];
+	lootDiscard: AdminDeckSnapshotCard[];
 }
 
 export interface AdminItem {
