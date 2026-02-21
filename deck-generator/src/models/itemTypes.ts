@@ -40,6 +40,7 @@ export type ItemConsumableBalanceRange = {
 	extraHeart: number;
 };
 
+export type ItemVariantRangeModifier = { valueDelta: number; chanceDelta: number };
 
 export type ItemCatalogSourceEntry = {
 	id: string;

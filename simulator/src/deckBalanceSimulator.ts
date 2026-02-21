@@ -88,6 +88,28 @@ async function generateDeckDefinitionsFile(outPath?: string, balancePath?: strin
 	return targetPath;
 }
 
+function createIsolatedDeckDefinitionsPath(prefix: string): string {
+	const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+	return path.resolve(os.tmpdir(), `${prefix}-${suffix}.json`);
+}
+
+async function resolveDeckDefinitionsForRun(options: SimOptions): Promise<{ path: string; cleanup: boolean }> {
+	if (options.balanceConfigPath) {
+		const isolatedPath = createIsolatedDeckDefinitionsPath('deck-definitions-balance');
+		const generated = await generateDeckDefinitionsFile(isolatedPath, options.balanceConfigPath);
+		return { path: generated, cleanup: true };
+	}
+
+	if (options.deckDefinitionsConfigPath && fs.existsSync(options.deckDefinitionsConfigPath)) {
+		const isolatedPath = createIsolatedDeckDefinitionsPath('deck-definitions-copy');
+		fs.copyFileSync(options.deckDefinitionsConfigPath, isolatedPath);
+		return { path: isolatedPath, cleanup: true };
+	}
+
+	const generated = await generateDeckDefinitionsFile();
+	return { path: generated, cleanup: true };
+}
+
 function parseArgs(): SimOptions {
 	const args = process.argv.slice(2);
 	const pairs = new Map<string, string>();
@@ -456,7 +478,8 @@ function writeReport(options: SimOptions, aggregate: AggregateResult, runs: Sing
 }
 
 export async function runApiSimulation(options: SimOptions, runOptions: RunOptions = {}): Promise<SimulationRunOutput> {
-	const deckDefinitionsPath = await generateDeckDefinitionsFile(options.deckDefinitionsConfigPath, options.balanceConfigPath);
+	const resolvedDeckDefinitions = await resolveDeckDefinitionsForRun(options);
+	const deckDefinitionsPath = resolvedDeckDefinitions.path;
 	if (!fs.existsSync(deckDefinitionsPath)) {
 		throw new Error(`Deck definitions were not generated: ${deckDefinitionsPath}`);
 	}
@@ -497,6 +520,13 @@ export async function runApiSimulation(options: SimOptions, runOptions: RunOptio
 		return output;
 	} finally {
 		await started.stop();
+		if (resolvedDeckDefinitions.cleanup && fs.existsSync(deckDefinitionsPath)) {
+			try {
+				fs.unlinkSync(deckDefinitionsPath);
+			} catch {
+				// best effort cleanup
+			}
+		}
 	}
 }
 

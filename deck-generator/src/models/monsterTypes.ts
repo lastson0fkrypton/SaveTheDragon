@@ -1,4 +1,3 @@
-
 import type { ItemConsumableBalanceRange, ItemTierDeck } from './itemTypes.js';
 
 export type MonsterTierDeck = ItemTierDeck;
@@ -16,7 +15,6 @@ export interface MonsterDef {
 	img: string;
 }
 
-
 export type MonsterDeckBalanceRange = {
 	minHealth: number;
 	maxHealth: number;
@@ -32,6 +30,14 @@ export type MonsterDeckBalanceRange = {
 
 export type MonsterConsumableBalanceRange = ItemConsumableBalanceRange & {
 	chest?: number;
+};
+
+export type MonsterVarientRangeModifier = {
+	healthDelta: number;
+	attackDelta: number;
+	attackChanceDelta: number;
+	defenseDelta: number;
+	defenseChanceDelta: number;
 };
 
 export type MonsterCatalogSourceEntry = {

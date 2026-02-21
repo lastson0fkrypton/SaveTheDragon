@@ -2,22 +2,18 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import {
-	DEFAULT_ARMOR_DECK_BALANCE,
+	DEFAULT_ARMOR_PROTECTION,
 	DEFAULT_HEALING_AMOUNT,
-	DEFAULT_ITEM_CONSUMABLE_BALANCE,
+	DEFAULT_ITEM_CONSUMABLES,
 	DEFAULT_ITEM_VARIANT_MODIFIERS,
-	DEFAULT_MONSTER_DECK_BALANCE,
-	DEFAULT_MONSTER_DECK_CONSUMABLES,
+	DEFAULT_MONSTER_TIER_BASE,
+	DEFAULT_MONSTER_CONSUMABLES,
 	DEFAULT_MONSTER_VARIANT_MODIFIERS,
 	DEFAULT_PLAYER_STATE,
- 	DEFAULT_WEAPON_DECK_BALANCE,
+	DEFAULT_WEAPON_DAMAGE,
+	DEFAULT_ITEM_TIER_BASE,
 } from './catalog/deck.js';
-import {
-	DESERT_ITEM_CATALOG,
-	FIST_ITEM,
-	FOREST_ITEM_CATALOG,
-	VOLCANO_ITEM_CATALOG,
-} from './catalog/items.js';
+import { DESERT_ITEM_CATALOG, FIST_ITEM, FOREST_ITEM_CATALOG, VOLCANO_ITEM_CATALOG } from './catalog/items.js';
 import {
 	DESERT_MONSTER_CATALOG,
 	EVIL_PRINCESS_MONSTER,
@@ -31,59 +27,87 @@ import type {
 	ItemTierDeck,
 	ItemVariant,
 } from './models/itemTypes.js';
-import type { MonsterConsumableBalanceRange, MonsterDef, MonsterTierDeck, MonsterVariant } from './models/monsterTypes.js';
-
-const DEFAULT_ITEM_TIER_BASE = {
-	weapon: DEFAULT_WEAPON_DECK_BALANCE,
-	armor: DEFAULT_ARMOR_DECK_BALANCE,
-};
-
-const DEFAULT_MONSTER_TIER_BASE_STATS = DEFAULT_MONSTER_DECK_BALANCE;
+import type {
+	MonsterConsumableBalanceRange,
+	MonsterDef,
+	MonsterTierDeck,
+	MonsterVariant,
+} from './models/monsterTypes.js';
 
 type DeckType = ItemTierDeck;
 type CardKind = 'monster' | 'item' | 'heart' | 'chest';
 type DeckKind = 'encounter' | 'loot';
 type PlayBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
 
+type WeaponBalanceOverrides = Partial<
+	Record<DeckType, { minAttack?: number; maxAttack?: number; minChance?: number; maxChance?: number }>
+>;
+type ArmorBalanceOverrides = Partial<
+	Record<DeckType, { minDefense?: number; maxDefense?: number; minChance?: number; maxChance?: number }>
+>;
+type ItemVarianceOverrides = Partial<Record<ItemVariant, { valueDelta?: number; chanceDelta?: number }>>;
+type HealingOverrides = {
+	smallPotionHeal?: number;
+	mediumPotionHeal?: number;
+	largePotionHeal?: number;
+};
+type MonsterTierOverrides = Partial<
+	Record<
+		DeckType,
+		{
+			minHealth?: number;
+			maxHealth?: number;
+			minAttack?: number;
+			maxAttack?: number;
+			minAttackChance?: number;
+			maxAttackChance?: number;
+			minDefense?: number;
+			maxDefense?: number;
+			minDefenseChance?: number;
+			maxDefenseChance?: number;
+		}
+	>
+>;
+type MonsterVarianceOverrides = Partial<
+	Record<
+		MonsterVariant,
+		{
+			healthDelta?: number;
+			attackDelta?: number;
+			attackChanceDelta?: number;
+			defenseDelta?: number;
+			defenseChanceDelta?: number;
+			health?: number;
+			attack?: number;
+			attackChance?: number;
+			defense?: number;
+			defenseChance?: number;
+		}
+	>
+>;
+
 type BalanceJsonConfig = {
-	weapons?: Partial<Record<DeckType, { minAttack?: number; maxAttack?: number; minChance?: number; maxChance?: number }>>;
-	armors?: Partial<Record<DeckType, { minDefense?: number; maxDefense?: number; minChance?: number; maxChance?: number }>>;
-	itemVariance?: Partial<Record<ItemVariant, { valueDelta?: number; chanceDelta?: number }>>;
-	consumables?: {
-		smallPotionHeal?: number;
-		mediumPotionHeal?: number;
-		largePotionHeal?: number;
-	};
+	weapons?: WeaponBalanceOverrides;
+	armors?: ArmorBalanceOverrides;
+	itemVariance?: ItemVarianceOverrides;
+	consumables?: HealingOverrides;
 	itemConsumables?: Partial<Record<DeckType, Partial<ItemConsumableBalanceRange>>>;
 	monsterConsumables?: Partial<Record<DeckType, Partial<MonsterConsumableBalanceRange>>>;
-	monsters?: Partial<Record<DeckType, {
-		minHealth?: number;
-		maxHealth?: number;
-		minAttack?: number;
-		maxAttack?: number;
-		minAttackChance?: number;
-		maxAttackChance?: number;
-		minDefense?: number;
-		maxDefense?: number;
-		minDefenseChance?: number;
-		maxDefenseChance?: number;
-	}>>;
-	monsterVariance?: Partial<Record<MonsterVariant, {
-		healthDelta?: number;
-		attackDelta?: number;
-		attackChanceDelta?: number;
-		defenseDelta?: number;
-		defenseChanceDelta?: number;
-		health?: number;
-		attack?: number;
-		attackChance?: number;
-		defense?: number;
-		defenseChance?: number;
-	}>>;
+	monsters?: MonsterTierOverrides;
+	monsterVariance?: MonsterVarianceOverrides;
+	DEFAULT_HEALING_AMOUNT?: Partial<typeof DEFAULT_HEALING_AMOUNT>;
+	DEFAULT_WEAPON_DAMAGE?: WeaponBalanceOverrides;
+	DEFAULT_ARMOR_PROTECTION?: ArmorBalanceOverrides;
+	DEFAULT_ITEM_CONSUMABLES?: Partial<Record<DeckType, Partial<ItemConsumableBalanceRange>>>;
+	DEFAULT_ITEM_VARIANT_MODIFIERS?: ItemVarianceOverrides;
+	DEFAULT_MONSTER_TIER_BASE?: MonsterTierOverrides;
+	DEFAULT_MONSTER_CONSUMABLES?: Partial<Record<DeckType, Partial<MonsterConsumableBalanceRange>>>;
+	DEFAULT_MONSTER_VARIANT_MODIFIERS?: MonsterVarianceOverrides;
 };
 
 type GeneratorConfig = {
 	outPath?: string;
+	defaults?: BalanceJsonConfig;
 	balance?: BalanceJsonConfig;
 };
 
@@ -107,7 +131,7 @@ type ItemBalanceProfile = {
 };
 
 type MonsterBalanceProfile = {
-	biomeTierBaseStats: typeof DEFAULT_MONSTER_TIER_BASE_STATS;
+	biomeTierBaseStats: typeof DEFAULT_MONSTER_TIER_BASE;
 	variantModifiers: typeof DEFAULT_MONSTER_VARIANT_MODIFIERS;
 	deckConsumables: Record<DeckType, MonsterConsumableBalanceRange>;
 };
@@ -155,10 +179,13 @@ const PLAY_BIOMES_BY_DECK_TYPE: Record<DeckType, PlayBiome[]> = {
 	hard: ['cave', 'volcano'],
 };
 
-const GENERATION_TEMPLATE: Record<DeckType, {
-	encounter: { item: number; consumable: number; heart: number; chest: number };
-	loot: { consumable: number; heart: number };
-}> = {
+const GENERATION_TEMPLATE: Record<
+	DeckType,
+	{
+		encounter: { item: number; consumable: number; heart: number; chest: number };
+		loot: { consumable: number; heart: number };
+	}
+> = {
 	easy: {
 		encounter: { item: 5, consumable: 4, heart: 1, chest: 1 },
 		loot: { consumable: 3, heart: 2 },
@@ -240,7 +267,10 @@ function parseValue(rawValue: string): unknown {
 }
 
 function setByPath(target: Record<string, unknown>, dotPath: string, rawValue: string): void {
-	const parts = dotPath.split('.').map(part => part.trim()).filter(Boolean);
+	const parts = dotPath
+		.split('.')
+		.map(part => part.trim())
+		.filter(Boolean);
 	if (parts.length === 0) {
 		throw new Error(`Invalid --set path '${dotPath}'`);
 	}
@@ -349,7 +379,10 @@ async function resolveConfig(args: Args): Promise<{ outPath: string; balance: Ba
 
 	const balance = deepMerge(
 		deepMerge(
-			deepMerge(configFromFile.balance ?? {}, balanceFromPath as Record<string, unknown>),
+			deepMerge(
+				deepMerge(configFromFile.defaults ?? {}, configFromFile.balance ?? {}),
+				balanceFromPath as Record<string, unknown>
+			),
 			balanceFromInline as Record<string, unknown>
 		),
 		setPatch
@@ -368,15 +401,15 @@ function getDefaultItemProfile(): ItemBalanceProfile {
 			mediumPotionHeal: DEFAULT_HEALING_AMOUNT.mediumHealthPotion,
 			largePotionHeal: DEFAULT_HEALING_AMOUNT.largeHealthPotion,
 		},
-		deckConsumables: structuredClone(DEFAULT_ITEM_CONSUMABLE_BALANCE),
+		deckConsumables: structuredClone(DEFAULT_ITEM_CONSUMABLES),
 	};
 }
 
 function getDefaultMonsterProfile(): MonsterBalanceProfile {
 	return {
-		biomeTierBaseStats: structuredClone(DEFAULT_MONSTER_TIER_BASE_STATS),
+		biomeTierBaseStats: structuredClone(DEFAULT_MONSTER_TIER_BASE),
 		variantModifiers: structuredClone(DEFAULT_MONSTER_VARIANT_MODIFIERS),
-		deckConsumables: structuredClone(DEFAULT_MONSTER_DECK_CONSUMABLES),
+		deckConsumables: structuredClone(DEFAULT_MONSTER_CONSUMABLES),
 	};
 }
 
@@ -385,6 +418,87 @@ function applyBalanceOverrides(
 	monsterProfile: MonsterBalanceProfile,
 	balance: BalanceJsonConfig
 ): void {
+	if (balance.DEFAULT_WEAPON_DAMAGE) {
+		for (const deck of DECK_ORDER) {
+			itemProfile.biomeTierBase.weapon[deck] = {
+				...itemProfile.biomeTierBase.weapon[deck],
+				...(balance.DEFAULT_WEAPON_DAMAGE[deck] ?? {}),
+			};
+		}
+	}
+
+	if (balance.DEFAULT_ARMOR_PROTECTION) {
+		for (const deck of DECK_ORDER) {
+			itemProfile.biomeTierBase.armor[deck] = {
+				...itemProfile.biomeTierBase.armor[deck],
+				...(balance.DEFAULT_ARMOR_PROTECTION[deck] ?? {}),
+			};
+		}
+	}
+
+	if (balance.DEFAULT_ITEM_VARIANT_MODIFIERS) {
+		for (const variant of ITEM_VARIANTS) {
+			itemProfile.variantModifiers[variant] = {
+				...itemProfile.variantModifiers[variant],
+				...(balance.DEFAULT_ITEM_VARIANT_MODIFIERS[variant] ?? {}),
+			};
+		}
+	}
+
+	if (balance.DEFAULT_HEALING_AMOUNT) {
+		itemProfile.consumables = {
+			...itemProfile.consumables,
+			smallPotionHeal: balance.DEFAULT_HEALING_AMOUNT.smallHealthPotion ?? itemProfile.consumables.smallPotionHeal,
+			mediumPotionHeal:
+				balance.DEFAULT_HEALING_AMOUNT.mediumHealthPotion ?? itemProfile.consumables.mediumPotionHeal,
+			largePotionHeal: balance.DEFAULT_HEALING_AMOUNT.largeHealthPotion ?? itemProfile.consumables.largePotionHeal,
+		};
+	}
+
+	if (balance.DEFAULT_ITEM_CONSUMABLES) {
+		for (const deck of DECK_ORDER) {
+			itemProfile.deckConsumables[deck] = {
+				...itemProfile.deckConsumables[deck],
+				...(balance.DEFAULT_ITEM_CONSUMABLES[deck] ?? {}),
+			};
+		}
+	}
+
+	if (balance.DEFAULT_MONSTER_TIER_BASE) {
+		for (const deck of DECK_ORDER) {
+			monsterProfile.biomeTierBaseStats[deck] = {
+				...monsterProfile.biomeTierBaseStats[deck],
+				...(balance.DEFAULT_MONSTER_TIER_BASE[deck] ?? {}),
+			};
+		}
+	}
+
+	if (balance.DEFAULT_MONSTER_VARIANT_MODIFIERS) {
+		for (const variant of MONSTER_VARIANTS) {
+			const next = balance.DEFAULT_MONSTER_VARIANT_MODIFIERS[variant] ?? {};
+			const normalizedNext = {
+				healthDelta: next.healthDelta ?? next.health,
+				attackDelta: next.attackDelta ?? next.attack,
+				attackChanceDelta: next.attackChanceDelta ?? next.attackChance,
+				defenseDelta: next.defenseDelta ?? next.defense,
+				defenseChanceDelta: next.defenseChanceDelta ?? next.defenseChance,
+			};
+			monsterProfile.variantModifiers[variant] = {
+				...monsterProfile.variantModifiers[variant],
+				...normalizedNext,
+			};
+		}
+	}
+
+	if (balance.DEFAULT_MONSTER_CONSUMABLES) {
+		for (const deck of DECK_ORDER) {
+			monsterProfile.deckConsumables[deck] = {
+				...monsterProfile.deckConsumables[deck],
+				...(balance.DEFAULT_MONSTER_CONSUMABLES[deck] ?? {}),
+			};
+		}
+	}
+
 	if (balance.weapons) {
 		for (const deck of DECK_ORDER) {
 			itemProfile.biomeTierBase.weapon[deck] = {
@@ -511,10 +625,7 @@ function buildConsumableCounts(base: ItemConsumableBalanceRange | MonsterConsuma
 	return counts;
 }
 
-function buildDeckItemDefs(
-	deck: DeckType,
-	profile: ItemBalanceProfile
-): { all: ItemDef[]; normalOnly: ItemDef[] } {
+function buildDeckItemDefs(deck: DeckType, profile: ItemBalanceProfile): { all: ItemDef[]; normalOnly: ItemDef[] } {
 	const sourceByDeck = {
 		easy: FOREST_ITEM_CATALOG,
 		medium: DESERT_ITEM_CATALOG,
@@ -535,7 +646,10 @@ function buildDeckItemDefs(
 		const mods = profile.variantModifiers[variant];
 		if (entry.type === 'weapon') {
 			const base = profile.biomeTierBase.weapon[deck];
-			const attack = Math.max(2, Math.round(interpolate(base.minAttack, base.maxAttack, ratio)) + mods.valueDelta);
+			const attack = Math.max(
+				2,
+				Math.round(interpolate(base.minAttack, base.maxAttack, ratio)) + mods.valueDelta
+			);
 			const attackChance = clampChance(interpolate(base.minChance, base.maxChance, ratio) + mods.chanceDelta);
 			return {
 				id: toVariantId(entry.id, variant),
@@ -623,31 +737,43 @@ function buildDeckMonsterDefs(deck: MonsterTierDeck, profile: MonsterBalanceProf
 	return out;
 }
 
-function buildDeckDefinitions(
-	itemProfile: ItemBalanceProfile,
-	monsterProfile: MonsterBalanceProfile
-) {
-	const deckData: Record<DeckType, {
-		itemsAll: ItemDef[];
-		itemsNormal: ItemDef[];
-		monsters: MonsterDef[];
-	}> = {
+function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: MonsterBalanceProfile) {
+	const deckData: Record<
+		DeckType,
+		{
+			itemsAll: ItemDef[];
+			itemsNormal: ItemDef[];
+			monsters: MonsterDef[];
+		}
+	> = {
 		easy: {
 			...(() => {
 				const items = buildDeckItemDefs('easy', itemProfile);
-				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('easy', monsterProfile) };
+				return {
+					itemsAll: items.all,
+					itemsNormal: items.normalOnly,
+					monsters: buildDeckMonsterDefs('easy', monsterProfile),
+				};
 			})(),
 		},
 		medium: {
 			...(() => {
 				const items = buildDeckItemDefs('medium', itemProfile);
-				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('medium', monsterProfile) };
+				return {
+					itemsAll: items.all,
+					itemsNormal: items.normalOnly,
+					monsters: buildDeckMonsterDefs('medium', monsterProfile),
+				};
 			})(),
 		},
 		hard: {
 			...(() => {
 				const items = buildDeckItemDefs('hard', itemProfile);
-				return { itemsAll: items.all, itemsNormal: items.normalOnly, monsters: buildDeckMonsterDefs('hard', monsterProfile) };
+				return {
+					itemsAll: items.all,
+					itemsNormal: items.normalOnly,
+					monsters: buildDeckMonsterDefs('hard', monsterProfile),
+				};
 			})(),
 		},
 	};
@@ -675,9 +801,9 @@ function buildDeckDefinitions(
 			...lootItems
 				.filter(item => item.type === 'weapon' || item.type === 'armor')
 				.map(item => {
-				const { variant } = toItemVariantMeta(item.id);
-				return toItemCard(item, variant);
-			}),
+					const { variant } = toItemVariantMeta(item.id);
+					return toItemCard(item, variant);
+				}),
 		];
 
 		const encounterConsumables = buildConsumableCounts(monsterProfile.deckConsumables[deck]);

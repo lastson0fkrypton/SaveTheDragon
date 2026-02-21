@@ -1,5 +1,18 @@
-import { ArmorDeckBalanceRange, ItemConsumableBalanceRange, ItemTierDeck, ItemVariant, WeaponDeckBalanceRange } from '../models/itemTypes.js';
-import { MonsterConsumableBalanceRange, MonsterDeckBalanceRange, MonsterTierDeck, MonsterVariant } from '../models/monsterTypes.js';
+import {
+	ArmorDeckBalanceRange,
+	ItemConsumableBalanceRange,
+	ItemTierDeck,
+	ItemVariant,
+	ItemVariantRangeModifier,
+	WeaponDeckBalanceRange,
+} from '../models/itemTypes.js';
+import {
+	MonsterConsumableBalanceRange,
+	MonsterDeckBalanceRange,
+	MonsterTierDeck,
+	MonsterVariant,
+	MonsterVarientRangeModifier,
+} from '../models/monsterTypes.js';
 
 export const DEFAULT_PLAYER_STATE = {
 	playerHealth: 5,
@@ -16,19 +29,24 @@ export const DEFAULT_HEALING_AMOUNT = {
 	largeHealthPotion: 7,
 };
 
-export const DEFAULT_WEAPON_DECK_BALANCE: Record<ItemTierDeck, WeaponDeckBalanceRange> = {
+export const DEFAULT_WEAPON_DAMAGE: Record<ItemTierDeck, WeaponDeckBalanceRange> = {
 	easy: { minAttack: 4, maxAttack: 4, minChance: 0.603, maxChance: 0.603 },
 	medium: { minAttack: 12, maxAttack: 12, minChance: 0.723, maxChance: 0.723 },
 	hard: { minAttack: 17, maxAttack: 17, minChance: 0.823, maxChance: 0.823 },
 };
 
-export const DEFAULT_ARMOR_DECK_BALANCE: Record<ItemTierDeck, ArmorDeckBalanceRange> = {
+export const DEFAULT_ARMOR_PROTECTION: Record<ItemTierDeck, ArmorDeckBalanceRange> = {
 	easy: { minDefense: 4, maxDefense: 4, minChance: 0.603, maxChance: 0.603 },
 	medium: { minDefense: 12, maxDefense: 12, minChance: 0.723, maxChance: 0.723 },
 	hard: { minDefense: 17, maxDefense: 17, minChance: 0.823, maxChance: 0.823 },
 };
 
-export const DEFAULT_ITEM_CONSUMABLE_BALANCE: Record<ItemTierDeck, ItemConsumableBalanceRange> = {
+export const DEFAULT_ITEM_TIER_BASE = {
+	weapon: DEFAULT_WEAPON_DAMAGE,
+	armor: DEFAULT_ARMOR_PROTECTION,
+};
+
+export const DEFAULT_ITEM_CONSUMABLES: Record<ItemTierDeck, ItemConsumableBalanceRange> = {
 	easy: {
 		teleport: 2,
 		smallHealthPotion: 2,
@@ -55,13 +73,13 @@ export const DEFAULT_ITEM_CONSUMABLE_BALANCE: Record<ItemTierDeck, ItemConsumabl
 	},
 };
 
-export const DEFAULT_ITEM_VARIANT_MODIFIERS: Record<ItemVariant, { valueDelta: number; chanceDelta: number }> = {
+export const DEFAULT_ITEM_VARIANT_MODIFIERS: Record<ItemVariant, ItemVariantRangeModifier> = {
 	cracked: { valueDelta: -1, chanceDelta: -0.0596 },
 	normal: { valueDelta: 0, chanceDelta: 0 },
 	enchanted: { valueDelta: 1, chanceDelta: 0.0596 },
 };
 
-export const DEFAULT_MONSTER_DECK_BALANCE: Record<MonsterTierDeck, MonsterDeckBalanceRange> = {
+export const DEFAULT_MONSTER_TIER_BASE: Record<MonsterTierDeck, MonsterDeckBalanceRange> = {
 	easy: {
 		minHealth: 5,
 		maxHealth: 7,
@@ -100,7 +118,7 @@ export const DEFAULT_MONSTER_DECK_BALANCE: Record<MonsterTierDeck, MonsterDeckBa
 	},
 };
 
-export const DEFAULT_MONSTER_DECK_CONSUMABLES: Record<MonsterTierDeck, MonsterConsumableBalanceRange> = {
+export const DEFAULT_MONSTER_CONSUMABLES: Record<MonsterTierDeck, MonsterConsumableBalanceRange> = {
 	easy: {
 		teleport: 2,
 		smallHealthPotion: 2,
@@ -130,16 +148,7 @@ export const DEFAULT_MONSTER_DECK_CONSUMABLES: Record<MonsterTierDeck, MonsterCo
 	},
 };
 
-export const DEFAULT_MONSTER_VARIANT_MODIFIERS: Record<
-	MonsterVariant,
-	{
-		healthDelta: number;
-		attackDelta: number;
-		attackChanceDelta: number;
-		defenseDelta: number;
-		defenseChanceDelta: number;
-	}
-> = {
+export const DEFAULT_MONSTER_VARIANT_MODIFIERS: Record<MonsterVariant, MonsterVarientRangeModifier> = {
 	weak: { healthDelta: -1, attackDelta: -1, attackChanceDelta: -0.08, defenseDelta: -1, defenseChanceDelta: -0.08 },
 	normal: { healthDelta: 0, attackDelta: 0, attackChanceDelta: 0, defenseDelta: 0, defenseChanceDelta: 0 },
 	strong: { healthDelta: 1, attackDelta: 1, attackChanceDelta: 0.08, defenseDelta: 1, defenseChanceDelta: 0.08 },

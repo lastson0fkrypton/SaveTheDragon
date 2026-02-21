@@ -5,35 +5,17 @@ import { spawn } from 'node:child_process';
 import { createSeededRandom } from './random.js';
 import { runApiSimulation, type AggregateResult, type SimOptions } from './deckBalanceSimulator.js';
 
+type BalanceDeck = 'easy' | 'medium' | 'hard';
+
 type Genome = {
-	monsterEncounterScale: number;
-	itemEncounterScale: number;
-	consumableEncounterScale: number;
-	heartEncounterScale: number;
-	lootItemScale: number;
-	lootConsumableScale: number;
-	lootHeartScale: number;
-	strongWeightScale: number;
-	weakWeightScale: number;
-	consumableHealScale: number;
-};
-
-type BalanceDeck = 'forest' | 'desert' | 'volcano';
-
-type BalanceJsonConfig = {
-	weapons: Record<BalanceDeck, { minAttack: number; maxAttack: number; minChance: number; maxChance: number }>;
-	armors: Record<BalanceDeck, { minDefense: number; maxDefense: number; minChance: number; maxChance: number }>;
-	itemVariance: {
-		cracked: { valueDelta: number; chanceDelta: number };
-		normal: { valueDelta: number; chanceDelta: number };
-		enchanted: { valueDelta: number; chanceDelta: number };
+	DEFAULT_HEALING_AMOUNT: {
+		smallHealthPotion: number;
+		mediumHealthPotion: number;
+		largeHealthPotion: number;
 	};
-	consumables: {
-		smallPotionHeal: number;
-		mediumPotionHeal: number;
-		largePotionHeal: number;
-	};
-	itemConsumables: Record<
+	DEFAULT_WEAPON_DAMAGE: Record<BalanceDeck, { minAttack: number; maxAttack: number; minChance: number; maxChance: number }>;
+	DEFAULT_ARMOR_PROTECTION: Record<BalanceDeck, { minDefense: number; maxDefense: number; minChance: number; maxChance: number }>;
+	DEFAULT_ITEM_CONSUMABLES: Record<
 		BalanceDeck,
 		{
 			teleport: number;
@@ -44,7 +26,12 @@ type BalanceJsonConfig = {
 			extraHeart: number;
 		}
 	>;
-	monsters: Record<
+	DEFAULT_ITEM_VARIANT_MODIFIERS: {
+		cracked: { valueDelta: number; chanceDelta: number };
+		normal: { valueDelta: number; chanceDelta: number };
+		enchanted: { valueDelta: number; chanceDelta: number };
+	};
+	DEFAULT_MONSTER_TIER_BASE: Record<
 		BalanceDeck,
 		{
 			minHealth: number;
@@ -59,12 +46,7 @@ type BalanceJsonConfig = {
 			maxDefenseChance: number;
 		}
 	>;
-	monsterVariance: {
-		weak: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
-		normal: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
-		strong: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
-	};
-	monsterConsumables: Record<
+	DEFAULT_MONSTER_CONSUMABLES: Record<
 		BalanceDeck,
 		{
 			teleport: number;
@@ -76,7 +58,14 @@ type BalanceJsonConfig = {
 			chest: number;
 		}
 	>;
+	DEFAULT_MONSTER_VARIANT_MODIFIERS: {
+		weak: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
+		normal: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
+		strong: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
+	};
 };
+
+type BalanceJsonConfig = Genome;
 
 type Candidate = {
 	genome: Genome;
@@ -155,15 +144,6 @@ function parseRuntimeArgs(raw: Record<string, string>): Args {
 	};
 }
 
-function normalizeWeights(weights: { weak: number; normal: number; strong: number }) {
-	const total = Math.max(0.0001, weights.weak + weights.normal + weights.strong);
-	return {
-		weak: weights.weak / total,
-		normal: weights.normal / total,
-		strong: weights.strong / total,
-	};
-}
-
 function toCount(value: number): number {
 	return Math.max(0, Math.round(value));
 }
@@ -172,211 +152,682 @@ function clampChance(value: number): number {
 	return clamp(Number(value.toFixed(4)), 0.05, 0.95);
 }
 
+type GenomeBound = {
+	path: string;
+	min: number;
+	max: number;
+	span: number;
+	integer?: boolean;
+	chance?: boolean;
+};
+
+const BASE_GENOME: Genome = {
+	DEFAULT_HEALING_AMOUNT: {
+		smallHealthPotion: 3,
+		mediumHealthPotion: 5,
+		largeHealthPotion: 7,
+	},
+	DEFAULT_WEAPON_DAMAGE: {
+		easy: { minAttack: 1, maxAttack: 4, minChance: 0.5, maxChance: 0.6 },
+		medium: { minAttack: 9, maxAttack: 12, minChance: 0.65, maxChance: 0.75 },
+		hard: { minAttack: 14, maxAttack: 17, minChance: 0.75, maxChance: 0.85 },
+	},
+	DEFAULT_ARMOR_PROTECTION: {
+		easy: { minDefense: 4, maxDefense: 4, minChance: 0.603, maxChance: 0.603 },
+		medium: { minDefense: 12, maxDefense: 12, minChance: 0.723, maxChance: 0.723 },
+		hard: { minDefense: 17, maxDefense: 17, minChance: 0.823, maxChance: 0.823 },
+	},
+	DEFAULT_ITEM_CONSUMABLES: {
+		easy: { teleport: 2, smallHealthPotion: 2, mediumHealthPotion: 2, largeHealthPotion: 2, fullHealthPotion: 2, extraHeart: 1 },
+		medium: { teleport: 2, smallHealthPotion: 2, mediumHealthPotion: 2, largeHealthPotion: 2, fullHealthPotion: 2, extraHeart: 1 },
+		hard: { teleport: 2, smallHealthPotion: 2, mediumHealthPotion: 2, largeHealthPotion: 2, fullHealthPotion: 2, extraHeart: 1 },
+	},
+	DEFAULT_ITEM_VARIANT_MODIFIERS: {
+		cracked: { valueDelta: -1, chanceDelta: -0.0596 },
+		normal: { valueDelta: 0, chanceDelta: 0 },
+		enchanted: { valueDelta: 1, chanceDelta: 0.0596 },
+	},
+	DEFAULT_MONSTER_TIER_BASE: {
+		easy: {
+			minHealth: 5,
+			maxHealth: 7,
+			minAttack: 3,
+			maxAttack: 5,
+			minAttackChance: 0.6098,
+			maxAttackChance: 0.7098,
+			minDefense: 1,
+			maxDefense: 3,
+			minDefenseChance: 0.3098,
+			maxDefenseChance: 0.4098,
+		},
+		medium: {
+			minHealth: 12,
+			maxHealth: 16,
+			minAttack: 4,
+			maxAttack: 6,
+			minAttackChance: 0.7298,
+			maxAttackChance: 0.8298,
+			minDefense: 3,
+			maxDefense: 5,
+			minDefenseChance: 0.4498,
+			maxDefenseChance: 0.5498,
+		},
+		hard: {
+			minHealth: 23,
+			maxHealth: 27,
+			minAttack: 7,
+			maxAttack: 9,
+			minAttackChance: 0.8498,
+			maxAttackChance: 0.93,
+			minDefense: 5,
+			maxDefense: 7,
+			minDefenseChance: 0.6098,
+			maxDefenseChance: 0.69,
+		},
+	},
+	DEFAULT_MONSTER_CONSUMABLES: {
+		easy: { teleport: 2, smallHealthPotion: 2, mediumHealthPotion: 2, largeHealthPotion: 2, fullHealthPotion: 2, extraHeart: 1, chest: 10 },
+		medium: { teleport: 2, smallHealthPotion: 2, mediumHealthPotion: 2, largeHealthPotion: 2, fullHealthPotion: 2, extraHeart: 1, chest: 10 },
+		hard: { teleport: 2, smallHealthPotion: 2, mediumHealthPotion: 2, largeHealthPotion: 2, fullHealthPotion: 2, extraHeart: 1, chest: 10 },
+	},
+	DEFAULT_MONSTER_VARIANT_MODIFIERS: {
+		weak: { healthDelta: -1, attackDelta: -1, attackChanceDelta: -0.08, defenseDelta: -1, defenseChanceDelta: -0.08 },
+		normal: { healthDelta: 0, attackDelta: 0, attackChanceDelta: 0, defenseDelta: 0, defenseChanceDelta: 0 },
+		strong: { healthDelta: 1, attackDelta: 1, attackChanceDelta: 0.08, defenseDelta: 1, defenseChanceDelta: 0.08 },
+	},
+};
+
+const GENOME_BOUNDS: GenomeBound[] = [
+	{ path: 'DEFAULT_HEALING_AMOUNT.smallHealthPotion', min: 1, max: 20, span: 2, integer: true },
+	{ path: 'DEFAULT_HEALING_AMOUNT.mediumHealthPotion', min: 1, max: 30, span: 2, integer: true },
+	{ path: 'DEFAULT_HEALING_AMOUNT.largeHealthPotion', min: 1, max: 40, span: 3, integer: true },
+	...(['easy', 'medium', 'hard'] as const).flatMap(deck => [
+		{ path: `DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`, min: 1, max: 60, span: 3, integer: true },
+		{ path: `DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`, min: 1, max: 70, span: 4, integer: true },
+		{ path: `DEFAULT_WEAPON_DAMAGE.${deck}.minChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`, min: 0, max: 60, span: 3, integer: true },
+		{ path: `DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`, min: 0, max: 70, span: 4, integer: true },
+		{ path: `DEFAULT_ARMOR_PROTECTION.${deck}.minChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_ITEM_CONSUMABLES.${deck}.teleport`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_ITEM_CONSUMABLES.${deck}.smallHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_ITEM_CONSUMABLES.${deck}.mediumHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_ITEM_CONSUMABLES.${deck}.largeHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_ITEM_CONSUMABLES.${deck}.fullHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_ITEM_CONSUMABLES.${deck}.extraHeart`, min: 0, max: 12, span: 1, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`, min: 1, max: 120, span: 6, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`, min: 1, max: 140, span: 8, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`, min: 1, max: 80, span: 4, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`, min: 1, max: 90, span: 5, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`, min: 0, max: 80, span: 4, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`, min: 0, max: 90, span: 5, integer: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`, min: 0.05, max: 0.95, span: 0.05, chance: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.teleport`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.smallHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.mediumHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.largeHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.fullHealthPotion`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.extraHeart`, min: 0, max: 12, span: 1, integer: true },
+		{ path: `DEFAULT_MONSTER_CONSUMABLES.${deck}.chest`, min: 0, max: 40, span: 3, integer: true },
+	]),
+	...(['cracked', 'normal', 'enchanted'] as const).flatMap(variant => [
+		{ path: `DEFAULT_ITEM_VARIANT_MODIFIERS.${variant}.valueDelta`, min: -12, max: 12, span: 1, integer: true },
+		{ path: `DEFAULT_ITEM_VARIANT_MODIFIERS.${variant}.chanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
+	]),
+	...(['weak', 'normal', 'strong'] as const).flatMap(variant => [
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.healthDelta`, min: -20, max: 20, span: 1, integer: true },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.attackDelta`, min: -20, max: 20, span: 1, integer: true },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.attackChanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.defenseDelta`, min: -20, max: 20, span: 1, integer: true },
+		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.defenseChanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
+	]),
+];
+
+function getNumericByPath(target: Record<string, unknown>, dotPath: string): number {
+	const value = dotPath.split('.').reduce<unknown>((current, key) => {
+		if (!current || typeof current !== 'object') return undefined;
+		return (current as Record<string, unknown>)[key];
+	}, target);
+	if (typeof value !== 'number') {
+		throw new Error(`Expected numeric value at genome path '${dotPath}'`);
+	}
+	return value;
+}
+
+function setNumericByPath(target: Record<string, unknown>, dotPath: string, value: number): void {
+	const parts = dotPath.split('.');
+	let cursor: Record<string, unknown> = target;
+	for (let index = 0; index < parts.length - 1; index += 1) {
+		const key = parts[index];
+		const next = cursor[key];
+		if (!next || typeof next !== 'object' || Array.isArray(next)) {
+			cursor[key] = {};
+		}
+		cursor = cursor[key] as Record<string, unknown>;
+	}
+	cursor[parts[parts.length - 1]] = value;
+}
+
+function normalizeRangePair(target: Record<string, unknown>, minPath: string, maxPath: string): void {
+	const minValue = getNumericByPath(target, minPath);
+	const maxValue = getNumericByPath(target, maxPath);
+	if (minValue <= maxValue) return;
+	setNumericByPath(target, minPath, maxValue);
+	setNumericByPath(target, maxPath, minValue);
+}
+
+function enforceRangeDelta(
+	target: Record<string, unknown>,
+	minPath: string,
+	maxPath: string,
+	minDelta: number,
+	options: { min: number; max: number; integer?: boolean; chance?: boolean }
+): void {
+	let minValue = clamp(getNumericByPath(target, minPath), options.min, options.max);
+	let maxValue = clamp(getNumericByPath(target, maxPath), options.min, options.max);
+
+	if (minValue > maxValue) {
+		[minValue, maxValue] = [maxValue, minValue];
+	}
+
+	if (maxValue - minValue < minDelta) {
+		const raisedMax = minValue + minDelta;
+		if (raisedMax <= options.max) {
+			maxValue = raisedMax;
+		} else {
+			const loweredMin = maxValue - minDelta;
+			if (loweredMin >= options.min) {
+				minValue = loweredMin;
+			} else {
+				minValue = options.min;
+				maxValue = options.max;
+			}
+		}
+	}
+
+	minValue = clamp(minValue, options.min, options.max);
+	maxValue = clamp(maxValue, options.min, options.max);
+
+	if (options.integer) {
+		minValue = Math.round(minValue);
+		maxValue = Math.round(maxValue);
+	}
+	if (options.chance) {
+		minValue = clampChance(minValue);
+		maxValue = clampChance(maxValue);
+	}
+
+	if (maxValue - minValue < minDelta) {
+		if (options.chance) {
+			maxValue = clampChance(Math.min(options.max, minValue + minDelta));
+			if (maxValue - minValue < minDelta) {
+				minValue = clampChance(Math.max(options.min, maxValue - minDelta));
+			}
+		} else {
+			maxValue = Math.min(options.max, minValue + minDelta);
+			if (maxValue - minValue < minDelta) {
+				minValue = Math.max(options.min, maxValue - minDelta);
+			}
+		}
+	}
+
+	setNumericByPath(target, minPath, minValue);
+	setNumericByPath(target, maxPath, maxValue);
+}
+
+function enforceStrictAscending(
+	target: Record<string, unknown>,
+	paths: [string, string, string],
+	options: { min: number; max: number; minStep: number; integer?: boolean; chance?: boolean }
+): void {
+	let values = paths.map(path => clamp(getNumericByPath(target, path), options.min, options.max));
+
+	for (let index = 1; index < values.length; index += 1) {
+		values[index] = Math.max(values[index], values[index - 1] + options.minStep);
+	}
+
+	if (values[values.length - 1] > options.max) {
+		values[values.length - 1] = options.max;
+		for (let index = values.length - 2; index >= 0; index -= 1) {
+			values[index] = Math.min(values[index], values[index + 1] - options.minStep);
+		}
+	}
+
+	if (values[0] < options.min) {
+		values[0] = options.min;
+		for (let index = 1; index < values.length; index += 1) {
+			values[index] = Math.max(values[index], values[index - 1] + options.minStep);
+		}
+	}
+
+	for (let index = 0; index < values.length; index += 1) {
+		let next = clamp(values[index], options.min, options.max);
+		if (options.integer) {
+			next = Math.round(next);
+		}
+		if (options.chance) {
+			next = clampChance(next);
+		}
+		setNumericByPath(target, paths[index], next);
+	}
+}
+
+function enforceSignedValue(
+	target: Record<string, unknown>,
+	path: string,
+	direction: 'negative' | 'zero' | 'positive',
+	options: { min: number; max: number; integer?: boolean; chance?: boolean }
+): void {
+	let value = clamp(getNumericByPath(target, path), options.min, options.max);
+
+	if (direction === 'zero') {
+		value = 0;
+	} else if (direction === 'negative') {
+		const threshold = options.integer ? -1 : -0.0001;
+		value = Math.min(value, threshold);
+	} else {
+		const threshold = options.integer ? 1 : 0.0001;
+		value = Math.max(value, threshold);
+	}
+
+	value = clamp(value, options.min, options.max);
+	if (options.integer) {
+		value = Math.round(value);
+	}
+	if (options.chance) {
+		value = clamp(Number(value.toFixed(4)), options.min, options.max);
+	}
+
+	setNumericByPath(target, path, value);
+}
+
 function createBalanceConfigFromGenome(genome: Genome): BalanceJsonConfig {
-	const weaponScale = clamp(genome.itemEncounterScale, 0.6, 1.8);
-	const monsterScale = clamp(genome.monsterEncounterScale, 0.6, 1.8);
-	const consumableScale = clamp(genome.consumableHealScale, 0.5, 2.0);
+	const normalized = structuredClone(genome) as Record<string, unknown>;
 
-	const weakStrong = normalizeWeights({
-		weak: genome.weakWeightScale,
-		normal: 1,
-		strong: genome.strongWeightScale,
-	});
+	for (const bound of GENOME_BOUNDS) {
+		const current = getNumericByPath(normalized, bound.path);
+		let next = clamp(current, bound.min, bound.max);
+		if (bound.integer) {
+			next = Math.round(next);
+		}
+		if (bound.chance) {
+			next = clampChance(next);
+		}
+		setNumericByPath(normalized, bound.path, next);
+	}
 
-	const weakFactor = clamp(0.5 + weakStrong.weak, 0.6, 1.4);
-	const strongFactor = clamp(0.5 + weakStrong.strong, 0.6, 1.4);
+	for (const deck of ['easy', 'medium', 'hard'] as const) {
+		normalizeRangePair(normalized, `DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`, `DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`);
+		normalizeRangePair(normalized, `DEFAULT_WEAPON_DAMAGE.${deck}.minChance`, `DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`);
+		normalizeRangePair(normalized, `DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`, `DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`);
+		normalizeRangePair(normalized, `DEFAULT_ARMOR_PROTECTION.${deck}.minChance`, `DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`);
+		normalizeRangePair(normalized, `DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`, `DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`);
+		normalizeRangePair(normalized, `DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`, `DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`);
+		normalizeRangePair(normalized, `DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`, `DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`);
+		normalizeRangePair(normalized, `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`, `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`);
+		normalizeRangePair(normalized, `DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`, `DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`);
+	}
 
-	const scaleWeapon = (minAttack: number, maxAttack: number, minChance: number, maxChance: number) => ({
-		minAttack: Math.max(1, Math.round(minAttack * weaponScale)),
-		maxAttack: Math.max(1, Math.round(maxAttack * weaponScale)),
-		minChance: clampChance(minChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
-		maxChance: clampChance(maxChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
-	});
+	for (const deck of ['easy', 'medium', 'hard'] as const) {
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`,
+			4,
+			{ min: 1, max: 70, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.minChance`,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
 
-	const scaleArmor = (minDefense: number, maxDefense: number, minChance: number, maxChance: number) => ({
-		minDefense: Math.max(1, Math.round(minDefense * weaponScale)),
-		maxDefense: Math.max(1, Math.round(maxDefense * weaponScale)),
-		minChance: clampChance(minChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
-		maxChance: clampChance(maxChance * clamp(0.9 + (weaponScale - 1) * 0.2, 0.75, 1.15)),
-	});
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`,
+			4,
+			{ min: 0, max: 70, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.minChance`,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
 
-	const scaleMonsterRange = (
-		minHealth: number,
-		maxHealth: number,
-		minAttack: number,
-		maxAttack: number,
-		minAttackChance: number,
-		maxAttackChance: number,
-		minDefense: number,
-		maxDefense: number,
-		minDefenseChance: number,
-		maxDefenseChance: number,
-	) => ({
-		minHealth: Math.max(1, Math.round(minHealth * monsterScale)),
-		maxHealth: Math.max(1, Math.round(maxHealth * monsterScale)),
-		minAttack: Math.max(1, Math.round(minAttack * monsterScale)),
-		maxAttack: Math.max(1, Math.round(maxAttack * monsterScale)),
-		minAttackChance: clampChance(minAttackChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
-		maxAttackChance: clampChance(maxAttackChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
-		minDefense: Math.max(0, Math.round(minDefense * monsterScale)),
-		maxDefense: Math.max(0, Math.round(maxDefense * monsterScale)),
-		minDefenseChance: clampChance(minDefenseChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
-		maxDefenseChance: clampChance(maxDefenseChance * clamp(0.9 + (monsterScale - 1) * 0.2, 0.75, 1.15)),
-	});
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`,
+			4,
+			{ min: 1, max: 140, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`,
+			4,
+			{ min: 1, max: 90, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`,
+			4,
+			{ min: 0, max: 90, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
+	}
 
-	return {
-		weapons: {
-			forest: scaleWeapon(1, 4, 0.5, 0.6),
-			desert: scaleWeapon(9, 12, 0.65, 0.75),
-			volcano: scaleWeapon(14, 17, 0.75, 0.85),
-		},
-		armors: {
-			forest: scaleArmor(4, 4, 0.603, 0.603),
-			desert: scaleArmor(12, 12, 0.723, 0.723),
-			volcano: scaleArmor(17, 17, 0.823, 0.823),
-		},
-		itemVariance: {
-			cracked: { valueDelta: -1, chanceDelta: -0.0596 },
-			normal: { valueDelta: 0, chanceDelta: 0 },
-			enchanted: { valueDelta: 1, chanceDelta: 0.0596 },
-		},
-		consumables: {
-			smallPotionHeal: Math.max(1, toCount(3 * consumableScale)),
-			mediumPotionHeal: Math.max(1, toCount(5 * consumableScale)),
-			largePotionHeal: Math.max(1, toCount(7 * consumableScale)),
-		},
-		itemConsumables: {
-			forest: {
-				teleport: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				extraHeart: Math.max(0, toCount(1 * clamp(genome.lootHeartScale, 0, 3))),
-			},
-			desert: {
-				teleport: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				extraHeart: Math.max(0, toCount(1 * clamp(genome.lootHeartScale, 0, 3))),
-			},
-			volcano: {
-				teleport: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.lootConsumableScale, 0, 3))),
-				extraHeart: Math.max(0, toCount(1 * clamp(genome.lootHeartScale, 0, 3))),
-			},
-		},
-		monsters: {
-			forest: scaleMonsterRange(5, 7, 3, 5, 0.6098, 0.7098, 1, 3, 0.3098, 0.4098),
-			desert: scaleMonsterRange(12, 16, 4, 6, 0.7298, 0.8298, 3, 5, 0.4498, 0.5498),
-			volcano: scaleMonsterRange(23, 27, 7, 9, 0.8498, 0.93, 5, 7, 0.6098, 0.69),
-		},
-		monsterVariance: {
-			weak: {
-				healthDelta: -Math.max(1, Math.round(weakFactor)),
-				attackDelta: -Math.max(1, Math.round(weakFactor)),
-				attackChanceDelta: -Number((0.08 * weakFactor).toFixed(4)),
-				defenseDelta: -Math.max(1, Math.round(weakFactor)),
-				defenseChanceDelta: -Number((0.08 * weakFactor).toFixed(4)),
-			},
-			normal: { healthDelta: 0, attackDelta: 0, attackChanceDelta: 0, defenseDelta: 0, defenseChanceDelta: 0 },
-			strong: {
-				healthDelta: Math.max(1, Math.round(strongFactor)),
-				attackDelta: Math.max(1, Math.round(strongFactor)),
-				attackChanceDelta: Number((0.08 * strongFactor).toFixed(4)),
-				defenseDelta: Math.max(1, Math.round(strongFactor)),
-				defenseChanceDelta: Number((0.08 * strongFactor).toFixed(4)),
-			},
-		},
-		monsterConsumables: {
-			forest: {
-				teleport: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				extraHeart: Math.max(0, toCount(1 * clamp(genome.heartEncounterScale, 0, 3))),
-				chest: Math.max(0, toCount(10 * clamp(genome.consumableEncounterScale, 0, 3))),
-			},
-			desert: {
-				teleport: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				extraHeart: Math.max(0, toCount(1 * clamp(genome.heartEncounterScale, 0, 3))),
-				chest: Math.max(0, toCount(10 * clamp(genome.consumableEncounterScale, 0, 3))),
-			},
-			volcano: {
-				teleport: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				smallHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				mediumHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				largeHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				fullHealthPotion: Math.max(0, toCount(2 * clamp(genome.consumableEncounterScale, 0, 3))),
-				extraHeart: Math.max(0, toCount(1 * clamp(genome.heartEncounterScale, 0, 3))),
-				chest: Math.max(0, toCount(10 * clamp(genome.consumableEncounterScale, 0, 3))),
-			},
-		},
-	};
+	enforceStrictAscending(
+		normalized,
+		[
+			'DEFAULT_HEALING_AMOUNT.smallHealthPotion',
+			'DEFAULT_HEALING_AMOUNT.mediumHealthPotion',
+			'DEFAULT_HEALING_AMOUNT.largeHealthPotion',
+		],
+		{ min: 1, max: 40, minStep: 1, integer: true }
+	);
+
+	enforceStrictAscending(
+		normalized,
+		[
+			'DEFAULT_WEAPON_DAMAGE.easy.minAttack',
+			'DEFAULT_WEAPON_DAMAGE.medium.minAttack',
+			'DEFAULT_WEAPON_DAMAGE.hard.minAttack',
+		],
+		{ min: 1, max: 60, minStep: 1, integer: true }
+	);
+	enforceStrictAscending(
+		normalized,
+		[
+			'DEFAULT_WEAPON_DAMAGE.easy.maxAttack',
+			'DEFAULT_WEAPON_DAMAGE.medium.maxAttack',
+			'DEFAULT_WEAPON_DAMAGE.hard.maxAttack',
+		],
+		{ min: 1, max: 70, minStep: 1, integer: true }
+	);
+
+	enforceStrictAscending(
+		normalized,
+		[
+			'DEFAULT_ARMOR_PROTECTION.easy.minDefense',
+			'DEFAULT_ARMOR_PROTECTION.medium.minDefense',
+			'DEFAULT_ARMOR_PROTECTION.hard.minDefense',
+		],
+		{ min: 0, max: 60, minStep: 1, integer: true }
+	);
+	enforceStrictAscending(
+		normalized,
+		[
+			'DEFAULT_ARMOR_PROTECTION.easy.maxDefense',
+			'DEFAULT_ARMOR_PROTECTION.medium.maxDefense',
+			'DEFAULT_ARMOR_PROTECTION.hard.maxDefense',
+		],
+		{ min: 0, max: 70, minStep: 1, integer: true }
+	);
+
+	for (const field of [
+		'minHealth',
+		'maxHealth',
+		'minAttack',
+		'maxAttack',
+		'minDefense',
+		'maxDefense',
+	] as const) {
+		enforceStrictAscending(
+			normalized,
+			[
+				`DEFAULT_MONSTER_TIER_BASE.easy.${field}`,
+				`DEFAULT_MONSTER_TIER_BASE.medium.${field}`,
+				`DEFAULT_MONSTER_TIER_BASE.hard.${field}`,
+			],
+			{ min: field.includes('Health') ? 1 : 0, max: field.includes('Health') ? 140 : 90, minStep: 1, integer: true }
+		);
+	}
+
+	for (const field of ['minAttackChance', 'maxAttackChance', 'minDefenseChance', 'maxDefenseChance'] as const) {
+		enforceStrictAscending(
+			normalized,
+			[
+				`DEFAULT_MONSTER_TIER_BASE.easy.${field}`,
+				`DEFAULT_MONSTER_TIER_BASE.medium.${field}`,
+				`DEFAULT_MONSTER_TIER_BASE.hard.${field}`,
+			],
+			{ min: 0.05, max: 0.95, minStep: 0.0001, chance: true }
+		);
+	}
+
+	for (const deck of ['easy', 'medium', 'hard'] as const) {
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`,
+			4,
+			{ min: 1, max: 70, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.minChance`,
+			`DEFAULT_WEAPON_DAMAGE.${deck}.maxChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.minDefense`,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.maxDefense`,
+			4,
+			{ min: 0, max: 70, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.minChance`,
+			`DEFAULT_ARMOR_PROTECTION.${deck}.maxChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minHealth`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxHealth`,
+			4,
+			{ min: 1, max: 140, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttack`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttack`,
+			4,
+			{ min: 1, max: 90, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefense`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefense`,
+			4,
+			{ min: 0, max: 90, integer: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minAttackChance`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxAttackChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
+		enforceRangeDelta(
+			normalized,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.minDefenseChance`,
+			`DEFAULT_MONSTER_TIER_BASE.${deck}.maxDefenseChance`,
+			0.2,
+			{ min: 0.05, max: 0.95, chance: true }
+		);
+	}
+
+	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.cracked.valueDelta', 'negative', { min: -12, max: 12, integer: true });
+	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.cracked.chanceDelta', 'negative', { min: -0.5, max: 0.5, chance: true });
+	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.normal.valueDelta', 'zero', { min: -12, max: 12, integer: true });
+	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.normal.chanceDelta', 'zero', { min: -0.5, max: 0.5, chance: true });
+	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.enchanted.valueDelta', 'positive', { min: -12, max: 12, integer: true });
+	enforceSignedValue(normalized, 'DEFAULT_ITEM_VARIANT_MODIFIERS.enchanted.chanceDelta', 'positive', { min: -0.5, max: 0.5, chance: true });
+
+	for (const field of ['healthDelta', 'attackDelta', 'defenseDelta'] as const) {
+		enforceSignedValue(
+			normalized,
+			`DEFAULT_MONSTER_VARIANT_MODIFIERS.weak.${field}`,
+			'negative',
+			{ min: -20, max: 20, integer: true }
+		);
+		enforceSignedValue(
+			normalized,
+			`DEFAULT_MONSTER_VARIANT_MODIFIERS.normal.${field}`,
+			'zero',
+			{ min: -20, max: 20, integer: true }
+		);
+		enforceSignedValue(
+			normalized,
+			`DEFAULT_MONSTER_VARIANT_MODIFIERS.strong.${field}`,
+			'positive',
+			{ min: -20, max: 20, integer: true }
+		);
+	}
+
+	for (const field of ['attackChanceDelta', 'defenseChanceDelta'] as const) {
+		enforceSignedValue(
+			normalized,
+			`DEFAULT_MONSTER_VARIANT_MODIFIERS.weak.${field}`,
+			'negative',
+			{ min: -0.5, max: 0.5, chance: true }
+		);
+		enforceSignedValue(
+			normalized,
+			`DEFAULT_MONSTER_VARIANT_MODIFIERS.normal.${field}`,
+			'zero',
+			{ min: -0.5, max: 0.5, chance: true }
+		);
+		enforceSignedValue(
+			normalized,
+			`DEFAULT_MONSTER_VARIANT_MODIFIERS.strong.${field}`,
+			'positive',
+			{ min: -0.5, max: 0.5, chance: true }
+		);
+	}
+
+	return normalized as BalanceJsonConfig;
 }
 
 function buildRandomGenome(rand: () => number): Genome {
-	return {
-		monsterEncounterScale: 0.65 + rand() * 0.9,
-		itemEncounterScale: 0.65 + rand() * 0.9,
-		consumableEncounterScale: 0.6 + rand() * 1.4,
-		heartEncounterScale: 0.4 + rand() * 1.8,
-		lootItemScale: 0.7 + rand() * 0.9,
-		lootConsumableScale: 0.6 + rand() * 1.2,
-		lootHeartScale: 0.3 + rand() * 1.6,
-		strongWeightScale: 0.6 + rand() * 1.1,
-		weakWeightScale: 0.6 + rand() * 1.1,
-		consumableHealScale: 0.7 + rand() * 1.1,
-	};
+	const out = structuredClone(BASE_GENOME) as Record<string, unknown>;
+	for (const bound of GENOME_BOUNDS) {
+		const baseValue = getNumericByPath(out, bound.path);
+		let next = clamp(baseValue + (rand() * 2 - 1) * bound.span, bound.min, bound.max);
+		if (bound.integer) {
+			next = Math.round(next);
+		}
+		if (bound.chance) {
+			next = clampChance(next);
+		}
+		setNumericByPath(out, bound.path, next);
+	}
+	return createBalanceConfigFromGenome(out as Genome);
 }
 
 function crossover(a: Genome, b: Genome, rand: () => number): Genome {
-	const mix = (left: number, right: number) => left * (1 - rand()) + right * rand();
-	return {
-		monsterEncounterScale: mix(a.monsterEncounterScale, b.monsterEncounterScale),
-		itemEncounterScale: mix(a.itemEncounterScale, b.itemEncounterScale),
-		consumableEncounterScale: mix(a.consumableEncounterScale, b.consumableEncounterScale),
-		heartEncounterScale: mix(a.heartEncounterScale, b.heartEncounterScale),
-		lootItemScale: mix(a.lootItemScale, b.lootItemScale),
-		lootConsumableScale: mix(a.lootConsumableScale, b.lootConsumableScale),
-		lootHeartScale: mix(a.lootHeartScale, b.lootHeartScale),
-		strongWeightScale: mix(a.strongWeightScale, b.strongWeightScale),
-		weakWeightScale: mix(a.weakWeightScale, b.weakWeightScale),
-		consumableHealScale: mix(a.consumableHealScale, b.consumableHealScale),
-	};
+	const out = structuredClone(a) as Record<string, unknown>;
+	for (const bound of GENOME_BOUNDS) {
+		const left = getNumericByPath(a as Record<string, unknown>, bound.path);
+		const right = getNumericByPath(b as Record<string, unknown>, bound.path);
+		const mixed = left * (1 - rand()) + right * rand();
+		setNumericByPath(out, bound.path, mixed);
+	}
+	return createBalanceConfigFromGenome(out as Genome);
 }
 
 function mutate(genome: Genome, mutationRate: number, rand: () => number): Genome {
-	const maybeMutate = (value: number, span: number, min: number, max: number) => {
-		if (rand() > mutationRate) return value;
-		return clamp(value + (rand() * 2 - 1) * span, min, max);
-	};
-	return {
-		monsterEncounterScale: maybeMutate(genome.monsterEncounterScale, 0.22, 0.4, 1.8),
-		itemEncounterScale: maybeMutate(genome.itemEncounterScale, 0.22, 0.4, 1.8),
-		consumableEncounterScale: maybeMutate(genome.consumableEncounterScale, 0.25, 0.3, 2.4),
-		heartEncounterScale: maybeMutate(genome.heartEncounterScale, 0.3, 0.1, 2.8),
-		lootItemScale: maybeMutate(genome.lootItemScale, 0.22, 0.3, 2.0),
-		lootConsumableScale: maybeMutate(genome.lootConsumableScale, 0.25, 0.2, 2.4),
-		lootHeartScale: maybeMutate(genome.lootHeartScale, 0.3, 0.1, 2.8),
-		strongWeightScale: maybeMutate(genome.strongWeightScale, 0.2, 0.2, 2.0),
-		weakWeightScale: maybeMutate(genome.weakWeightScale, 0.2, 0.2, 2.0),
-		consumableHealScale: maybeMutate(genome.consumableHealScale, 0.2, 0.4, 2.0),
-	};
+	const out = structuredClone(genome) as Record<string, unknown>;
+	for (const bound of GENOME_BOUNDS) {
+		if (rand() > mutationRate) continue;
+		const current = getNumericByPath(out, bound.path);
+		const next = clamp(current + (rand() * 2 - 1) * bound.span, bound.min, bound.max);
+		setNumericByPath(out, bound.path, next);
+	}
+	return createBalanceConfigFromGenome(out as Genome);
 }
 
 function getTsxBinPath(): string {
 	return 'tsx';
+}
+
+function getDeckGeneratorScriptPath(): string {
+	return path.resolve(process.cwd(), '..', 'deck-generator', 'src', 'generateDeckDefinitions.ts');
+}
+
+async function generateDeckDefinitionsFromBalance(outPath: string, balanceConfigPath?: string): Promise<void> {
+	const scriptPath = getDeckGeneratorScriptPath();
+	const tsxLoader = getTsxBinPath();
+	const args = [
+		'--import',
+		tsxLoader,
+		scriptPath,
+		`--out=${outPath}`,
+	];
+	if (balanceConfigPath) {
+		args.push(`--balance=${balanceConfigPath}`);
+	}
+
+	await new Promise<void>((resolve, reject) => {
+		const child = spawn(process.execPath, args, {
+			cwd: process.cwd(),
+			env: { ...process.env },
+			stdio: ['ignore', 'pipe', 'pipe'],
+		});
+
+		let stdout = '';
+		let stderr = '';
+		child.stdout.on('data', chunk => {
+			stdout += chunk.toString();
+		});
+		child.stderr.on('data', chunk => {
+			stderr += chunk.toString();
+		});
+
+		child.on('error', error => {
+			reject(error);
+		});
+
+		child.on('close', code => {
+			if (code !== 0) {
+				reject(
+					new Error(
+						`deck generator exited with code ${code}. ${stderr.trim() || stdout.trim() || 'no generator output'}`
+					)
+				);
+				return;
+			}
+			resolve();
+		});
+	});
 }
 
 async function runSimulationWorker(simOptions: SimOptions): Promise<WorkerSimulationResult> {
@@ -637,7 +1088,11 @@ async function main() {
 	const bestBalancePath = path.join(artifactDir, 'best-balance.json');
 	await fs.writeFile(bestBalancePath, JSON.stringify(createBalanceConfigFromGenome(best.genome), null, 2), 'utf8');
 
-	const bestDeckDefinitionsPath = args.baseDeckDefinitionsPath;
+	const baselineDeckDefinitionsPath = path.join(artifactDir, 'baseline-deck-definitions.json');
+	await fs.copyFile(args.baseDeckDefinitionsPath, baselineDeckDefinitionsPath);
+
+	const bestDeckDefinitionsPath = path.join(artifactDir, 'best-deck-definitions.json');
+	await generateDeckDefinitionsFromBalance(bestDeckDefinitionsPath, bestBalancePath);
 
 	const baselineSummary = await runApiSimulation(
 		{
@@ -691,6 +1146,7 @@ async function main() {
 			bossDefeatRate: best.aggregate.successRate,
 			aggregate: best.aggregate,
 			genome: best.genome,
+			baselineDeckDefinitionsPath,
 			bestDeckDefinitionsPath,
 			bestBalancePath,
 		},
