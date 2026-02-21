@@ -1,8 +1,8 @@
 import { CHARACTERS } from '../constants/characters.js';
 import {
 	getFinalBossDefinition,
+	getInitialPlayerStateDefinition,
 	getItemDefinitionById,
-	getStartingItemsDefinition,
 } from '../config/deckDefinitionsConfig.js';
 import type { PlayBiome } from '../config/biomeTypes.js';
 import { createBiomeDeckRuntime, drawEncounterCard, drawLootCard, type BiomeDeckRuntime } from './biomeDeckService.js';
@@ -76,12 +76,12 @@ function getRequiredFinalBoss() {
 	return boss;
 }
 
-function getRequiredStartingItems() {
-	const startingItems = getStartingItemsDefinition();
-	if (!startingItems?.weapon?.id) {
-		throw new Error('Missing required startingItems.weapon definition in deck-definitions.json');
+function getRequiredInitialPlayerState() {
+	const initialPlayerState = getInitialPlayerStateDefinition();
+	if (!initialPlayerState?.playerWeapon?.id) {
+		throw new Error('Missing required initialPlayerState.playerWeapon definition in deck-definitions.json');
 	}
-	return startingItems;
+	return initialPlayerState;
 }
 
 export function assertRequiredGameItems(): void {
@@ -288,6 +288,11 @@ async function joinExistingGame(gameId, playerName) {
 		availableCharacters.length > 0
 			? randomChoice(availableCharacters).id
 			: 'none';
+	const initialPlayerState = getRequiredInitialPlayerState();
+	const initialArmor =
+		initialPlayerState.playerArmor && typeof initialPlayerState.playerArmor !== 'string'
+			? initialPlayerState.playerArmor
+			: null;
 
 	const gameState = getGameState(gameRow);
 	const spawn = pickPlayerSpawn(gameState, usedPositions);
@@ -295,15 +300,15 @@ async function joinExistingGame(gameId, playerName) {
 	const playerState = {
 		positionX: spawn.x,
 		positionY: spawn.y,
-		maxHearts: 5,
+		maxHearts: initialPlayerState.playerHealth,
 		damage: 0,
 		characterId: randomCharacterId,
 		inventory: {
-			weapons: [getRequiredStartingItems().weapon.id],
-			armor: [],
+			weapons: [initialPlayerState.playerWeapon.id],
+			armor: initialArmor ? [initialArmor.id] : [],
 			items: [],
-			equippedWeaponId: getRequiredStartingItems().weapon.id,
-			equippedArmorId: null,
+			equippedWeaponId: initialPlayerState.playerWeapon.id,
+			equippedArmorId: initialArmor ? initialArmor.id : null,
 		},
 	};
 

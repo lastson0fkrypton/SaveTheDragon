@@ -1,7 +1,5 @@
 import {
 	type DeckConsumableCounts,
-	getAllItemDefinitions,
-	getAllMonsterDefinitions,
 	getDeckDefinition,
 } from '../config/deckDefinitionsConfig.js';
 import {
@@ -67,15 +65,30 @@ function inferMonsterVariant(monsterId: string): MonsterVariant {
 
 function resolveEncounterCardFromDefinition(
 	templateBiome: PlayBiome,
-	card: { kind: string; id: string; hearts?: number },
-	monsterById: Map<string, MonsterDef>,
-	itemById: Map<string, ItemDef>
+	card: { kind: string; id: string; hearts?: number }
 ): EncounterCard {
+	const rawCard = card as Record<string, unknown>;
 	if (card.kind === 'monster') {
-		const monster = monsterById.get(card.id);
-		if (!monster) {
-			throw new Error(`Unknown monster id in encounter deck: ${card.id}`);
+		if (
+			typeof rawCard.health !== 'number' ||
+			typeof rawCard.attack !== 'number' ||
+			typeof rawCard.attackChance !== 'number' ||
+			typeof rawCard.defense !== 'number' ||
+			typeof rawCard.defenseChance !== 'number'
+		) {
+			throw new Error(`Encounter monster card is missing required stat fields: ${card.id}`);
 		}
+		const monster: MonsterDef = {
+			id: card.id,
+			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
+			biome: typeof rawCard.biome === 'string' ? rawCard.biome : templateBiome,
+			health: rawCard.health,
+			attack: rawCard.attack,
+			attackChance: rawCard.attackChance,
+			defense: rawCard.defense,
+			defenseChance: rawCard.defenseChance,
+			img: typeof rawCard.img === 'string' ? rawCard.img : '',
+		};
 		return {
 			kind: 'monster',
 			biome: templateBiome,
@@ -85,13 +98,23 @@ function resolveEncounterCardFromDefinition(
 	}
 
 	if (card.kind === 'item') {
-		const item = itemById.get(card.id);
-		if (!item) {
-			throw new Error(`Unknown item id in encounter deck: ${card.id}`);
-		}
-		if (item.type !== 'weapon' && item.type !== 'armor') {
+		const cardType = rawCard.type;
+		if (cardType !== 'weapon' && cardType !== 'armor') {
 			throw new Error(`Encounter item card must reference weapon/armor definition: ${card.id}`);
 		}
+		const item: ItemDef = {
+			id: card.id,
+			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
+			type: cardType,
+			img: typeof rawCard.img === 'string' ? rawCard.img : null,
+			biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
+			attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
+			attackChance: typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
+			defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
+			defenseChance: typeof rawCard.defenseChance === 'number' ? rawCard.defenseChance : null,
+			heal: typeof rawCard.heal === 'number' ? rawCard.heal : null,
+			effect: typeof rawCard.effect === 'string' ? rawCard.effect : null,
+		};
 		return {
 			kind: 'item',
 			biome: templateBiome,
@@ -120,14 +143,27 @@ function resolveEncounterCardFromDefinition(
 
 function resolveLootCardFromDefinition(
 	templateBiome: PlayBiome,
-	card: { kind: string; id: string; hearts?: number },
-	itemById: Map<string, ItemDef>
+	card: { kind: string; id: string; hearts?: number }
 ): LootCard {
+	const rawCard = card as Record<string, unknown>;
 	if (card.kind === 'item') {
-		const item = itemById.get(card.id);
-		if (!item) {
-			throw new Error(`Unknown item id in loot deck: ${card.id}`);
+		const cardType = rawCard.type;
+		if (cardType !== 'weapon' && cardType !== 'armor' && cardType !== 'item') {
+			throw new Error(`Loot item card is missing valid type: ${card.id}`);
 		}
+		const item: ItemDef = {
+			id: card.id,
+			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
+			type: cardType,
+			img: typeof rawCard.img === 'string' ? rawCard.img : null,
+			biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
+			attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
+			attackChance: typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
+			defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
+			defenseChance: typeof rawCard.defenseChance === 'number' ? rawCard.defenseChance : null,
+			heal: typeof rawCard.heal === 'number' ? rawCard.heal : null,
+			effect: typeof rawCard.effect === 'string' ? rawCard.effect : null,
+		};
 		if (item.type === 'item') {
 			return {
 				kind: 'consumable',
@@ -218,18 +254,34 @@ function buildDecksFromDefinitions(deckType: DeckType): DeckPair {
 	}
 
 	const templateBiome = getTemplateBiomeForDeckType(deckType);
-	const monsters = getAllMonsterDefinitions();
-	const items = getAllItemDefinitions();
-	const monsterById = new Map(monsters.map(monster => [monster.id, monster]));
-	const itemById = new Map(items.map(item => [item.id, item]));
+	const itemById = new Map<string, ItemDef>();
+	for (const card of [...encounterDefinition.cards, ...lootDefinition.cards]) {
+		if (card.kind !== 'item') continue;
+		const rawCard = card as Record<string, unknown>;
+		const cardType = rawCard.type;
+		if (cardType !== 'weapon' && cardType !== 'armor' && cardType !== 'item') continue;
+		itemById.set(card.id, {
+			id: card.id,
+			name: typeof rawCard.name === 'string' ? rawCard.name : card.id,
+			type: cardType,
+			img: typeof rawCard.img === 'string' ? rawCard.img : null,
+			biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
+			attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
+			attackChance: typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
+			defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
+			defenseChance: typeof rawCard.defenseChance === 'number' ? rawCard.defenseChance : null,
+			heal: typeof rawCard.heal === 'number' ? rawCard.heal : null,
+			effect: typeof rawCard.effect === 'string' ? rawCard.effect : null,
+		});
+	}
 
 	const encounterCards = encounterDefinition.cards.map(card =>
-		resolveEncounterCardFromDefinition(templateBiome, card as { kind: string; id: string; hearts?: number }, monsterById, itemById)
+		resolveEncounterCardFromDefinition(templateBiome, card as { kind: string; id: string; hearts?: number })
 	);
 	const encounterConsumables = expandEncounterConsumables(templateBiome, encounterDefinition.consumables, itemById);
 
 	const lootCards = lootDefinition.cards.map(card =>
-		resolveLootCardFromDefinition(templateBiome, card as { kind: string; id: string; hearts?: number }, itemById)
+		resolveLootCardFromDefinition(templateBiome, card as { kind: string; id: string; hearts?: number })
 	);
 	const lootConsumables = expandLootConsumables(templateBiome, lootDefinition.consumables, itemById);
 

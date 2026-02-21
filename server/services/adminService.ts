@@ -39,12 +39,18 @@ function toGroupLabel(group: string) {
 }
 
 function getVariantRank(variant: unknown): number {
-	if (variant === 'normal') return 0;
-	if (variant === 'cracked') return 1;
+	if (variant === 'cracked') return 0;
+	if (variant === 'normal') return 1;
 	if (variant === 'enchanted') return 2;
 	if (variant === 'weak') return 1;
 	if (variant === 'strong') return 2;
 	return 0;
+}
+
+function inferBaseId(itemId: string): string {
+	if (itemId.startsWith('cracked_')) return itemId.replace(/^cracked_/, '');
+	if (itemId.startsWith('enchanted_')) return itemId.replace(/^enchanted_/, '');
+	return itemId;
 }
 
 function getAdminDeckItemOptions() {
@@ -91,8 +97,8 @@ function getAdminDeckItemOptions() {
 		}))
 		.sort((left, right) => {
 			if (left.group !== right.group) return left.group.localeCompare(right.group);
-			const leftBase = left.baseId || left.id;
-			const rightBase = right.baseId || right.id;
+			const leftBase = left.baseId || inferBaseId(left.id);
+			const rightBase = right.baseId || inferBaseId(right.id);
 			if (leftBase !== rightBase) return leftBase.localeCompare(rightBase);
 			const variantDiff = getVariantRank(left.variant) - getVariantRank(right.variant);
 			if (variantDiff !== 0) return variantDiff;

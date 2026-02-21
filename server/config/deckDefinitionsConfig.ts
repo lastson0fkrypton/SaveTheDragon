@@ -29,6 +29,7 @@ export type DeckConsumableCounts = {
 	largeHealthPotion: number;
 	fullHealthPotion: number;
 	extraHeart: number;
+	chest?: number;
 };
 
 export type DeckDefinition = {
@@ -38,7 +39,7 @@ export type DeckDefinition = {
 };
 
 export type DeckDefinitionsConfig = {
-	initialPlayerState?: {
+	initialPlayerState: {
 		playerHealth: number;
 		playerWeapon: ItemDef;
 		playerArmor: ItemDef | '';
@@ -49,12 +50,6 @@ export type DeckDefinitionsConfig = {
 		largeHealthPotion: number;
 	};
 	'final-boss': MonsterDef;
-	startingItems: {
-		weapon: ItemDef;
-		armor: ItemDef | '';
-	};
-	itemDefinitions: Record<string, ItemDef>;
-	monsterDefinitions: Record<string, { id: string; name: string; biome: string; img?: string | null }>;
 	decks: Record<DeckId, DeckDefinition>;
 	meta?: Record<string, unknown>;
 };
@@ -148,57 +143,9 @@ function validateMonsterDef(rawMonster: unknown, label: string): MonsterDef {
 	};
 }
 
-function validateMonsterCatalogEntry(
-	rawMonster: unknown,
-	label: string
-): { id: string; name: string; biome: string; img?: string | null } {
-	if (!isPlainObject(rawMonster)) {
-		throw new Error(`Invalid monster definition '${label}': expected object`);
-	}
-	if (typeof rawMonster.id !== 'string' || rawMonster.id.length === 0) {
-		throw new Error(`Invalid monster definition '${label}': missing id`);
-	}
-	if (typeof rawMonster.name !== 'string' || rawMonster.name.length === 0) {
-		throw new Error(`Invalid monster definition '${label}': missing name`);
-	}
-	if (typeof rawMonster.biome !== 'string' || rawMonster.biome.length === 0) {
-		throw new Error(`Invalid monster definition '${label}': missing biome`);
-	}
-	return {
-		id: rawMonster.id,
-		name: rawMonster.name,
-		biome: rawMonster.biome,
-		img: typeof rawMonster.img === 'string' ? rawMonster.img : null,
-	};
-}
-
-function validateStartingItems(rawStartingItems: unknown): DeckDefinitionsConfig['startingItems'] {
-	if (!isPlainObject(rawStartingItems)) {
-		throw new Error('Invalid deck definitions config: missing startingItems object');
-	}
-
-	const weapon = validateItemDef(rawStartingItems.weapon, 'startingItems.weapon');
-	if (weapon.type !== 'weapon') {
-		throw new Error('Invalid deck definitions config: startingItems.weapon must have type=weapon');
-	}
-
-	let armor: ItemDef | '' = '';
-	if (rawStartingItems.armor === '') {
-		armor = '';
-	} else if (rawStartingItems.armor !== undefined && rawStartingItems.armor !== null) {
-		const parsedArmor = validateItemDef(rawStartingItems.armor, 'startingItems.armor');
-		if (parsedArmor.type !== 'armor') {
-			throw new Error('Invalid deck definitions config: startingItems.armor must have type=armor or be empty string');
-		}
-		armor = parsedArmor;
-	}
-
-	return { weapon, armor };
-}
-
-function validateInitialPlayerState(rawInitialPlayerState: unknown): DeckDefinitionsConfig['initialPlayerState'] | undefined {
+function validateInitialPlayerState(rawInitialPlayerState: unknown): DeckDefinitionsConfig['initialPlayerState'] {
 	if (!isPlainObject(rawInitialPlayerState)) {
-		return undefined;
+		throw new Error('Invalid deck definitions config: missing initialPlayerState object');
 	}
 
 	if (typeof rawInitialPlayerState.playerHealth !== 'number' || !Number.isFinite(rawInitialPlayerState.playerHealth)) {
@@ -254,57 +201,6 @@ function validateHealingAmount(rawHealingAmount: unknown): DeckDefinitionsConfig
 	};
 }
 
-function validateItemDefinitions(rawItemDefinitions: unknown): Record<string, ItemDef> {
-	const result: Record<string, ItemDef> = {};
-	if (Array.isArray(rawItemDefinitions)) {
-		for (let index = 0; index < rawItemDefinitions.length; index += 1) {
-			const rawItem = rawItemDefinitions[index];
-			const normalizedRawItem =
-				isPlainObject(rawItem) &&
-				rawItem.type === undefined &&
-				typeof rawItem.effect === 'string'
-					? { ...rawItem, type: 'item' }
-					: rawItem;
-			const item = validateItemDef(normalizedRawItem, `itemDefinitions[${index}]`);
-			result[item.id] = item;
-		}
-		return result;
-	}
-
-	if (!isPlainObject(rawItemDefinitions)) {
-		throw new Error('Invalid deck definitions config: missing itemDefinitions object/array');
-	}
-
-	for (const [id, rawItem] of Object.entries(rawItemDefinitions)) {
-		result[id] = validateItemDef(rawItem, `itemDefinitions.${id}`);
-	}
-
-	return result;
-}
-
-function validateMonsterDefinitions(
-	rawMonsterDefinitions: unknown
-): Record<string, { id: string; name: string; biome: string; img?: string | null }> {
-	const result: Record<string, { id: string; name: string; biome: string; img?: string | null }> = {};
-	if (rawMonsterDefinitions === undefined || rawMonsterDefinitions === null) {
-		return result;
-	}
-	if (Array.isArray(rawMonsterDefinitions)) {
-		for (let index = 0; index < rawMonsterDefinitions.length; index += 1) {
-			const monster = validateMonsterCatalogEntry(rawMonsterDefinitions[index], `monsterDefinitions[${index}]`);
-			result[monster.id] = monster;
-		}
-		return result;
-	}
-	if (!isPlainObject(rawMonsterDefinitions)) {
-		throw new Error('Invalid deck definitions config: monsterDefinitions must be object/array when provided');
-	}
-	for (const [id, rawMonster] of Object.entries(rawMonsterDefinitions)) {
-		result[id] = validateMonsterCatalogEntry(rawMonster, `monsterDefinitions.${id}`);
-	}
-	return result;
-}
-
 function validateCard(rawCard: unknown, deckId: DeckId, index: number): EncounterDeckCardDef | LootDeckCardDef {
 	if (!isPlainObject(rawCard)) {
 		throw new Error(`Invalid card at ${deckId}[${index}]: expected object`);
@@ -355,6 +251,7 @@ function validateConsumables(rawConsumables: unknown, deckId: DeckId): DeckConsu
 		largeHealthPotion: toCount(rawConsumables.largeHealthPotion, 'largeHealthPotion', deckId),
 		fullHealthPotion: toCount(rawConsumables.fullHealthPotion, 'fullHealthPotion', deckId),
 		extraHeart: toCount(rawConsumables.extraHeart, 'extraHeart', deckId),
+		...(rawConsumables.chest !== undefined ? { chest: toCount(rawConsumables.chest, 'chest', deckId) } : {}),
 	};
 }
 
@@ -382,13 +279,19 @@ function normalizeConfig(input: unknown): DeckDefinitionsConfig {
 	if (!isPlainObject(input)) {
 		throw new Error('Invalid deck definitions config: expected object');
 	}
+	if (input.startingItems !== undefined) {
+		throw new Error('Invalid deck definitions config: startingItems is no longer supported. Use initialPlayerState only.');
+	}
+	if (input.itemDefinitions !== undefined) {
+		throw new Error('Invalid deck definitions config: itemDefinitions is no longer supported. Use self-contained item cards.');
+	}
+	if (input.monsterDefinitions !== undefined) {
+		throw new Error('Invalid deck definitions config: monsterDefinitions is no longer supported. Use self-contained monster cards.');
+	}
 
 	const finalBoss = validateMonsterDef(input['final-boss'], 'final-boss');
-	const startingItems = validateStartingItems(input.startingItems);
 	const initialPlayerState = validateInitialPlayerState(input.initialPlayerState);
 	const healingAmount = validateHealingAmount(input.healingAmount);
-	const itemDefinitions = validateItemDefinitions(input.itemDefinitions);
-	const monsterDefinitions = validateMonsterDefinitions(input.monsterDefinitions);
 	if (!isPlainObject(input.decks)) {
 		throw new Error('Invalid deck definitions config: missing decks object');
 	}
@@ -406,9 +309,6 @@ function normalizeConfig(input: unknown): DeckDefinitionsConfig {
 		initialPlayerState,
 		healingAmount,
 		'final-boss': finalBoss,
-		startingItems,
-		itemDefinitions,
-		monsterDefinitions,
 		decks,
 		meta: isPlainObject(input.meta) ? input.meta : undefined,
 	};
@@ -417,13 +317,9 @@ function normalizeConfig(input: unknown): DeckDefinitionsConfig {
 function buildItemDefinitions(config: DeckDefinitionsConfig): Record<string, ItemDef> {
 	const items: Record<string, ItemDef> = {};
 
-	for (const item of Object.values(config.itemDefinitions)) {
-		items[item.id] = item;
-	}
-
-	items[config.startingItems.weapon.id] = config.startingItems.weapon;
-	if (config.startingItems.armor && typeof config.startingItems.armor !== 'string') {
-		items[config.startingItems.armor.id] = config.startingItems.armor;
+	items[config.initialPlayerState.playerWeapon.id] = config.initialPlayerState.playerWeapon;
+	if (config.initialPlayerState.playerArmor && typeof config.initialPlayerState.playerArmor !== 'string') {
+		items[config.initialPlayerState.playerArmor.id] = config.initialPlayerState.playerArmor;
 	}
 
 	for (const deck of Object.values(config.decks)) {
@@ -431,43 +327,31 @@ function buildItemDefinitions(config: DeckDefinitionsConfig): Record<string, Ite
 			if (card.kind !== 'item') continue;
 			const rawCard = card as Record<string, unknown>;
 			if (!items[card.id]) {
-				const baseId =
-					typeof rawCard.baseItemId === 'string'
-						? rawCard.baseItemId
-						: typeof rawCard.baseId === 'string'
-							? rawCard.baseId
-							: card.id;
-				const base = items[baseId] || items[card.id];
-				const inferredType = base?.type || (typeof rawCard.type === 'string' ? rawCard.type : undefined);
-				if (inferredType !== 'weapon' && inferredType !== 'armor' && inferredType !== 'item') {
-					throw new Error(`Cannot infer item type for card '${card.id}' in deck '${deck.deck}'`);
+				const resolvedType = typeof rawCard.type === 'string' ? rawCard.type : undefined;
+				if (resolvedType !== 'weapon' && resolvedType !== 'armor' && resolvedType !== 'item') {
+					throw new Error(`Item card '${card.id}' is missing required type in deck '${deck.deck}'`);
+				}
+				if (typeof rawCard.name !== 'string' || rawCard.name.length === 0) {
+					throw new Error(`Item card '${card.id}' is missing required name in deck '${deck.deck}'`);
+				}
+				if (typeof rawCard.img !== 'string' || rawCard.img.length === 0) {
+					throw new Error(`Item card '${card.id}' is missing required img in deck '${deck.deck}'`);
 				}
 				items[card.id] = {
 					id: card.id,
-					name: typeof rawCard.name === 'string' ? rawCard.name : base?.name || card.id,
-					type: inferredType,
-					biome: base?.biome,
-					img: base?.img ?? null,
-					effect: base?.effect ?? null,
-					heal: typeof rawCard.heal === 'number' ? rawCard.heal : (base?.heal ?? null),
-					attack: typeof rawCard.attack === 'number' ? rawCard.attack : (base?.attack ?? null),
+					name: rawCard.name,
+					type: resolvedType,
+					biome: typeof rawCard.biome === 'string' ? rawCard.biome : undefined,
+					img: rawCard.img,
+					effect: typeof rawCard.effect === 'string' ? rawCard.effect : null,
+					heal: typeof rawCard.heal === 'number' ? rawCard.heal : null,
+					attack: typeof rawCard.attack === 'number' ? rawCard.attack : null,
 					attackChance:
-						typeof rawCard.attackChance === 'number' ? rawCard.attackChance : (base?.attackChance ?? null),
-					defense: typeof rawCard.defense === 'number' ? rawCard.defense : (base?.defense ?? null),
+						typeof rawCard.attackChance === 'number' ? rawCard.attackChance : null,
+					defense: typeof rawCard.defense === 'number' ? rawCard.defense : null,
 					defenseChance:
-						typeof rawCard.defenseChance === 'number' ? rawCard.defenseChance : (base?.defenseChance ?? null),
+						typeof rawCard.defenseChance === 'number' ? rawCard.defenseChance : null,
 				};
-			}
-			if (!items[card.id].effect && items[card.id].type === 'item') {
-				const fallbackBase =
-					items[
-						typeof rawCard.baseItemId === 'string'
-							? rawCard.baseItemId
-							: typeof rawCard.baseId === 'string'
-								? rawCard.baseId
-								: card.id
-					];
-				items[card.id].effect = fallbackBase?.effect ?? items[card.id].effect;
 			}
 		}
 	}
@@ -485,50 +369,28 @@ function buildMonsterDefinitions(config: DeckDefinitionsConfig): Record<string, 
 			if (card.kind !== 'monster') continue;
 			const rawCard = card as Record<string, unknown>;
 			if (!monsters[card.id]) {
-				const canUseLegacyCardDirectly =
-					typeof rawCard.biome === 'string' &&
-					typeof rawCard.health === 'number' &&
-					typeof rawCard.attack === 'number' &&
-					typeof rawCard.attackChance === 'number' &&
-					typeof rawCard.defense === 'number' &&
-					typeof rawCard.defenseChance === 'number';
-
-				if (canUseLegacyCardDirectly) {
-					monsters[card.id] = validateMonsterDef(rawCard, `decks.${deck.deck}.cards.${card.id}`);
-					continue;
-				}
-
-				const baseId =
-					typeof rawCard.baseMonsterId === 'string'
-						? rawCard.baseMonsterId
-						: typeof rawCard.baseId === 'string'
-							? rawCard.baseId
-							: card.id.startsWith('weak_') || card.id.startsWith('strong_')
-								? card.id.replace(/^weak_|^strong_/, '')
-								: card.id;
-				const base = config.monsterDefinitions[baseId] || config.monsterDefinitions[card.id];
-				if (!base) {
-					throw new Error(`Missing monsterDefinitions base entry for '${baseId}' (card '${card.id}')`);
-				}
 				if (
+					typeof rawCard.name !== 'string' ||
+					typeof rawCard.biome !== 'string' ||
+					typeof rawCard.img !== 'string' ||
 					typeof rawCard.health !== 'number' ||
 					typeof rawCard.attack !== 'number' ||
 					typeof rawCard.attackChance !== 'number' ||
 					typeof rawCard.defense !== 'number' ||
 					typeof rawCard.defenseChance !== 'number'
 				) {
-					throw new Error(`Monster card '${card.id}' is missing required stat fields`);
+					throw new Error(`Monster card '${card.id}' is missing required fields`);
 				}
 				monsters[card.id] = {
 					id: card.id,
-					name: typeof rawCard.name === 'string' ? rawCard.name : base.name,
-					biome: typeof rawCard.biome === 'string' ? rawCard.biome : base.biome,
+					name: rawCard.name,
+					biome: rawCard.biome,
 					health: rawCard.health,
 					attack: rawCard.attack,
 					attackChance: rawCard.attackChance,
 					defense: rawCard.defense,
 					defenseChance: rawCard.defenseChance,
-					img: typeof rawCard.img === 'string' ? rawCard.img : (base.img || ''),
+					img: rawCard.img,
 				};
 			}
 		}
@@ -595,9 +457,9 @@ export function getFinalBossDefinition(): MonsterDef | null {
 	return activeDeckDefinitionsConfig['final-boss'];
 }
 
-export function getStartingItemsDefinition(): DeckDefinitionsConfig['startingItems'] | null {
+export function getInitialPlayerStateDefinition(): DeckDefinitionsConfig['initialPlayerState'] | null {
 	if (!activeDeckDefinitionsConfig) return null;
-	return activeDeckDefinitionsConfig.startingItems;
+	return activeDeckDefinitionsConfig.initialPlayerState;
 }
 
 export function getHealingAmountDefinition(): {

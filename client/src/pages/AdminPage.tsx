@@ -213,7 +213,7 @@ const AdminPage: React.FC<AdminPageProps> = observer(() => {
                     <optgroup key={groupName} label={groupedAdminItems[groupName][0]?.groupLabel || groupName}>
                       {groupedAdminItems[groupName].map(item => (
                         <option key={`${groupName}:${item.id}`} value={item.id}>
-                          {item.name} ({item.type})
+                          {item.name}{item.variant ? ` [${item.variant}]` : ''} ({item.type})
                         </option>
                       ))}
                     </optgroup>

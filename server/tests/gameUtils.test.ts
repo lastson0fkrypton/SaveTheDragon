@@ -62,26 +62,18 @@ describe('gameUtils', () => {
 				defenseChance: 0.65,
 				img: 'evil_princess.png',
 			},
-			startingItems: {
-				weapon: {
+			initialPlayerState: {
+				playerHealth: 5,
+				playerWeapon: {
 					id: 'fist',
 					name: 'Fist',
 					type: 'weapon',
+					img: 'fist.png',
 					biome: 'any',
 					attack: 1,
 					attackChance: 0.5,
 				},
-				armor: '',
-			},
-			itemDefinitions: {
-				fist: {
-					id: 'fist',
-					name: 'Fist',
-					type: 'weapon',
-					biome: 'any',
-					attack: 1,
-					attackChance: 0.5,
-				},
+				playerArmor: '',
 			},
 			decks: {
 				forest_encounter: { deck: 'forest_encounter', cards: [], consumables: { teleport: 0, smallHealthPotion: 0, mediumHealthPotion: 0, largeHealthPotion: 0, fullHealthPotion: 0, extraHeart: 0 } },
