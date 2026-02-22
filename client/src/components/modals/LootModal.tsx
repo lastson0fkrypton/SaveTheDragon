@@ -39,8 +39,10 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 
 	const playerName = gameState?.players?.find(p => p.id === loot.playerId)?.name || 'Unknown Player';
 	const isMyLoot = loot.playerId === playerId;
+	const isForcedUseHeart = isMyLoot && loot.item.type === 'item' && loot.item.effect === 'extra_heart';
 	const canEquipNow = isMyLoot && (loot.item.type === 'weapon' || loot.item.type === 'armor');
 	const canUseNow = isMyLoot && loot.item.type === 'item';
+	const canKeepForLater = !isForcedUseHeart;
 
 	const handleEquipNow = async () => {
 		if (!canEquipNow || isSubmitting) return;
@@ -117,9 +119,11 @@ const LootModal: React.FC<{ onClose: () => void }> = observer(({ onClose }) => {
 							Use Now
 						</button>
 					)}
-					<button onClick={handleClose} className="battle-modal-action-btn" disabled={isSubmitting}>
-						{canEquipNow || canUseNow ? 'Keep for Later' : 'Close'}
-					</button>
+					{canKeepForLater && (
+						<button onClick={handleClose} className="battle-modal-action-btn" disabled={isSubmitting}>
+							{canEquipNow || canUseNow ? 'Keep for Later' : 'Close'}
+						</button>
+					)}
 				</div>
 			</div>
 		</div>

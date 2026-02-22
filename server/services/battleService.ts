@@ -140,7 +140,7 @@ function resolveMonsterCounterAttack(battle, playerState, log, playerName) {
 	if (monsterHit) {
 		monsterDamage = battle.monster.attack || 1;
 		if (playerBlock) {
-			monsterDamage = Math.max(0, monsterDamage - (armor?.defense || 0));
+			monsterDamage = Math.max(1, monsterDamage - (armor?.defense || 0));
 			log.push(`${playerName} blocks! Damage reduced.`);
 		}
 		battle.playerHealth -= monsterDamage;
@@ -184,7 +184,7 @@ async function attackBattle(gameId, playerId) {
 	if (playerHit) {
 		playerDamage = weapon?.attack || 1;
 		if (monsterBlock) {
-			playerDamage = Math.max(0, playerDamage - (battle.monster.defense || 0));
+			playerDamage = Math.max(1, playerDamage - (battle.monster.defense || 0));
 			log.push('Monster blocks! Damage reduced.');
 		}
 		battle.monsterHealth -= playerDamage;
