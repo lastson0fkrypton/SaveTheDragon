@@ -81,16 +81,20 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
 - **Acceptance Criteria:**
   - Random towns can host available quests, visually indicated on map/UI.
   - Walking over a quest town prompts player to accept/start a quest.
-  - Quest tracking and completion status persist in game state.
+  - Quest tracking and completion status persist in game state and are handled server side.
   - Initial quest types implemented:
-    - Kill a monster from biome X.
-    - Kill 3 weak/regular/strong monsters in a row.
-    - Kill 3 venom monsters (scorpion/snake/spider) and return to hospital.
-    - Kill X skeletons and return to church.
-    - Rescue a villager from biome X and return.
-    - Deliver parcel from town A to town B.
-  - Return/turn-in conditions are validated server-side.
+    - Kill N(1-5) monster(s) from biome X.
+    - Kill N(1-5) weak/regular/strong monsters.
+    - Kill N(1-5) of X monster type (scorpion/snake/spider, etc).
+    - Rescue a villager (movement quest, target X, Y, and id for image to render) (appears on map after accepting quest, quest complete when player reaches cell)
+    - Deliver parcel to town (movement quest, target X, Y - a town and id for image of mailbox to render)
+  - Player quests, and quest status should be serialised as part of game state.
   - Quest log UI displays active/completed quests and progress.
+  - Only a max of 5 quests per person at a time, quests can only be accepted if there is space for one. 
+  - Players can click "X" on a quest to abandon it. Popup for "are you sure you wish to abandon quest" required.
+  - Completed quests result in an additional_heart being gifted to the player.
+  - All towns should have a quest at all times. Once a quest is accepted by a player, it is replaced by a new one.
+  - Players landing on a town are prompted to accept the quest upon starting their next turn (when on a town square)
 - **Status:** TODO
 - **Notes:** Define quest state model first (assignment, progress counters, objective targets, completion rewards).
 
