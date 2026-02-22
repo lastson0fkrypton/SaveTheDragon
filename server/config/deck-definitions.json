@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-21T14:35:38.637Z",
+  "generatedAt": "2026-02-22T01:52:31.238Z",
   "initialPlayerState": {
     "playerHealth": 5,
     "playerWeapon": {
@@ -17,7 +17,7 @@
     "playerArmor": ""
   },
   "healingAmount": {
-    "smallHealthPotion": 3,
+    "smallHealthPotion": 4,
     "mediumHealthPotion": 5,
     "largeHealthPotion": 7
   },
@@ -41,11 +41,11 @@
           "name": "Weak Bat",
           "variant": "weak",
           "img": "bat.png",
-          "health": 4,
-          "attack": 2,
-          "attackChance": 0.5298,
+          "health": 1,
+          "attack": 1,
+          "attackChance": 0.4186,
           "defense": 0,
-          "defenseChance": 0.2298
+          "defenseChance": 0.05
         },
         {
           "kind": "monster",
@@ -53,11 +53,11 @@
           "name": "Bat",
           "variant": "normal",
           "img": "bat.png",
-          "health": 5,
-          "attack": 3,
-          "attackChance": 0.6098,
-          "defense": 1,
-          "defenseChance": 0.3098
+          "health": 1,
+          "attack": 1,
+          "attackChance": 0.4882,
+          "defense": 0,
+          "defenseChance": 0.05
         },
         {
           "kind": "monster",
@@ -65,11 +65,11 @@
           "name": "Strong Bat",
           "variant": "strong",
           "img": "bat.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6898,
-          "defense": 2,
-          "defenseChance": 0.3898
+          "health": 2,
+          "attack": 2,
+          "attackChance": 0.5707,
+          "defense": 4,
+          "defenseChance": 0.1667
         },
         {
           "kind": "monster",
@@ -77,11 +77,11 @@
           "name": "Weak Bigfoot",
           "variant": "weak",
           "img": "bigfoot.png",
-          "health": 4,
-          "attack": 2,
-          "attackChance": 0.5423,
+          "health": 1,
+          "attack": 1,
+          "attackChance": 0.449,
           "defense": 0,
-          "defenseChance": 0.2423
+          "defenseChance": 0.0757
         },
         {
           "kind": "monster",
@@ -89,11 +89,11 @@
           "name": "Bigfoot",
           "variant": "normal",
           "img": "bigfoot.png",
-          "health": 5,
-          "attack": 3,
-          "attackChance": 0.6223,
+          "health": 2,
+          "attack": 2,
+          "attackChance": 0.5186,
           "defense": 1,
-          "defenseChance": 0.3223
+          "defenseChance": 0.1441
         },
         {
           "kind": "monster",
@@ -101,11 +101,11 @@
           "name": "Strong Bigfoot",
           "variant": "strong",
           "img": "bigfoot.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.7023,
-          "defense": 2,
-          "defenseChance": 0.4023
+          "health": 3,
+          "attack": 3,
+          "attackChance": 0.6011,
+          "defense": 5,
+          "defenseChance": 0.2608
         },
         {
           "kind": "monster",
@@ -113,11 +113,11 @@
           "name": "Weak Black Cat",
           "variant": "weak",
           "img": "black_cat.png",
-          "health": 5,
+          "health": 1,
           "attack": 3,
-          "attackChance": 0.5548,
-          "defense": 1,
-          "defenseChance": 0.2548
+          "attackChance": 0.4795,
+          "defense": 0,
+          "defenseChance": 0.1697
         },
         {
           "kind": "monster",
@@ -125,11 +125,11 @@
           "name": "Black Cat",
           "variant": "normal",
           "img": "black_cat.png",
-          "health": 6,
+          "health": 2,
           "attack": 4,
-          "attackChance": 0.6348,
+          "attackChance": 0.5491,
           "defense": 2,
-          "defenseChance": 0.3348
+          "defenseChance": 0.2381
         },
         {
           "kind": "monster",
@@ -137,11 +137,11 @@
           "name": "Strong Black Cat",
           "variant": "strong",
           "img": "black_cat.png",
-          "health": 7,
+          "health": 3,
           "attack": 5,
-          "attackChance": 0.7148,
-          "defense": 3,
-          "defenseChance": 0.4148
+          "attackChance": 0.6316,
+          "defense": 6,
+          "defenseChance": 0.3548
         },
         {
           "kind": "monster",
@@ -149,11 +149,11 @@
           "name": "Weak Fairy",
           "variant": "weak",
           "img": "fairy.png",
-          "health": 5,
-          "attack": 3,
-          "attackChance": 0.5673,
-          "defense": 1,
-          "defenseChance": 0.2673
+          "health": 2,
+          "attack": 4,
+          "attackChance": 0.5099,
+          "defense": 0,
+          "defenseChance": 0.2638
         },
         {
           "kind": "monster",
@@ -161,11 +161,11 @@
           "name": "Fairy",
           "variant": "normal",
           "img": "fairy.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6473,
-          "defense": 2,
-          "defenseChance": 0.3473
+          "health": 3,
+          "attack": 5,
+          "attackChance": 0.5795,
+          "defense": 3,
+          "defenseChance": 0.3322
         },
         {
           "kind": "monster",
@@ -173,11 +173,11 @@
           "name": "Strong Fairy",
           "variant": "strong",
           "img": "fairy.png",
-          "health": 7,
-          "attack": 5,
-          "attackChance": 0.7273,
-          "defense": 3,
-          "defenseChance": 0.4273
+          "health": 4,
+          "attack": 6,
+          "attackChance": 0.662,
+          "defense": 7,
+          "defenseChance": 0.4489
         },
         {
           "kind": "monster",
@@ -185,11 +185,11 @@
           "name": "Weak Giant Spider",
           "variant": "weak",
           "img": "giant_spider.png",
-          "health": 5,
-          "attack": 3,
-          "attackChance": 0.5798,
+          "health": 3,
+          "attack": 5,
+          "attackChance": 0.5403,
           "defense": 1,
-          "defenseChance": 0.2798
+          "defenseChance": 0.3579
         },
         {
           "kind": "monster",
@@ -197,11 +197,11 @@
           "name": "Giant Spider",
           "variant": "normal",
           "img": "giant_spider.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6598,
-          "defense": 2,
-          "defenseChance": 0.3598
+          "health": 4,
+          "attack": 6,
+          "attackChance": 0.6099,
+          "defense": 4,
+          "defenseChance": 0.4263
         },
         {
           "kind": "monster",
@@ -209,11 +209,11 @@
           "name": "Strong Giant Spider",
           "variant": "strong",
           "img": "giant_spider.png",
-          "health": 7,
-          "attack": 5,
-          "attackChance": 0.7398,
-          "defense": 3,
-          "defenseChance": 0.4398
+          "health": 5,
+          "attack": 7,
+          "attackChance": 0.6924,
+          "defense": 8,
+          "defenseChance": 0.543
         },
         {
           "kind": "monster",
@@ -221,11 +221,11 @@
           "name": "Weak Goblin",
           "variant": "weak",
           "img": "goblin.png",
-          "health": 5,
-          "attack": 3,
-          "attackChance": 0.5923,
+          "health": 3,
+          "attack": 6,
+          "attackChance": 0.5707,
           "defense": 1,
-          "defenseChance": 0.2923
+          "defenseChance": 0.452
         },
         {
           "kind": "monster",
@@ -233,11 +233,11 @@
           "name": "Goblin",
           "variant": "normal",
           "img": "goblin.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6723,
-          "defense": 2,
-          "defenseChance": 0.3723
+          "health": 4,
+          "attack": 7,
+          "attackChance": 0.6403,
+          "defense": 4,
+          "defenseChance": 0.5204
         },
         {
           "kind": "monster",
@@ -245,11 +245,11 @@
           "name": "Strong Goblin",
           "variant": "strong",
           "img": "goblin.png",
-          "health": 7,
-          "attack": 5,
-          "attackChance": 0.7523,
-          "defense": 3,
-          "defenseChance": 0.4523
+          "health": 5,
+          "attack": 8,
+          "attackChance": 0.7228,
+          "defense": 8,
+          "defenseChance": 0.6371
         },
         {
           "kind": "monster",
@@ -257,11 +257,11 @@
           "name": "Weak Ogre",
           "variant": "weak",
           "img": "ogre.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6048,
+          "health": 4,
+          "attack": 8,
+          "attackChance": 0.6011,
           "defense": 2,
-          "defenseChance": 0.3048
+          "defenseChance": 0.546
         },
         {
           "kind": "monster",
@@ -269,11 +269,11 @@
           "name": "Ogre",
           "variant": "normal",
           "img": "ogre.png",
-          "health": 7,
-          "attack": 5,
-          "attackChance": 0.6848,
-          "defense": 3,
-          "defenseChance": 0.3848
+          "health": 5,
+          "attack": 9,
+          "attackChance": 0.6707,
+          "defense": 5,
+          "defenseChance": 0.6144
         },
         {
           "kind": "monster",
@@ -281,11 +281,11 @@
           "name": "Strong Ogre",
           "variant": "strong",
           "img": "ogre.png",
-          "health": 8,
-          "attack": 6,
-          "attackChance": 0.7648,
-          "defense": 4,
-          "defenseChance": 0.4648
+          "health": 6,
+          "attack": 10,
+          "attackChance": 0.7532,
+          "defense": 9,
+          "defenseChance": 0.7311
         },
         {
           "kind": "monster",
@@ -293,11 +293,11 @@
           "name": "Weak Trollkin",
           "variant": "weak",
           "img": "trollkin.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6173,
-          "defense": 2,
-          "defenseChance": 0.3173
+          "health": 4,
+          "attack": 9,
+          "attackChance": 0.6316,
+          "defense": 3,
+          "defenseChance": 0.6401
         },
         {
           "kind": "monster",
@@ -305,11 +305,11 @@
           "name": "Trollkin",
           "variant": "normal",
           "img": "trollkin.png",
-          "health": 7,
-          "attack": 5,
-          "attackChance": 0.6973,
-          "defense": 3,
-          "defenseChance": 0.3973
+          "health": 5,
+          "attack": 10,
+          "attackChance": 0.7012,
+          "defense": 6,
+          "defenseChance": 0.7085
         },
         {
           "kind": "monster",
@@ -317,11 +317,11 @@
           "name": "Strong Trollkin",
           "variant": "strong",
           "img": "trollkin.png",
-          "health": 8,
-          "attack": 6,
-          "attackChance": 0.7773,
-          "defense": 4,
-          "defenseChance": 0.4773
+          "health": 6,
+          "attack": 11,
+          "attackChance": 0.7837,
+          "defense": 10,
+          "defenseChance": 0.8252
         },
         {
           "kind": "monster",
@@ -329,11 +329,11 @@
           "name": "Weak Warewolf",
           "variant": "weak",
           "img": "warewolf.png",
-          "health": 6,
-          "attack": 4,
-          "attackChance": 0.6298,
-          "defense": 2,
-          "defenseChance": 0.3298
+          "health": 5,
+          "attack": 10,
+          "attackChance": 0.662,
+          "defense": 4,
+          "defenseChance": 0.7342
         },
         {
           "kind": "monster",
@@ -341,11 +341,11 @@
           "name": "Warewolf",
           "variant": "normal",
           "img": "warewolf.png",
-          "health": 7,
-          "attack": 5,
-          "attackChance": 0.7098,
-          "defense": 3,
-          "defenseChance": 0.4098
+          "health": 6,
+          "attack": 11,
+          "attackChance": 0.7316,
+          "defense": 7,
+          "defenseChance": 0.8026
         },
         {
           "kind": "monster",
@@ -353,21 +353,21 @@
           "name": "Strong Warewolf",
           "variant": "strong",
           "img": "warewolf.png",
-          "health": 8,
-          "attack": 6,
-          "attackChance": 0.7898,
-          "defense": 4,
-          "defenseChance": 0.4898
+          "health": 7,
+          "attack": 12,
+          "attackChance": 0.8141,
+          "defense": 11,
+          "defenseChance": 0.9193
         }
       ],
       "consumables": {
-        "teleport": 2,
+        "teleport": 0,
         "smallHealthPotion": 2,
         "mediumHealthPotion": 2,
         "largeHealthPotion": 2,
-        "fullHealthPotion": 2,
-        "extraHeart": 1,
-        "chest": 10
+        "fullHealthPotion": 0,
+        "extraHeart": 0,
+        "chest": 14
       }
     },
     "easy_loot": {
@@ -383,7 +383,7 @@
           "effect": null,
           "heal": null,
           "attack": 3,
-          "attackChance": 0.5434,
+          "attackChance": 0.4185,
           "defense": null,
           "defenseChance": null
         },
@@ -397,7 +397,7 @@
           "effect": null,
           "heal": null,
           "attack": 4,
-          "attackChance": 0.603,
+          "attackChance": 0.5107,
           "defense": null,
           "defenseChance": null
         },
@@ -411,7 +411,7 @@
           "effect": null,
           "heal": null,
           "attack": 5,
-          "attackChance": 0.6626,
+          "attackChance": 0.609,
           "defense": null,
           "defenseChance": null
         },
@@ -424,8 +424,8 @@
           "img": "foam_noodle.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 4,
+          "attackChance": 0.4443,
           "defense": null,
           "defenseChance": null
         },
@@ -438,8 +438,8 @@
           "img": "foam_noodle.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 5,
+          "attackChance": 0.5365,
           "defense": null,
           "defenseChance": null
         },
@@ -452,8 +452,8 @@
           "img": "foam_noodle.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 6,
+          "attackChance": 0.6348,
           "defense": null,
           "defenseChance": null
         },
@@ -466,8 +466,8 @@
           "img": "rubber_chicken.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 4,
+          "attackChance": 0.4702,
           "defense": null,
           "defenseChance": null
         },
@@ -480,8 +480,8 @@
           "img": "rubber_chicken.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 5,
+          "attackChance": 0.5624,
           "defense": null,
           "defenseChance": null
         },
@@ -494,8 +494,8 @@
           "img": "rubber_chicken.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 6,
+          "attackChance": 0.6607,
           "defense": null,
           "defenseChance": null
         },
@@ -508,8 +508,8 @@
           "img": "feather_duster.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 5,
+          "attackChance": 0.496,
           "defense": null,
           "defenseChance": null
         },
@@ -522,8 +522,8 @@
           "img": "feather_duster.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 6,
+          "attackChance": 0.5882,
           "defense": null,
           "defenseChance": null
         },
@@ -536,8 +536,8 @@
           "img": "feather_duster.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 7,
+          "attackChance": 0.6865,
           "defense": null,
           "defenseChance": null
         },
@@ -550,8 +550,8 @@
           "img": "banana_boomerang.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 5,
+          "attackChance": 0.5219,
           "defense": null,
           "defenseChance": null
         },
@@ -564,8 +564,8 @@
           "img": "banana_boomerang.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 6,
+          "attackChance": 0.6141,
           "defense": null,
           "defenseChance": null
         },
@@ -578,8 +578,8 @@
           "img": "banana_boomerang.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 7,
+          "attackChance": 0.7124,
           "defense": null,
           "defenseChance": null
         },
@@ -592,8 +592,8 @@
           "img": "bubble_wrap_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 6,
+          "attackChance": 0.5477,
           "defense": null,
           "defenseChance": null
         },
@@ -606,8 +606,8 @@
           "img": "bubble_wrap_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 7,
+          "attackChance": 0.6399,
           "defense": null,
           "defenseChance": null
         },
@@ -620,8 +620,8 @@
           "img": "bubble_wrap_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 8,
+          "attackChance": 0.7382,
           "defense": null,
           "defenseChance": null
         },
@@ -634,8 +634,8 @@
           "img": "bubble_wand.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 6,
+          "attackChance": 0.5735,
           "defense": null,
           "defenseChance": null
         },
@@ -648,8 +648,8 @@
           "img": "bubble_wand.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 7,
+          "attackChance": 0.6657,
           "defense": null,
           "defenseChance": null
         },
@@ -662,8 +662,8 @@
           "img": "bubble_wand.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 8,
+          "attackChance": 0.764,
           "defense": null,
           "defenseChance": null
         },
@@ -676,8 +676,8 @@
           "img": "squirt_gun_blaster.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 7,
+          "attackChance": 0.5994,
           "defense": null,
           "defenseChance": null
         },
@@ -690,8 +690,8 @@
           "img": "squirt_gun_blaster.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 8,
+          "attackChance": 0.6916,
           "defense": null,
           "defenseChance": null
         },
@@ -704,8 +704,8 @@
           "img": "squirt_gun_blaster.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 9,
+          "attackChance": 0.7899,
           "defense": null,
           "defenseChance": null
         },
@@ -718,8 +718,8 @@
           "img": "balloon_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 7,
+          "attackChance": 0.6252,
           "defense": null,
           "defenseChance": null
         },
@@ -732,8 +732,8 @@
           "img": "balloon_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 8,
+          "attackChance": 0.7174,
           "defense": null,
           "defenseChance": null
         },
@@ -746,8 +746,8 @@
           "img": "balloon_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 9,
+          "attackChance": 0.8157,
           "defense": null,
           "defenseChance": null
         },
@@ -760,8 +760,8 @@
           "img": "spaghetti_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 8,
+          "attackChance": 0.6511,
           "defense": null,
           "defenseChance": null
         },
@@ -774,8 +774,8 @@
           "img": "spaghetti_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 9,
+          "attackChance": 0.7433,
           "defense": null,
           "defenseChance": null
         },
@@ -788,8 +788,8 @@
           "img": "spaghetti_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 10,
+          "attackChance": 0.8416,
           "defense": null,
           "defenseChance": null
         },
@@ -802,8 +802,8 @@
           "img": "silly_string_shooter.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 8,
+          "attackChance": 0.6769,
           "defense": null,
           "defenseChance": null
         },
@@ -816,8 +816,8 @@
           "img": "silly_string_shooter.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 9,
+          "attackChance": 0.7691,
           "defense": null,
           "defenseChance": null
         },
@@ -830,8 +830,8 @@
           "img": "silly_string_shooter.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 10,
+          "attackChance": 0.8674,
           "defense": null,
           "defenseChance": null
         },
@@ -844,8 +844,8 @@
           "img": "cucumber_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 9,
+          "attackChance": 0.7028,
           "defense": null,
           "defenseChance": null
         },
@@ -858,8 +858,8 @@
           "img": "cucumber_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 10,
+          "attackChance": 0.795,
           "defense": null,
           "defenseChance": null
         },
@@ -872,8 +872,8 @@
           "img": "cucumber_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 11,
+          "attackChance": 0.8933,
           "defense": null,
           "defenseChance": null
         },
@@ -886,8 +886,8 @@
           "img": "clown_nose_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 9,
+          "attackChance": 0.7286,
           "defense": null,
           "defenseChance": null
         },
@@ -900,8 +900,8 @@
           "img": "clown_nose_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 10,
+          "attackChance": 0.8208,
           "defense": null,
           "defenseChance": null
         },
@@ -914,8 +914,8 @@
           "img": "clown_nose_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 11,
+          "attackChance": 0.9191,
           "defense": null,
           "defenseChance": null
         },
@@ -928,8 +928,8 @@
           "img": "balloon_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 10,
+          "attackChance": 0.7544,
           "defense": null,
           "defenseChance": null
         },
@@ -942,8 +942,8 @@
           "img": "balloon_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 11,
+          "attackChance": 0.8466,
           "defense": null,
           "defenseChance": null
         },
@@ -956,8 +956,8 @@
           "img": "balloon_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 12,
+          "attackChance": 0.9449,
           "defense": null,
           "defenseChance": null
         },
@@ -970,8 +970,8 @@
           "img": "sausage_nunchucks.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 10,
+          "attackChance": 0.7803,
           "defense": null,
           "defenseChance": null
         },
@@ -984,8 +984,8 @@
           "img": "sausage_nunchucks.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 11,
+          "attackChance": 0.8725,
           "defense": null,
           "defenseChance": null
         },
@@ -998,8 +998,8 @@
           "img": "sausage_nunchucks.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 12,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -1012,8 +1012,8 @@
           "img": "bouncy_ball_blaster.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 11,
+          "attackChance": 0.8061,
           "defense": null,
           "defenseChance": null
         },
@@ -1026,8 +1026,8 @@
           "img": "bouncy_ball_blaster.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 12,
+          "attackChance": 0.8983,
           "defense": null,
           "defenseChance": null
         },
@@ -1040,8 +1040,8 @@
           "img": "bouncy_ball_blaster.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 13,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -1054,8 +1054,8 @@
           "img": "sock_with_a_rock.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 11,
+          "attackChance": 0.832,
           "defense": null,
           "defenseChance": null
         },
@@ -1068,8 +1068,8 @@
           "img": "sock_with_a_rock.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 12,
+          "attackChance": 0.9242,
           "defense": null,
           "defenseChance": null
         },
@@ -1082,8 +1082,8 @@
           "img": "sock_with_a_rock.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 13,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -1096,8 +1096,8 @@
           "img": "pooper_scooper.png",
           "effect": null,
           "heal": null,
-          "attack": 3,
-          "attackChance": 0.5434,
+          "attack": 12,
+          "attackChance": 0.8578,
           "defense": null,
           "defenseChance": null
         },
@@ -1110,8 +1110,8 @@
           "img": "pooper_scooper.png",
           "effect": null,
           "heal": null,
-          "attack": 4,
-          "attackChance": 0.603,
+          "attack": 13,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -1124,8 +1124,8 @@
           "img": "pooper_scooper.png",
           "effect": null,
           "heal": null,
-          "attack": 5,
-          "attackChance": 0.6626,
+          "attack": 14,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -1140,8 +1140,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 7,
+          "defenseChance": 0.5325
         },
         {
           "kind": "item",
@@ -1154,8 +1154,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 8,
+          "defenseChance": 0.6247
         },
         {
           "kind": "item",
@@ -1168,8 +1168,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 9,
+          "defenseChance": 0.723
         },
         {
           "kind": "item",
@@ -1182,8 +1182,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 7,
+          "defenseChance": 0.5516
         },
         {
           "kind": "item",
@@ -1196,8 +1196,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 8,
+          "defenseChance": 0.6438
         },
         {
           "kind": "item",
@@ -1210,8 +1210,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 9,
+          "defenseChance": 0.7421
         },
         {
           "kind": "item",
@@ -1224,8 +1224,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 7,
+          "defenseChance": 0.5708
         },
         {
           "kind": "item",
@@ -1238,8 +1238,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 8,
+          "defenseChance": 0.663
         },
         {
           "kind": "item",
@@ -1252,8 +1252,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 9,
+          "defenseChance": 0.7613
         },
         {
           "kind": "item",
@@ -1266,8 +1266,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 8,
+          "defenseChance": 0.5899
         },
         {
           "kind": "item",
@@ -1280,8 +1280,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 9,
+          "defenseChance": 0.6821
         },
         {
           "kind": "item",
@@ -1294,8 +1294,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 10,
+          "defenseChance": 0.7804
         },
         {
           "kind": "item",
@@ -1308,8 +1308,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 8,
+          "defenseChance": 0.609
         },
         {
           "kind": "item",
@@ -1322,8 +1322,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 9,
+          "defenseChance": 0.7012
         },
         {
           "kind": "item",
@@ -1336,8 +1336,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 10,
+          "defenseChance": 0.7995
         },
         {
           "kind": "item",
@@ -1350,8 +1350,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 8,
+          "defenseChance": 0.6282
         },
         {
           "kind": "item",
@@ -1364,8 +1364,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 9,
+          "defenseChance": 0.7204
         },
         {
           "kind": "item",
@@ -1378,8 +1378,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 10,
+          "defenseChance": 0.8187
         },
         {
           "kind": "item",
@@ -1392,8 +1392,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 8,
+          "defenseChance": 0.6473
         },
         {
           "kind": "item",
@@ -1406,8 +1406,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 9,
+          "defenseChance": 0.7395
         },
         {
           "kind": "item",
@@ -1420,8 +1420,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 10,
+          "defenseChance": 0.8378
         },
         {
           "kind": "item",
@@ -1434,8 +1434,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 9,
+          "defenseChance": 0.6664
         },
         {
           "kind": "item",
@@ -1448,8 +1448,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 10,
+          "defenseChance": 0.7586
         },
         {
           "kind": "item",
@@ -1462,8 +1462,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 11,
+          "defenseChance": 0.8569
         },
         {
           "kind": "item",
@@ -1476,8 +1476,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 9,
+          "defenseChance": 0.6856
         },
         {
           "kind": "item",
@@ -1490,8 +1490,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 10,
+          "defenseChance": 0.7778
         },
         {
           "kind": "item",
@@ -1504,8 +1504,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 11,
+          "defenseChance": 0.8761
         },
         {
           "kind": "item",
@@ -1518,8 +1518,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 9,
+          "defenseChance": 0.7047
         },
         {
           "kind": "item",
@@ -1532,8 +1532,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 10,
+          "defenseChance": 0.7969
         },
         {
           "kind": "item",
@@ -1546,8 +1546,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 11,
+          "defenseChance": 0.8952
         },
         {
           "kind": "item",
@@ -1560,8 +1560,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 9,
+          "defenseChance": 0.7239
         },
         {
           "kind": "item",
@@ -1574,8 +1574,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 10,
+          "defenseChance": 0.8161
         },
         {
           "kind": "item",
@@ -1588,8 +1588,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 11,
+          "defenseChance": 0.9144
         },
         {
           "kind": "item",
@@ -1602,8 +1602,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 10,
+          "defenseChance": 0.743
         },
         {
           "kind": "item",
@@ -1616,8 +1616,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 11,
+          "defenseChance": 0.8352
         },
         {
           "kind": "item",
@@ -1630,8 +1630,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 12,
+          "defenseChance": 0.9335
         },
         {
           "kind": "item",
@@ -1644,8 +1644,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 10,
+          "defenseChance": 0.7621
         },
         {
           "kind": "item",
@@ -1658,8 +1658,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 11,
+          "defenseChance": 0.8543
         },
         {
           "kind": "item",
@@ -1672,8 +1672,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 12,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -1686,8 +1686,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 10,
+          "defenseChance": 0.7813
         },
         {
           "kind": "item",
@@ -1700,8 +1700,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 11,
+          "defenseChance": 0.8735
         },
         {
           "kind": "item",
@@ -1714,8 +1714,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 12,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -1728,8 +1728,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 10,
+          "defenseChance": 0.8004
         },
         {
           "kind": "item",
@@ -1742,8 +1742,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 11,
+          "defenseChance": 0.8926
         },
         {
           "kind": "item",
@@ -1756,8 +1756,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 12,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -1770,8 +1770,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 11,
+          "defenseChance": 0.8195
         },
         {
           "kind": "item",
@@ -1784,8 +1784,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 12,
+          "defenseChance": 0.9117
         },
         {
           "kind": "item",
@@ -1798,8 +1798,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 13,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -1812,8 +1812,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 11,
+          "defenseChance": 0.8387
         },
         {
           "kind": "item",
@@ -1826,8 +1826,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 12,
+          "defenseChance": 0.9309
         },
         {
           "kind": "item",
@@ -1840,8 +1840,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 13,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -1854,8 +1854,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 3,
-          "defenseChance": 0.5434
+          "defense": 11,
+          "defenseChance": 0.8578
         },
         {
           "kind": "item",
@@ -1868,8 +1868,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 4,
-          "defenseChance": 0.603
+          "defense": 12,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -1882,17 +1882,17 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 5,
-          "defenseChance": 0.6626
+          "defense": 13,
+          "defenseChance": 0.95
         }
       ],
       "consumables": {
-        "teleport": 2,
-        "smallHealthPotion": 2,
-        "mediumHealthPotion": 2,
-        "largeHealthPotion": 2,
-        "fullHealthPotion": 2,
-        "extraHeart": 1
+        "teleport": 0,
+        "smallHealthPotion": 3,
+        "mediumHealthPotion": 3,
+        "largeHealthPotion": 5,
+        "fullHealthPotion": 1,
+        "extraHeart": 0
       }
     },
     "medium_encounter": {
@@ -1904,11 +1904,11 @@
           "name": "Weak Centaur",
           "variant": "weak",
           "img": "centaur.png",
-          "health": 11,
-          "attack": 3,
-          "attackChance": 0.6498,
-          "defense": 2,
-          "defenseChance": 0.3698
+          "health": 13,
+          "attack": 1,
+          "attackChance": 0.6606,
+          "defense": 0,
+          "defenseChance": 0.0677
         },
         {
           "kind": "monster",
@@ -1916,11 +1916,11 @@
           "name": "Centaur",
           "variant": "normal",
           "img": "centaur.png",
-          "health": 12,
-          "attack": 4,
-          "attackChance": 0.7298,
-          "defense": 3,
-          "defenseChance": 0.4498
+          "health": 14,
+          "attack": 2,
+          "attackChance": 0.7302,
+          "defense": 2,
+          "defenseChance": 0.1361
         },
         {
           "kind": "monster",
@@ -1928,11 +1928,11 @@
           "name": "Strong Centaur",
           "variant": "strong",
           "img": "centaur.png",
-          "health": 13,
-          "attack": 5,
-          "attackChance": 0.8098,
-          "defense": 4,
-          "defenseChance": 0.5298
+          "health": 15,
+          "attack": 3,
+          "attackChance": 0.8127,
+          "defense": 6,
+          "defenseChance": 0.2528
         },
         {
           "kind": "monster",
@@ -1940,11 +1940,11 @@
           "name": "Weak Gryphon",
           "variant": "weak",
           "img": "gryphon.png",
-          "health": 12,
-          "attack": 3,
-          "attackChance": 0.6623,
-          "defense": 2,
-          "defenseChance": 0.3823
+          "health": 14,
+          "attack": 2,
+          "attackChance": 0.6881,
+          "defense": 0,
+          "defenseChance": 0.1571
         },
         {
           "kind": "monster",
@@ -1952,11 +1952,11 @@
           "name": "Gryphon",
           "variant": "normal",
           "img": "gryphon.png",
-          "health": 13,
-          "attack": 4,
-          "attackChance": 0.7423,
+          "health": 15,
+          "attack": 3,
+          "attackChance": 0.7577,
           "defense": 3,
-          "defenseChance": 0.4623
+          "defenseChance": 0.2255
         },
         {
           "kind": "monster",
@@ -1964,11 +1964,11 @@
           "name": "Strong Gryphon",
           "variant": "strong",
           "img": "gryphon.png",
-          "health": 14,
-          "attack": 5,
-          "attackChance": 0.8223,
-          "defense": 4,
-          "defenseChance": 0.5423
+          "health": 16,
+          "attack": 4,
+          "attackChance": 0.8402,
+          "defense": 7,
+          "defenseChance": 0.3422
         },
         {
           "kind": "monster",
@@ -1976,11 +1976,11 @@
           "name": "Weak Harpy",
           "variant": "weak",
           "img": "harpy.png",
-          "health": 12,
+          "health": 16,
           "attack": 4,
-          "attackChance": 0.6748,
-          "defense": 3,
-          "defenseChance": 0.3948
+          "attackChance": 0.7155,
+          "defense": 1,
+          "defenseChance": 0.2464
         },
         {
           "kind": "monster",
@@ -1988,11 +1988,11 @@
           "name": "Harpy",
           "variant": "normal",
           "img": "harpy.png",
-          "health": 13,
+          "health": 17,
           "attack": 5,
-          "attackChance": 0.7548,
+          "attackChance": 0.7851,
           "defense": 4,
-          "defenseChance": 0.4748
+          "defenseChance": 0.3148
         },
         {
           "kind": "monster",
@@ -2000,11 +2000,11 @@
           "name": "Strong Harpy",
           "variant": "strong",
           "img": "harpy.png",
-          "health": 14,
+          "health": 18,
           "attack": 6,
-          "attackChance": 0.8348,
-          "defense": 5,
-          "defenseChance": 0.5548
+          "attackChance": 0.8676,
+          "defense": 8,
+          "defenseChance": 0.4315
         },
         {
           "kind": "monster",
@@ -2012,11 +2012,11 @@
           "name": "Weak Pheonix",
           "variant": "weak",
           "img": "pheonix.png",
-          "health": 13,
-          "attack": 4,
-          "attackChance": 0.6873,
-          "defense": 3,
-          "defenseChance": 0.4073
+          "health": 17,
+          "attack": 5,
+          "attackChance": 0.743,
+          "defense": 1,
+          "defenseChance": 0.3358
         },
         {
           "kind": "monster",
@@ -2024,11 +2024,11 @@
           "name": "Pheonix",
           "variant": "normal",
           "img": "pheonix.png",
-          "health": 14,
-          "attack": 5,
-          "attackChance": 0.7673,
+          "health": 18,
+          "attack": 6,
+          "attackChance": 0.8126,
           "defense": 4,
-          "defenseChance": 0.4873
+          "defenseChance": 0.4042
         },
         {
           "kind": "monster",
@@ -2036,11 +2036,11 @@
           "name": "Strong Pheonix",
           "variant": "strong",
           "img": "pheonix.png",
-          "health": 15,
-          "attack": 6,
-          "attackChance": 0.8473,
-          "defense": 5,
-          "defenseChance": 0.5673
+          "health": 19,
+          "attack": 7,
+          "attackChance": 0.8951,
+          "defense": 8,
+          "defenseChance": 0.5209
         },
         {
           "kind": "monster",
@@ -2048,11 +2048,11 @@
           "name": "Weak Sand Golem",
           "variant": "weak",
           "img": "sand_golem.png",
-          "health": 13,
-          "attack": 4,
-          "attackChance": 0.6998,
-          "defense": 3,
-          "defenseChance": 0.4198
+          "health": 19,
+          "attack": 6,
+          "attackChance": 0.7704,
+          "defense": 2,
+          "defenseChance": 0.4251
         },
         {
           "kind": "monster",
@@ -2060,11 +2060,11 @@
           "name": "Sand Golem",
           "variant": "normal",
           "img": "sand_golem.png",
-          "health": 14,
-          "attack": 5,
-          "attackChance": 0.7798,
-          "defense": 4,
-          "defenseChance": 0.4998
+          "health": 20,
+          "attack": 7,
+          "attackChance": 0.84,
+          "defense": 5,
+          "defenseChance": 0.4935
         },
         {
           "kind": "monster",
@@ -2072,11 +2072,11 @@
           "name": "Strong Sand Golem",
           "variant": "strong",
           "img": "sand_golem.png",
-          "health": 15,
-          "attack": 6,
-          "attackChance": 0.8598,
-          "defense": 5,
-          "defenseChance": 0.5798
+          "health": 21,
+          "attack": 8,
+          "attackChance": 0.9225,
+          "defense": 9,
+          "defenseChance": 0.6102
         },
         {
           "kind": "monster",
@@ -2084,11 +2084,11 @@
           "name": "Weak Scorpion",
           "variant": "weak",
           "img": "scorpion.png",
-          "health": 14,
-          "attack": 4,
-          "attackChance": 0.7123,
+          "health": 20,
+          "attack": 7,
+          "attackChance": 0.7979,
           "defense": 3,
-          "defenseChance": 0.4323
+          "defenseChance": 0.5145
         },
         {
           "kind": "monster",
@@ -2096,11 +2096,11 @@
           "name": "Scorpion",
           "variant": "normal",
           "img": "scorpion.png",
-          "health": 15,
-          "attack": 5,
-          "attackChance": 0.7923,
-          "defense": 4,
-          "defenseChance": 0.5123
+          "health": 21,
+          "attack": 8,
+          "attackChance": 0.8675,
+          "defense": 6,
+          "defenseChance": 0.5829
         },
         {
           "kind": "monster",
@@ -2108,11 +2108,11 @@
           "name": "Strong Scorpion",
           "variant": "strong",
           "img": "scorpion.png",
-          "health": 16,
-          "attack": 6,
-          "attackChance": 0.8723,
-          "defense": 5,
-          "defenseChance": 0.5923
+          "health": 22,
+          "attack": 9,
+          "attackChance": 0.95,
+          "defense": 10,
+          "defenseChance": 0.6996
         },
         {
           "kind": "monster",
@@ -2120,11 +2120,11 @@
           "name": "Weak Snake",
           "variant": "weak",
           "img": "snake.png",
-          "health": 14,
-          "attack": 5,
-          "attackChance": 0.7248,
+          "health": 21,
+          "attack": 9,
+          "attackChance": 0.8254,
           "defense": 4,
-          "defenseChance": 0.4448
+          "defenseChance": 0.6039
         },
         {
           "kind": "monster",
@@ -2132,11 +2132,11 @@
           "name": "Snake",
           "variant": "normal",
           "img": "snake.png",
-          "health": 15,
-          "attack": 6,
-          "attackChance": 0.8048,
-          "defense": 5,
-          "defenseChance": 0.5248
+          "health": 22,
+          "attack": 10,
+          "attackChance": 0.895,
+          "defense": 7,
+          "defenseChance": 0.6723
         },
         {
           "kind": "monster",
@@ -2144,11 +2144,11 @@
           "name": "Strong Snake",
           "variant": "strong",
           "img": "snake.png",
-          "health": 16,
-          "attack": 7,
-          "attackChance": 0.8848,
-          "defense": 6,
-          "defenseChance": 0.6048
+          "health": 23,
+          "attack": 11,
+          "attackChance": 0.95,
+          "defense": 11,
+          "defenseChance": 0.789
         },
         {
           "kind": "monster",
@@ -2156,11 +2156,11 @@
           "name": "Weak Spiky Lizard",
           "variant": "weak",
           "img": "spiky_lizard.png",
-          "health": 15,
-          "attack": 5,
-          "attackChance": 0.7373,
+          "health": 23,
+          "attack": 10,
+          "attackChance": 0.8528,
           "defense": 4,
-          "defenseChance": 0.4573
+          "defenseChance": 0.6932
         },
         {
           "kind": "monster",
@@ -2168,11 +2168,11 @@
           "name": "Spiky Lizard",
           "variant": "normal",
           "img": "spiky_lizard.png",
-          "health": 16,
-          "attack": 6,
-          "attackChance": 0.8173,
-          "defense": 5,
-          "defenseChance": 0.5373
+          "health": 24,
+          "attack": 11,
+          "attackChance": 0.9224,
+          "defense": 7,
+          "defenseChance": 0.7616
         },
         {
           "kind": "monster",
@@ -2180,11 +2180,11 @@
           "name": "Strong Spiky Lizard",
           "variant": "strong",
           "img": "spiky_lizard.png",
-          "health": 17,
-          "attack": 7,
-          "attackChance": 0.8973,
-          "defense": 6,
-          "defenseChance": 0.6173
+          "health": 25,
+          "attack": 12,
+          "attackChance": 0.95,
+          "defense": 11,
+          "defenseChance": 0.8783
         },
         {
           "kind": "monster",
@@ -2192,11 +2192,11 @@
           "name": "Weak Vulture",
           "variant": "weak",
           "img": "vulture.png",
-          "health": 15,
-          "attack": 5,
-          "attackChance": 0.7498,
-          "defense": 4,
-          "defenseChance": 0.4698
+          "health": 24,
+          "attack": 11,
+          "attackChance": 0.8803,
+          "defense": 5,
+          "defenseChance": 0.7826
         },
         {
           "kind": "monster",
@@ -2204,11 +2204,11 @@
           "name": "Vulture",
           "variant": "normal",
           "img": "vulture.png",
-          "health": 16,
-          "attack": 6,
-          "attackChance": 0.8298,
-          "defense": 5,
-          "defenseChance": 0.5498
+          "health": 25,
+          "attack": 12,
+          "attackChance": 0.9499,
+          "defense": 8,
+          "defenseChance": 0.851
         },
         {
           "kind": "monster",
@@ -2216,21 +2216,21 @@
           "name": "Strong Vulture",
           "variant": "strong",
           "img": "vulture.png",
-          "health": 17,
-          "attack": 7,
-          "attackChance": 0.9098,
-          "defense": 6,
-          "defenseChance": 0.6298
+          "health": 26,
+          "attack": 13,
+          "attackChance": 0.95,
+          "defense": 12,
+          "defenseChance": 0.95
         }
       ],
       "consumables": {
-        "teleport": 2,
-        "smallHealthPotion": 2,
-        "mediumHealthPotion": 2,
-        "largeHealthPotion": 2,
-        "fullHealthPotion": 2,
-        "extraHeart": 1,
-        "chest": 10
+        "teleport": 0,
+        "smallHealthPotion": 1,
+        "mediumHealthPotion": 1,
+        "largeHealthPotion": 0,
+        "fullHealthPotion": 0,
+        "extraHeart": 0,
+        "chest": 19
       }
     },
     "medium_loot": {
@@ -2245,8 +2245,8 @@
           "img": "cola_bomb.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 7,
+          "attackChance": 0.1275,
           "defense": null,
           "defenseChance": null
         },
@@ -2259,8 +2259,8 @@
           "img": "cola_bomb.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 8,
+          "attackChance": 0.2197,
           "defense": null,
           "defenseChance": null
         },
@@ -2273,8 +2273,8 @@
           "img": "cola_bomb.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 9,
+          "attackChance": 0.318,
           "defense": null,
           "defenseChance": null
         },
@@ -2287,8 +2287,8 @@
           "img": "feather_boomerang.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 8,
+          "attackChance": 0.1571,
           "defense": null,
           "defenseChance": null
         },
@@ -2301,8 +2301,8 @@
           "img": "feather_boomerang.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 9,
+          "attackChance": 0.2493,
           "defense": null,
           "defenseChance": null
         },
@@ -2315,8 +2315,8 @@
           "img": "feather_boomerang.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 10,
+          "attackChance": 0.3476,
           "defense": null,
           "defenseChance": null
         },
@@ -2329,8 +2329,8 @@
           "img": "confetti_cannon.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 9,
+          "attackChance": 0.1867,
           "defense": null,
           "defenseChance": null
         },
@@ -2343,8 +2343,8 @@
           "img": "confetti_cannon.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 10,
+          "attackChance": 0.2789,
           "defense": null,
           "defenseChance": null
         },
@@ -2357,8 +2357,8 @@
           "img": "confetti_cannon.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 11,
+          "attackChance": 0.3772,
           "defense": null,
           "defenseChance": null
         },
@@ -2372,7 +2372,7 @@
           "effect": null,
           "heal": null,
           "attack": 11,
-          "attackChance": 0.6634,
+          "attackChance": 0.2164,
           "defense": null,
           "defenseChance": null
         },
@@ -2386,7 +2386,7 @@
           "effect": null,
           "heal": null,
           "attack": 12,
-          "attackChance": 0.723,
+          "attackChance": 0.3086,
           "defense": null,
           "defenseChance": null
         },
@@ -2400,7 +2400,7 @@
           "effect": null,
           "heal": null,
           "attack": 13,
-          "attackChance": 0.7826,
+          "attackChance": 0.4069,
           "defense": null,
           "defenseChance": null
         },
@@ -2413,8 +2413,8 @@
           "img": "paper_fan.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 12,
+          "attackChance": 0.246,
           "defense": null,
           "defenseChance": null
         },
@@ -2427,8 +2427,8 @@
           "img": "paper_fan.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 13,
+          "attackChance": 0.3382,
           "defense": null,
           "defenseChance": null
         },
@@ -2441,8 +2441,8 @@
           "img": "paper_fan.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 14,
+          "attackChance": 0.4365,
           "defense": null,
           "defenseChance": null
         },
@@ -2455,8 +2455,8 @@
           "img": "banana_slingshot.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 13,
+          "attackChance": 0.2756,
           "defense": null,
           "defenseChance": null
         },
@@ -2469,8 +2469,8 @@
           "img": "banana_slingshot.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 14,
+          "attackChance": 0.3678,
           "defense": null,
           "defenseChance": null
         },
@@ -2483,8 +2483,8 @@
           "img": "banana_slingshot.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 15,
+          "attackChance": 0.4661,
           "defense": null,
           "defenseChance": null
         },
@@ -2497,8 +2497,8 @@
           "img": "red_licorice_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 14,
+          "attackChance": 0.3052,
           "defense": null,
           "defenseChance": null
         },
@@ -2511,8 +2511,8 @@
           "img": "red_licorice_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 15,
+          "attackChance": 0.3974,
           "defense": null,
           "defenseChance": null
         },
@@ -2525,8 +2525,8 @@
           "img": "red_licorice_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 16,
+          "attackChance": 0.4957,
           "defense": null,
           "defenseChance": null
         },
@@ -2539,8 +2539,8 @@
           "img": "mallow_catapult.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 16,
+          "attackChance": 0.3349,
           "defense": null,
           "defenseChance": null
         },
@@ -2553,8 +2553,8 @@
           "img": "mallow_catapult.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 17,
+          "attackChance": 0.4271,
           "defense": null,
           "defenseChance": null
         },
@@ -2567,8 +2567,8 @@
           "img": "mallow_catapult.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 18,
+          "attackChance": 0.5254,
           "defense": null,
           "defenseChance": null
         },
@@ -2581,8 +2581,8 @@
           "img": "fart_bomb.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 17,
+          "attackChance": 0.3645,
           "defense": null,
           "defenseChance": null
         },
@@ -2595,8 +2595,8 @@
           "img": "fart_bomb.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 18,
+          "attackChance": 0.4567,
           "defense": null,
           "defenseChance": null
         },
@@ -2609,8 +2609,8 @@
           "img": "fart_bomb.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 19,
+          "attackChance": 0.555,
           "defense": null,
           "defenseChance": null
         },
@@ -2623,8 +2623,8 @@
           "img": "pogo_stick_lance.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 18,
+          "attackChance": 0.3941,
           "defense": null,
           "defenseChance": null
         },
@@ -2637,8 +2637,8 @@
           "img": "pogo_stick_lance.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 19,
+          "attackChance": 0.4863,
           "defense": null,
           "defenseChance": null
         },
@@ -2651,8 +2651,8 @@
           "img": "pogo_stick_lance.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 20,
+          "attackChance": 0.5846,
           "defense": null,
           "defenseChance": null
         },
@@ -2665,8 +2665,8 @@
           "img": "jesters_scepter.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 19,
+          "attackChance": 0.4237,
           "defense": null,
           "defenseChance": null
         },
@@ -2679,8 +2679,8 @@
           "img": "jesters_scepter.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 20,
+          "attackChance": 0.5159,
           "defense": null,
           "defenseChance": null
         },
@@ -2693,8 +2693,8 @@
           "img": "jesters_scepter.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 21,
+          "attackChance": 0.6142,
           "defense": null,
           "defenseChance": null
         },
@@ -2707,8 +2707,8 @@
           "img": "jelly_bean_gun.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 21,
+          "attackChance": 0.4534,
           "defense": null,
           "defenseChance": null
         },
@@ -2721,8 +2721,8 @@
           "img": "jelly_bean_gun.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 22,
+          "attackChance": 0.5456,
           "defense": null,
           "defenseChance": null
         },
@@ -2735,8 +2735,8 @@
           "img": "jelly_bean_gun.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 23,
+          "attackChance": 0.6439,
           "defense": null,
           "defenseChance": null
         },
@@ -2749,8 +2749,8 @@
           "img": "plunger_bow.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 22,
+          "attackChance": 0.483,
           "defense": null,
           "defenseChance": null
         },
@@ -2763,8 +2763,8 @@
           "img": "plunger_bow.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 23,
+          "attackChance": 0.5752,
           "defense": null,
           "defenseChance": null
         },
@@ -2777,8 +2777,8 @@
           "img": "plunger_bow.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 24,
+          "attackChance": 0.6735,
           "defense": null,
           "defenseChance": null
         },
@@ -2791,8 +2791,8 @@
           "img": "sharp_candy_cane.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 23,
+          "attackChance": 0.5126,
           "defense": null,
           "defenseChance": null
         },
@@ -2805,8 +2805,8 @@
           "img": "sharp_candy_cane.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 24,
+          "attackChance": 0.6048,
           "defense": null,
           "defenseChance": null
         },
@@ -2819,8 +2819,8 @@
           "img": "sharp_candy_cane.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 25,
+          "attackChance": 0.7031,
           "defense": null,
           "defenseChance": null
         },
@@ -2833,8 +2833,8 @@
           "img": "glue_shooter.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 24,
+          "attackChance": 0.5422,
           "defense": null,
           "defenseChance": null
         },
@@ -2847,8 +2847,8 @@
           "img": "glue_shooter.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 25,
+          "attackChance": 0.6344,
           "defense": null,
           "defenseChance": null
         },
@@ -2861,8 +2861,8 @@
           "img": "glue_shooter.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 26,
+          "attackChance": 0.7327,
           "defense": null,
           "defenseChance": null
         },
@@ -2875,8 +2875,8 @@
           "img": "baguette_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 26,
+          "attackChance": 0.5719,
           "defense": null,
           "defenseChance": null
         },
@@ -2889,8 +2889,8 @@
           "img": "baguette_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 27,
+          "attackChance": 0.6641,
           "defense": null,
           "defenseChance": null
         },
@@ -2903,8 +2903,8 @@
           "img": "baguette_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 28,
+          "attackChance": 0.7624,
           "defense": null,
           "defenseChance": null
         },
@@ -2917,8 +2917,8 @@
           "img": "rolling_pin_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 27,
+          "attackChance": 0.6015,
           "defense": null,
           "defenseChance": null
         },
@@ -2931,8 +2931,8 @@
           "img": "rolling_pin_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 28,
+          "attackChance": 0.6937,
           "defense": null,
           "defenseChance": null
         },
@@ -2945,8 +2945,8 @@
           "img": "rolling_pin_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 29,
+          "attackChance": 0.792,
           "defense": null,
           "defenseChance": null
         },
@@ -2959,8 +2959,8 @@
           "img": "exploding_ice_cream.png",
           "effect": null,
           "heal": null,
-          "attack": 11,
-          "attackChance": 0.6634,
+          "attack": 28,
+          "attackChance": 0.6311,
           "defense": null,
           "defenseChance": null
         },
@@ -2973,8 +2973,8 @@
           "img": "exploding_ice_cream.png",
           "effect": null,
           "heal": null,
-          "attack": 12,
-          "attackChance": 0.723,
+          "attack": 29,
+          "attackChance": 0.7233,
           "defense": null,
           "defenseChance": null
         },
@@ -2987,8 +2987,8 @@
           "img": "exploding_ice_cream.png",
           "effect": null,
           "heal": null,
-          "attack": 13,
-          "attackChance": 0.7826,
+          "attack": 30,
+          "attackChance": 0.8216,
           "defense": null,
           "defenseChance": null
         },
@@ -3003,8 +3003,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 8,
+          "defenseChance": 0.1415
         },
         {
           "kind": "item",
@@ -3017,8 +3017,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 9,
+          "defenseChance": 0.2337
         },
         {
           "kind": "item",
@@ -3031,8 +3031,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 10,
+          "defenseChance": 0.332
         },
         {
           "kind": "item",
@@ -3045,8 +3045,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 8,
+          "defenseChance": 0.1836
         },
         {
           "kind": "item",
@@ -3059,8 +3059,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 9,
+          "defenseChance": 0.2758
         },
         {
           "kind": "item",
@@ -3073,8 +3073,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 10,
+          "defenseChance": 0.3741
         },
         {
           "kind": "item",
@@ -3087,8 +3087,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 9,
+          "defenseChance": 0.2258
         },
         {
           "kind": "item",
@@ -3101,8 +3101,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 10,
+          "defenseChance": 0.318
         },
         {
           "kind": "item",
@@ -3115,8 +3115,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 11,
+          "defenseChance": 0.4163
         },
         {
           "kind": "item",
@@ -3129,8 +3129,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 9,
+          "defenseChance": 0.2679
         },
         {
           "kind": "item",
@@ -3143,8 +3143,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 10,
+          "defenseChance": 0.3601
         },
         {
           "kind": "item",
@@ -3157,8 +3157,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 11,
+          "defenseChance": 0.4584
         },
         {
           "kind": "item",
@@ -3171,8 +3171,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 10,
+          "defenseChance": 0.31
         },
         {
           "kind": "item",
@@ -3185,8 +3185,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 11,
+          "defenseChance": 0.4022
         },
         {
           "kind": "item",
@@ -3199,8 +3199,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 12,
+          "defenseChance": 0.5005
         },
         {
           "kind": "item",
@@ -3213,8 +3213,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 10,
+          "defenseChance": 0.3522
         },
         {
           "kind": "item",
@@ -3227,8 +3227,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 11,
+          "defenseChance": 0.4444
         },
         {
           "kind": "item",
@@ -3241,8 +3241,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 12,
+          "defenseChance": 0.5427
         },
         {
           "kind": "item",
@@ -3255,8 +3255,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 10,
+          "defenseChance": 0.3943
         },
         {
           "kind": "item",
@@ -3269,8 +3269,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 11,
+          "defenseChance": 0.4865
         },
         {
           "kind": "item",
@@ -3283,8 +3283,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 12,
+          "defenseChance": 0.5848
         },
         {
           "kind": "item",
@@ -3298,7 +3298,7 @@
           "attack": null,
           "attackChance": null,
           "defense": 11,
-          "defenseChance": 0.6634
+          "defenseChance": 0.4364
         },
         {
           "kind": "item",
@@ -3312,7 +3312,7 @@
           "attack": null,
           "attackChance": null,
           "defense": 12,
-          "defenseChance": 0.723
+          "defenseChance": 0.5286
         },
         {
           "kind": "item",
@@ -3326,7 +3326,7 @@
           "attack": null,
           "attackChance": null,
           "defense": 13,
-          "defenseChance": 0.7826
+          "defenseChance": 0.6269
         },
         {
           "kind": "item",
@@ -3340,7 +3340,7 @@
           "attack": null,
           "attackChance": null,
           "defense": 11,
-          "defenseChance": 0.6634
+          "defenseChance": 0.4786
         },
         {
           "kind": "item",
@@ -3354,7 +3354,7 @@
           "attack": null,
           "attackChance": null,
           "defense": 12,
-          "defenseChance": 0.723
+          "defenseChance": 0.5708
         },
         {
           "kind": "item",
@@ -3368,7 +3368,7 @@
           "attack": null,
           "attackChance": null,
           "defense": 13,
-          "defenseChance": 0.7826
+          "defenseChance": 0.6691
         },
         {
           "kind": "item",
@@ -3381,8 +3381,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 12,
+          "defenseChance": 0.5207
         },
         {
           "kind": "item",
@@ -3395,8 +3395,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 13,
+          "defenseChance": 0.6129
         },
         {
           "kind": "item",
@@ -3409,8 +3409,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 14,
+          "defenseChance": 0.7112
         },
         {
           "kind": "item",
@@ -3423,8 +3423,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 12,
+          "defenseChance": 0.5629
         },
         {
           "kind": "item",
@@ -3437,8 +3437,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 13,
+          "defenseChance": 0.6551
         },
         {
           "kind": "item",
@@ -3451,8 +3451,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 14,
+          "defenseChance": 0.7534
         },
         {
           "kind": "item",
@@ -3465,8 +3465,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 13,
+          "defenseChance": 0.605
         },
         {
           "kind": "item",
@@ -3479,8 +3479,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 14,
+          "defenseChance": 0.6972
         },
         {
           "kind": "item",
@@ -3493,8 +3493,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 15,
+          "defenseChance": 0.7955
         },
         {
           "kind": "item",
@@ -3507,8 +3507,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 13,
+          "defenseChance": 0.6471
         },
         {
           "kind": "item",
@@ -3521,8 +3521,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 14,
+          "defenseChance": 0.7393
         },
         {
           "kind": "item",
@@ -3535,8 +3535,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 15,
+          "defenseChance": 0.8376
         },
         {
           "kind": "item",
@@ -3549,8 +3549,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 13,
+          "defenseChance": 0.6893
         },
         {
           "kind": "item",
@@ -3563,8 +3563,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 14,
+          "defenseChance": 0.7815
         },
         {
           "kind": "item",
@@ -3577,8 +3577,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 15,
+          "defenseChance": 0.8798
         },
         {
           "kind": "item",
@@ -3591,8 +3591,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 14,
+          "defenseChance": 0.7314
         },
         {
           "kind": "item",
@@ -3605,8 +3605,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 15,
+          "defenseChance": 0.8236
         },
         {
           "kind": "item",
@@ -3619,8 +3619,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 16,
+          "defenseChance": 0.9219
         },
         {
           "kind": "item",
@@ -3633,8 +3633,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 14,
+          "defenseChance": 0.7735
         },
         {
           "kind": "item",
@@ -3647,8 +3647,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 15,
+          "defenseChance": 0.8657
         },
         {
           "kind": "item",
@@ -3661,8 +3661,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 16,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -3675,8 +3675,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 15,
+          "defenseChance": 0.8157
         },
         {
           "kind": "item",
@@ -3689,8 +3689,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 16,
+          "defenseChance": 0.9079
         },
         {
           "kind": "item",
@@ -3703,8 +3703,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 17,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -3717,8 +3717,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 11,
-          "defenseChance": 0.6634
+          "defense": 15,
+          "defenseChance": 0.8578
         },
         {
           "kind": "item",
@@ -3731,8 +3731,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 12,
-          "defenseChance": 0.723
+          "defense": 16,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -3745,17 +3745,17 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 13,
-          "defenseChance": 0.7826
+          "defense": 17,
+          "defenseChance": 0.95
         }
       ],
       "consumables": {
-        "teleport": 2,
+        "teleport": 3,
         "smallHealthPotion": 2,
-        "mediumHealthPotion": 2,
-        "largeHealthPotion": 2,
-        "fullHealthPotion": 2,
-        "extraHeart": 1
+        "mediumHealthPotion": 1,
+        "largeHealthPotion": 3,
+        "fullHealthPotion": 1,
+        "extraHeart": 2
       }
     },
     "hard_encounter": {
@@ -3767,11 +3767,11 @@
           "name": "Weak Dark Unicorn",
           "variant": "weak",
           "img": "dark_unicorn.png",
-          "health": 22,
-          "attack": 6,
-          "attackChance": 0.7698,
-          "defense": 4,
-          "defenseChance": 0.5298
+          "health": 28,
+          "attack": 5,
+          "attackChance": 0.6607,
+          "defense": 1,
+          "defenseChance": 0.2498
         },
         {
           "kind": "monster",
@@ -3779,11 +3779,11 @@
           "name": "Dark Unicorn",
           "variant": "normal",
           "img": "dark_unicorn.png",
-          "health": 23,
-          "attack": 7,
-          "attackChance": 0.8498,
-          "defense": 5,
-          "defenseChance": 0.6098
+          "health": 29,
+          "attack": 6,
+          "attackChance": 0.7303,
+          "defense": 4,
+          "defenseChance": 0.3182
         },
         {
           "kind": "monster",
@@ -3791,11 +3791,11 @@
           "name": "Strong Dark Unicorn",
           "variant": "strong",
           "img": "dark_unicorn.png",
-          "health": 24,
-          "attack": 8,
-          "attackChance": 0.9298,
-          "defense": 6,
-          "defenseChance": 0.6898
+          "health": 30,
+          "attack": 7,
+          "attackChance": 0.8128,
+          "defense": 8,
+          "defenseChance": 0.4349
         },
         {
           "kind": "monster",
@@ -3803,11 +3803,11 @@
           "name": "Weak Ember Imp",
           "variant": "weak",
           "img": "ember_imp.png",
-          "health": 23,
+          "health": 31,
           "attack": 6,
-          "attackChance": 0.7798,
-          "defense": 4,
-          "defenseChance": 0.5398
+          "attackChance": 0.6882,
+          "defense": 2,
+          "defenseChance": 0.3288
         },
         {
           "kind": "monster",
@@ -3815,11 +3815,11 @@
           "name": "Ember Imp",
           "variant": "normal",
           "img": "ember_imp.png",
-          "health": 24,
+          "health": 32,
           "attack": 7,
-          "attackChance": 0.8598,
+          "attackChance": 0.7578,
           "defense": 5,
-          "defenseChance": 0.6198
+          "defenseChance": 0.3972
         },
         {
           "kind": "monster",
@@ -3827,11 +3827,11 @@
           "name": "Strong Ember Imp",
           "variant": "strong",
           "img": "ember_imp.png",
-          "health": 25,
+          "health": 33,
           "attack": 8,
-          "attackChance": 0.9398,
-          "defense": 6,
-          "defenseChance": 0.6998
+          "attackChance": 0.8403,
+          "defense": 9,
+          "defenseChance": 0.5139
         },
         {
           "kind": "monster",
@@ -3839,11 +3839,11 @@
           "name": "Weak Fire Butterfly",
           "variant": "weak",
           "img": "fire_butterfly.png",
-          "health": 23,
+          "health": 34,
           "attack": 7,
-          "attackChance": 0.7899,
-          "defense": 5,
-          "defenseChance": 0.5499
+          "attackChance": 0.7156,
+          "defense": 4,
+          "defenseChance": 0.4077
         },
         {
           "kind": "monster",
@@ -3851,11 +3851,11 @@
           "name": "Fire Butterfly",
           "variant": "normal",
           "img": "fire_butterfly.png",
-          "health": 24,
+          "health": 35,
           "attack": 8,
-          "attackChance": 0.8699,
-          "defense": 6,
-          "defenseChance": 0.6299
+          "attackChance": 0.7852,
+          "defense": 7,
+          "defenseChance": 0.4761
         },
         {
           "kind": "monster",
@@ -3863,11 +3863,11 @@
           "name": "Strong Fire Butterfly",
           "variant": "strong",
           "img": "fire_butterfly.png",
-          "health": 25,
+          "health": 36,
           "attack": 9,
-          "attackChance": 0.9499,
-          "defense": 7,
-          "defenseChance": 0.7099
+          "attackChance": 0.8677,
+          "defense": 11,
+          "defenseChance": 0.5928
         },
         {
           "kind": "monster",
@@ -3875,11 +3875,11 @@
           "name": "Weak Magma Cube",
           "variant": "weak",
           "img": "magma_cube.png",
-          "health": 24,
-          "attack": 7,
-          "attackChance": 0.7999,
+          "health": 37,
+          "attack": 8,
+          "attackChance": 0.7431,
           "defense": 5,
-          "defenseChance": 0.5599
+          "defenseChance": 0.4867
         },
         {
           "kind": "monster",
@@ -3887,11 +3887,11 @@
           "name": "Magma Cube",
           "variant": "normal",
           "img": "magma_cube.png",
-          "health": 25,
-          "attack": 8,
-          "attackChance": 0.8799,
-          "defense": 6,
-          "defenseChance": 0.6399
+          "health": 38,
+          "attack": 9,
+          "attackChance": 0.8127,
+          "defense": 8,
+          "defenseChance": 0.5551
         },
         {
           "kind": "monster",
@@ -3899,11 +3899,11 @@
           "name": "Strong Magma Cube",
           "variant": "strong",
           "img": "magma_cube.png",
-          "health": 26,
-          "attack": 9,
-          "attackChance": 0.95,
-          "defense": 7,
-          "defenseChance": 0.7199
+          "health": 39,
+          "attack": 10,
+          "attackChance": 0.8952,
+          "defense": 12,
+          "defenseChance": 0.6718
         },
         {
           "kind": "monster",
@@ -3911,11 +3911,11 @@
           "name": "Weak Medusa",
           "variant": "weak",
           "img": "medusa.png",
-          "health": 24,
-          "attack": 7,
-          "attackChance": 0.8099,
-          "defense": 5,
-          "defenseChance": 0.5699
+          "health": 41,
+          "attack": 9,
+          "attackChance": 0.7705,
+          "defense": 7,
+          "defenseChance": 0.5657
         },
         {
           "kind": "monster",
@@ -3923,11 +3923,11 @@
           "name": "Medusa",
           "variant": "normal",
           "img": "medusa.png",
-          "health": 25,
-          "attack": 8,
-          "attackChance": 0.8899,
-          "defense": 6,
-          "defenseChance": 0.6499
+          "health": 42,
+          "attack": 10,
+          "attackChance": 0.8401,
+          "defense": 10,
+          "defenseChance": 0.6341
         },
         {
           "kind": "monster",
@@ -3935,11 +3935,11 @@
           "name": "Strong Medusa",
           "variant": "strong",
           "img": "medusa.png",
-          "health": 26,
-          "attack": 9,
-          "attackChance": 0.95,
-          "defense": 7,
-          "defenseChance": 0.7299
+          "health": 43,
+          "attack": 11,
+          "attackChance": 0.9226,
+          "defense": 14,
+          "defenseChance": 0.7508
         },
         {
           "kind": "monster",
@@ -3947,11 +3947,11 @@
           "name": "Weak Red Dragon",
           "variant": "weak",
           "img": "red_dragon.png",
-          "health": 25,
-          "attack": 7,
-          "attackChance": 0.8199,
-          "defense": 5,
-          "defenseChance": 0.5799
+          "health": 44,
+          "attack": 9,
+          "attackChance": 0.798,
+          "defense": 8,
+          "defenseChance": 0.6447
         },
         {
           "kind": "monster",
@@ -3959,11 +3959,11 @@
           "name": "Red Dragon",
           "variant": "normal",
           "img": "red_dragon.png",
-          "health": 26,
-          "attack": 8,
-          "attackChance": 0.8999,
-          "defense": 6,
-          "defenseChance": 0.6599
+          "health": 45,
+          "attack": 10,
+          "attackChance": 0.8676,
+          "defense": 11,
+          "defenseChance": 0.7131
         },
         {
           "kind": "monster",
@@ -3971,11 +3971,11 @@
           "name": "Strong Red Dragon",
           "variant": "strong",
           "img": "red_dragon.png",
-          "health": 27,
-          "attack": 9,
+          "health": 46,
+          "attack": 11,
           "attackChance": 0.95,
-          "defense": 7,
-          "defenseChance": 0.7399
+          "defense": 15,
+          "defenseChance": 0.8298
         },
         {
           "kind": "monster",
@@ -3983,11 +3983,11 @@
           "name": "Weak Rock Troll",
           "variant": "weak",
           "img": "rock_troll.png",
-          "health": 25,
-          "attack": 8,
-          "attackChance": 0.83,
-          "defense": 6,
-          "defenseChance": 0.5899
+          "health": 47,
+          "attack": 10,
+          "attackChance": 0.8255,
+          "defense": 9,
+          "defenseChance": 0.7236
         },
         {
           "kind": "monster",
@@ -3995,11 +3995,11 @@
           "name": "Rock Troll",
           "variant": "normal",
           "img": "rock_troll.png",
-          "health": 26,
-          "attack": 9,
-          "attackChance": 0.91,
-          "defense": 7,
-          "defenseChance": 0.6699
+          "health": 48,
+          "attack": 11,
+          "attackChance": 0.8951,
+          "defense": 12,
+          "defenseChance": 0.792
         },
         {
           "kind": "monster",
@@ -4007,11 +4007,11 @@
           "name": "Strong Rock Troll",
           "variant": "strong",
           "img": "rock_troll.png",
-          "health": 27,
-          "attack": 10,
+          "health": 49,
+          "attack": 12,
           "attackChance": 0.95,
-          "defense": 8,
-          "defenseChance": 0.7499
+          "defense": 16,
+          "defenseChance": 0.9087
         },
         {
           "kind": "monster",
@@ -4019,11 +4019,11 @@
           "name": "Weak Skeleton",
           "variant": "weak",
           "img": "skeleton.png",
-          "health": 26,
-          "attack": 8,
-          "attackChance": 0.84,
-          "defense": 6,
-          "defenseChance": 0.6
+          "health": 50,
+          "attack": 11,
+          "attackChance": 0.8529,
+          "defense": 11,
+          "defenseChance": 0.8026
         },
         {
           "kind": "monster",
@@ -4031,11 +4031,11 @@
           "name": "Skeleton",
           "variant": "normal",
           "img": "skeleton.png",
-          "health": 27,
-          "attack": 9,
-          "attackChance": 0.92,
-          "defense": 7,
-          "defenseChance": 0.68
+          "health": 51,
+          "attack": 12,
+          "attackChance": 0.9225,
+          "defense": 14,
+          "defenseChance": 0.871
         },
         {
           "kind": "monster",
@@ -4043,11 +4043,11 @@
           "name": "Strong Skeleton",
           "variant": "strong",
           "img": "skeleton.png",
-          "health": 28,
-          "attack": 10,
+          "health": 52,
+          "attack": 13,
           "attackChance": 0.95,
-          "defense": 8,
-          "defenseChance": 0.76
+          "defense": 18,
+          "defenseChance": 0.95
         },
         {
           "kind": "monster",
@@ -4055,11 +4055,11 @@
           "name": "Weak Wizard",
           "variant": "weak",
           "img": "wizard.png",
-          "health": 26,
-          "attack": 8,
-          "attackChance": 0.85,
-          "defense": 6,
-          "defenseChance": 0.61
+          "health": 53,
+          "attack": 12,
+          "attackChance": 0.8804,
+          "defense": 12,
+          "defenseChance": 0.8816
         },
         {
           "kind": "monster",
@@ -4067,11 +4067,11 @@
           "name": "Wizard",
           "variant": "normal",
           "img": "wizard.png",
-          "health": 27,
-          "attack": 9,
-          "attackChance": 0.93,
-          "defense": 7,
-          "defenseChance": 0.69
+          "health": 54,
+          "attack": 13,
+          "attackChance": 0.95,
+          "defense": 15,
+          "defenseChance": 0.95
         },
         {
           "kind": "monster",
@@ -4079,21 +4079,21 @@
           "name": "Strong Wizard",
           "variant": "strong",
           "img": "wizard.png",
-          "health": 28,
-          "attack": 10,
+          "health": 55,
+          "attack": 14,
           "attackChance": 0.95,
-          "defense": 8,
-          "defenseChance": 0.77
+          "defense": 19,
+          "defenseChance": 0.95
         }
       ],
       "consumables": {
-        "teleport": 2,
+        "teleport": 1,
         "smallHealthPotion": 2,
-        "mediumHealthPotion": 2,
+        "mediumHealthPotion": 1,
         "largeHealthPotion": 2,
         "fullHealthPotion": 2,
         "extraHeart": 1,
-        "chest": 10
+        "chest": 11
       }
     },
     "hard_loot": {
@@ -4108,8 +4108,8 @@
           "img": "exploding_pie.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 24,
+          "attackChance": 0.6578,
           "defense": null,
           "defenseChance": null
         },
@@ -4122,8 +4122,8 @@
           "img": "exploding_pie.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 25,
+          "attackChance": 0.75,
           "defense": null,
           "defenseChance": null
         },
@@ -4136,8 +4136,8 @@
           "img": "exploding_pie.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 26,
+          "attackChance": 0.8483,
           "defense": null,
           "defenseChance": null
         },
@@ -4150,8 +4150,8 @@
           "img": "flaming_tuba.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 24,
+          "attackChance": 0.6696,
           "defense": null,
           "defenseChance": null
         },
@@ -4164,8 +4164,8 @@
           "img": "flaming_tuba.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 25,
+          "attackChance": 0.7618,
           "defense": null,
           "defenseChance": null
         },
@@ -4178,8 +4178,8 @@
           "img": "flaming_tuba.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 26,
+          "attackChance": 0.8601,
           "defense": null,
           "defenseChance": null
         },
@@ -4192,8 +4192,8 @@
           "img": "glass_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 25,
+          "attackChance": 0.6813,
           "defense": null,
           "defenseChance": null
         },
@@ -4206,8 +4206,8 @@
           "img": "glass_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 26,
+          "attackChance": 0.7735,
           "defense": null,
           "defenseChance": null
         },
@@ -4220,8 +4220,8 @@
           "img": "glass_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 27,
+          "attackChance": 0.8718,
           "defense": null,
           "defenseChance": null
         },
@@ -4234,8 +4234,8 @@
           "img": "octopus_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 25,
+          "attackChance": 0.6931,
           "defense": null,
           "defenseChance": null
         },
@@ -4248,8 +4248,8 @@
           "img": "octopus_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 26,
+          "attackChance": 0.7853,
           "defense": null,
           "defenseChance": null
         },
@@ -4262,8 +4262,8 @@
           "img": "octopus_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 27,
+          "attackChance": 0.8836,
           "defense": null,
           "defenseChance": null
         },
@@ -4276,8 +4276,8 @@
           "img": "gummy_bear_mace.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 25,
+          "attackChance": 0.7049,
           "defense": null,
           "defenseChance": null
         },
@@ -4290,8 +4290,8 @@
           "img": "gummy_bear_mace.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 26,
+          "attackChance": 0.7971,
           "defense": null,
           "defenseChance": null
         },
@@ -4304,8 +4304,8 @@
           "img": "gummy_bear_mace.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 27,
+          "attackChance": 0.8954,
           "defense": null,
           "defenseChance": null
         },
@@ -4318,8 +4318,8 @@
           "img": "mud_shotgun.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 25,
+          "attackChance": 0.7166,
           "defense": null,
           "defenseChance": null
         },
@@ -4332,8 +4332,8 @@
           "img": "mud_shotgun.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 26,
+          "attackChance": 0.8088,
           "defense": null,
           "defenseChance": null
         },
@@ -4346,8 +4346,8 @@
           "img": "mud_shotgun.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 27,
+          "attackChance": 0.9071,
           "defense": null,
           "defenseChance": null
         },
@@ -4360,8 +4360,8 @@
           "img": "whacky_wizard_staff.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 26,
+          "attackChance": 0.7284,
           "defense": null,
           "defenseChance": null
         },
@@ -4374,8 +4374,8 @@
           "img": "whacky_wizard_staff.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 27,
+          "attackChance": 0.8206,
           "defense": null,
           "defenseChance": null
         },
@@ -4388,8 +4388,8 @@
           "img": "whacky_wizard_staff.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 28,
+          "attackChance": 0.9189,
           "defense": null,
           "defenseChance": null
         },
@@ -4402,8 +4402,8 @@
           "img": "bagpipe_cannon.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 26,
+          "attackChance": 0.7402,
           "defense": null,
           "defenseChance": null
         },
@@ -4416,8 +4416,8 @@
           "img": "bagpipe_cannon.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 27,
+          "attackChance": 0.8324,
           "defense": null,
           "defenseChance": null
         },
@@ -4430,8 +4430,8 @@
           "img": "bagpipe_cannon.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 28,
+          "attackChance": 0.9307,
           "defense": null,
           "defenseChance": null
         },
@@ -4444,8 +4444,8 @@
           "img": "piranha_on_a_stick.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 26,
+          "attackChance": 0.7519,
           "defense": null,
           "defenseChance": null
         },
@@ -4458,8 +4458,8 @@
           "img": "piranha_on_a_stick.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 27,
+          "attackChance": 0.8441,
           "defense": null,
           "defenseChance": null
         },
@@ -4472,8 +4472,8 @@
           "img": "piranha_on_a_stick.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 28,
+          "attackChance": 0.9424,
           "defense": null,
           "defenseChance": null
         },
@@ -4486,8 +4486,8 @@
           "img": "scorpion_tail_spear.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 27,
+          "attackChance": 0.7637,
           "defense": null,
           "defenseChance": null
         },
@@ -4500,8 +4500,8 @@
           "img": "scorpion_tail_spear.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 28,
+          "attackChance": 0.8559,
           "defense": null,
           "defenseChance": null
         },
@@ -4514,8 +4514,8 @@
           "img": "scorpion_tail_spear.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 29,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4528,8 +4528,8 @@
           "img": "box_of_tiny_lion.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 27,
+          "attackChance": 0.7754,
           "defense": null,
           "defenseChance": null
         },
@@ -4542,8 +4542,8 @@
           "img": "box_of_tiny_lion.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 28,
+          "attackChance": 0.8676,
           "defense": null,
           "defenseChance": null
         },
@@ -4556,8 +4556,8 @@
           "img": "box_of_tiny_lion.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 29,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4570,8 +4570,8 @@
           "img": "danger_noodle_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 27,
+          "attackChance": 0.7872,
           "defense": null,
           "defenseChance": null
         },
@@ -4584,8 +4584,8 @@
           "img": "danger_noodle_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 28,
+          "attackChance": 0.8794,
           "defense": null,
           "defenseChance": null
         },
@@ -4598,8 +4598,8 @@
           "img": "danger_noodle_whip.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 29,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4612,8 +4612,8 @@
           "img": "giggle_daggers.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 28,
+          "attackChance": 0.799,
           "defense": null,
           "defenseChance": null
         },
@@ -4626,8 +4626,8 @@
           "img": "giggle_daggers.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 29,
+          "attackChance": 0.8912,
           "defense": null,
           "defenseChance": null
         },
@@ -4640,8 +4640,8 @@
           "img": "giggle_daggers.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 30,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4654,8 +4654,8 @@
           "img": "rubber_chicken_axe.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 28,
+          "attackChance": 0.8107,
           "defense": null,
           "defenseChance": null
         },
@@ -4668,8 +4668,8 @@
           "img": "rubber_chicken_axe.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 29,
+          "attackChance": 0.9029,
           "defense": null,
           "defenseChance": null
         },
@@ -4682,8 +4682,8 @@
           "img": "rubber_chicken_axe.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 30,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4696,8 +4696,8 @@
           "img": "shark_head_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 28,
+          "attackChance": 0.8225,
           "defense": null,
           "defenseChance": null
         },
@@ -4710,8 +4710,8 @@
           "img": "shark_head_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 29,
+          "attackChance": 0.9147,
           "defense": null,
           "defenseChance": null
         },
@@ -4724,8 +4724,8 @@
           "img": "shark_head_hammer.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 30,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4738,8 +4738,8 @@
           "img": "roaring_great_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 28,
+          "attackChance": 0.8343,
           "defense": null,
           "defenseChance": null
         },
@@ -4752,8 +4752,8 @@
           "img": "roaring_great_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 29,
+          "attackChance": 0.9265,
           "defense": null,
           "defenseChance": null
         },
@@ -4766,8 +4766,8 @@
           "img": "roaring_great_sword.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 30,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4780,8 +4780,8 @@
           "img": "wild_whirl_scythe.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 29,
+          "attackChance": 0.846,
           "defense": null,
           "defenseChance": null
         },
@@ -4794,8 +4794,8 @@
           "img": "wild_whirl_scythe.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 30,
+          "attackChance": 0.9382,
           "defense": null,
           "defenseChance": null
         },
@@ -4808,8 +4808,8 @@
           "img": "wild_whirl_scythe.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 31,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4822,8 +4822,8 @@
           "img": "crazy_cat_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 16,
-          "attackChance": 0.7634,
+          "attack": 29,
+          "attackChance": 0.8578,
           "defense": null,
           "defenseChance": null
         },
@@ -4836,8 +4836,8 @@
           "img": "crazy_cat_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 17,
-          "attackChance": 0.823,
+          "attack": 30,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4850,8 +4850,8 @@
           "img": "crazy_cat_launcher.png",
           "effect": null,
           "heal": null,
-          "attack": 18,
-          "attackChance": 0.8826,
+          "attack": 31,
+          "attackChance": 0.95,
           "defense": null,
           "defenseChance": null
         },
@@ -4866,8 +4866,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 18,
+          "defenseChance": 0.2372
         },
         {
           "kind": "item",
@@ -4880,8 +4880,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 19,
+          "defenseChance": 0.3294
         },
         {
           "kind": "item",
@@ -4894,8 +4894,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 20,
+          "defenseChance": 0.4277
         },
         {
           "kind": "item",
@@ -4908,8 +4908,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 18,
+          "defenseChance": 0.2737
         },
         {
           "kind": "item",
@@ -4922,8 +4922,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 19,
+          "defenseChance": 0.3659
         },
         {
           "kind": "item",
@@ -4936,8 +4936,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 20,
+          "defenseChance": 0.4642
         },
         {
           "kind": "item",
@@ -4950,8 +4950,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 19,
+          "defenseChance": 0.3102
         },
         {
           "kind": "item",
@@ -4964,8 +4964,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 20,
+          "defenseChance": 0.4024
         },
         {
           "kind": "item",
@@ -4978,8 +4978,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 21,
+          "defenseChance": 0.5007
         },
         {
           "kind": "item",
@@ -4992,8 +4992,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 19,
+          "defenseChance": 0.3467
         },
         {
           "kind": "item",
@@ -5006,8 +5006,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 20,
+          "defenseChance": 0.4389
         },
         {
           "kind": "item",
@@ -5020,8 +5020,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 21,
+          "defenseChance": 0.5372
         },
         {
           "kind": "item",
@@ -5034,8 +5034,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 20,
+          "defenseChance": 0.3832
         },
         {
           "kind": "item",
@@ -5048,8 +5048,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 21,
+          "defenseChance": 0.4754
         },
         {
           "kind": "item",
@@ -5062,8 +5062,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 22,
+          "defenseChance": 0.5737
         },
         {
           "kind": "item",
@@ -5076,8 +5076,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 20,
+          "defenseChance": 0.4197
         },
         {
           "kind": "item",
@@ -5090,8 +5090,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 21,
+          "defenseChance": 0.5119
         },
         {
           "kind": "item",
@@ -5104,8 +5104,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 22,
+          "defenseChance": 0.6102
         },
         {
           "kind": "item",
@@ -5118,8 +5118,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 20,
+          "defenseChance": 0.4562
         },
         {
           "kind": "item",
@@ -5132,8 +5132,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 21,
+          "defenseChance": 0.5484
         },
         {
           "kind": "item",
@@ -5146,8 +5146,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 22,
+          "defenseChance": 0.6467
         },
         {
           "kind": "item",
@@ -5160,8 +5160,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 21,
+          "defenseChance": 0.4927
         },
         {
           "kind": "item",
@@ -5174,8 +5174,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 22,
+          "defenseChance": 0.5849
         },
         {
           "kind": "item",
@@ -5188,8 +5188,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 23,
+          "defenseChance": 0.6832
         },
         {
           "kind": "item",
@@ -5202,8 +5202,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 21,
+          "defenseChance": 0.5292
         },
         {
           "kind": "item",
@@ -5216,8 +5216,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 22,
+          "defenseChance": 0.6214
         },
         {
           "kind": "item",
@@ -5230,8 +5230,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 23,
+          "defenseChance": 0.7197
         },
         {
           "kind": "item",
@@ -5244,8 +5244,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 22,
+          "defenseChance": 0.5658
         },
         {
           "kind": "item",
@@ -5258,8 +5258,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 23,
+          "defenseChance": 0.658
         },
         {
           "kind": "item",
@@ -5272,8 +5272,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 24,
+          "defenseChance": 0.7563
         },
         {
           "kind": "item",
@@ -5286,8 +5286,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 22,
+          "defenseChance": 0.6023
         },
         {
           "kind": "item",
@@ -5300,8 +5300,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 23,
+          "defenseChance": 0.6945
         },
         {
           "kind": "item",
@@ -5314,8 +5314,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 24,
+          "defenseChance": 0.7928
         },
         {
           "kind": "item",
@@ -5328,8 +5328,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 23,
+          "defenseChance": 0.6388
         },
         {
           "kind": "item",
@@ -5342,8 +5342,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 24,
+          "defenseChance": 0.731
         },
         {
           "kind": "item",
@@ -5356,8 +5356,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 25,
+          "defenseChance": 0.8293
         },
         {
           "kind": "item",
@@ -5370,8 +5370,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 23,
+          "defenseChance": 0.6753
         },
         {
           "kind": "item",
@@ -5384,8 +5384,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 24,
+          "defenseChance": 0.7675
         },
         {
           "kind": "item",
@@ -5398,8 +5398,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 25,
+          "defenseChance": 0.8658
         },
         {
           "kind": "item",
@@ -5412,8 +5412,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 23,
+          "defenseChance": 0.7118
         },
         {
           "kind": "item",
@@ -5426,8 +5426,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 24,
+          "defenseChance": 0.804
         },
         {
           "kind": "item",
@@ -5440,8 +5440,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 25,
+          "defenseChance": 0.9023
         },
         {
           "kind": "item",
@@ -5454,8 +5454,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 24,
+          "defenseChance": 0.7483
         },
         {
           "kind": "item",
@@ -5468,8 +5468,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 25,
+          "defenseChance": 0.8405
         },
         {
           "kind": "item",
@@ -5482,8 +5482,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 26,
+          "defenseChance": 0.9388
         },
         {
           "kind": "item",
@@ -5496,8 +5496,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 24,
+          "defenseChance": 0.7848
         },
         {
           "kind": "item",
@@ -5510,8 +5510,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 25,
+          "defenseChance": 0.877
         },
         {
           "kind": "item",
@@ -5524,8 +5524,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 26,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -5538,8 +5538,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 25,
+          "defenseChance": 0.8213
         },
         {
           "kind": "item",
@@ -5552,8 +5552,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 26,
+          "defenseChance": 0.9135
         },
         {
           "kind": "item",
@@ -5566,8 +5566,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 27,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -5580,8 +5580,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 16,
-          "defenseChance": 0.7634
+          "defense": 25,
+          "defenseChance": 0.8578
         },
         {
           "kind": "item",
@@ -5594,8 +5594,8 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 17,
-          "defenseChance": 0.823
+          "defense": 26,
+          "defenseChance": 0.95
         },
         {
           "kind": "item",
@@ -5608,15 +5608,15 @@
           "heal": null,
           "attack": null,
           "attackChance": null,
-          "defense": 18,
-          "defenseChance": 0.8826
+          "defense": 27,
+          "defenseChance": 0.95
         }
       ],
       "consumables": {
-        "teleport": 2,
-        "smallHealthPotion": 2,
+        "teleport": 4,
+        "smallHealthPotion": 0,
         "mediumHealthPotion": 2,
-        "largeHealthPotion": 2,
+        "largeHealthPotion": 0,
         "fullHealthPotion": 2,
         "extraHeart": 1
       }
