@@ -6,7 +6,6 @@ export type MonsterVariant = 'weak' | 'normal' | 'strong';
 export interface MonsterDef {
 	id: string;
 	name: string;
-	biome: string;
 	health: number;
 	attack: number;
 	attackChance: number;
@@ -43,8 +42,7 @@ export type MonsterVarientRangeModifier = {
 export type MonsterCatalogSourceEntry = {
 	id: string;
 	name: string;
-	biome: string;
 	img: string;
 };
 
-export type MonsterCatalogBase = Pick<MonsterCatalogSourceEntry, 'id' | 'name' | 'biome' | 'img'>;
+export type MonsterCatalogBase = Pick<MonsterCatalogSourceEntry, 'id' | 'name' | 'img'>;

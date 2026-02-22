@@ -23,6 +23,13 @@ export const DEFAULT_PLAYER_STATE = {
 	},
 };
 
+export const DEFAULT_BOSS_STATE = {
+	health: 120,
+	attack: 8,
+	attackChance: 0.85,
+	defense: 5,
+	defenseChance: 0.65,
+};
 export const DEFAULT_HEALING_AMOUNT = {
 	smallHealthPotion: 3,
 	mediumHealthPotion: 5,

@@ -13,6 +13,13 @@ type Genome = {
 		mediumHealthPotion: number;
 		largeHealthPotion: number;
 	};
+	DEFAULT_BOSS_STATE: {
+		health: number;
+		attack: number;
+		attackChance: number;
+		defense: number;
+		defenseChance: number;
+	};
 	DEFAULT_WEAPON_DAMAGE: Record<BalanceDeck, { minAttack: number; maxAttack: number; minChance: number; maxChance: number }>;
 	DEFAULT_ARMOR_PROTECTION: Record<BalanceDeck, { minDefense: number; maxDefense: number; minChance: number; maxChance: number }>;
 	DEFAULT_ITEM_CONSUMABLES: Record<
@@ -185,6 +192,13 @@ const BASE_GENOME: Genome = {
 		mediumHealthPotion: 5,
 		largeHealthPotion: 7,
 	},
+	DEFAULT_BOSS_STATE: {
+		health: 120,
+		attack: 8,
+		attackChance: 0.85,
+		defense: 5,
+		defenseChance: 0.65,
+	},
 	DEFAULT_WEAPON_DAMAGE: {
 		easy: { minAttack: 1, maxAttack: 4, minChance: 0.5, maxChance: 0.6 },
 		medium: { minAttack: 9, maxAttack: 12, minChance: 0.65, maxChance: 0.75 },
@@ -259,6 +273,11 @@ const GENOME_BOUNDS: GenomeBound[] = [
 	{ path: 'DEFAULT_HEALING_AMOUNT.smallHealthPotion', min: 1, max: 20, span: 2, integer: true },
 	{ path: 'DEFAULT_HEALING_AMOUNT.mediumHealthPotion', min: 1, max: 30, span: 2, integer: true },
 	{ path: 'DEFAULT_HEALING_AMOUNT.largeHealthPotion', min: 1, max: 40, span: 3, integer: true },
+	{ path: 'DEFAULT_BOSS_STATE.health', min: 20, max: 400, span: 20, integer: true },
+	{ path: 'DEFAULT_BOSS_STATE.attack', min: 1, max: 80, span: 4, integer: true },
+	{ path: 'DEFAULT_BOSS_STATE.attackChance', min: 0.05, max: 0.95, span: 0.05, chance: true },
+	{ path: 'DEFAULT_BOSS_STATE.defense', min: 0, max: 80, span: 4, integer: true },
+	{ path: 'DEFAULT_BOSS_STATE.defenseChance', min: 0.05, max: 0.95, span: 0.05, chance: true },
 	...(['easy', 'medium', 'hard'] as const).flatMap(deck => [
 		{ path: `DEFAULT_WEAPON_DAMAGE.${deck}.minAttack`, min: 1, max: 60, span: 3, integer: true },
 		{ path: `DEFAULT_WEAPON_DAMAGE.${deck}.maxAttack`, min: 1, max: 70, span: 4, integer: true },

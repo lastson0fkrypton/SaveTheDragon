@@ -3,6 +3,7 @@ import fsSync from 'node:fs';
 import path from 'node:path';
 import {
 	DEFAULT_ARMOR_PROTECTION,
+	DEFAULT_BOSS_STATE,
 	DEFAULT_HEALING_AMOUNT,
 	DEFAULT_ITEM_CONSUMABLES,
 	DEFAULT_ITEM_VARIANT_MODIFIERS,
@@ -91,6 +92,7 @@ type BalanceJsonConfig = {
 	armors?: ArmorBalanceOverrides;
 	itemVariance?: ItemVarianceOverrides;
 	consumables?: HealingOverrides;
+	DEFAULT_BOSS_STATE?: Partial<typeof DEFAULT_BOSS_STATE>;
 	itemConsumables?: Partial<Record<DeckType, Partial<ItemConsumableBalanceRange>>>;
 	monsterConsumables?: Partial<Record<DeckType, Partial<MonsterConsumableBalanceRange>>>;
 	monsters?: MonsterTierOverrides;
@@ -135,6 +137,8 @@ type MonsterBalanceProfile = {
 	variantModifiers: typeof DEFAULT_MONSTER_VARIANT_MODIFIERS;
 	deckConsumables: Record<DeckType, MonsterConsumableBalanceRange>;
 };
+
+type BossBalanceProfile = typeof DEFAULT_BOSS_STATE;
 
 type DeckConsumableCounts = {
 	teleport: number;
@@ -413,11 +417,20 @@ function getDefaultMonsterProfile(): MonsterBalanceProfile {
 	};
 }
 
+function getDefaultBossProfile(): BossBalanceProfile {
+	return structuredClone(DEFAULT_BOSS_STATE);
+}
+
 function applyBalanceOverrides(
 	itemProfile: ItemBalanceProfile,
 	monsterProfile: MonsterBalanceProfile,
+	bossProfile: BossBalanceProfile,
 	balance: BalanceJsonConfig
 ): void {
+	if (balance.DEFAULT_BOSS_STATE) {
+		Object.assign(bossProfile, balance.DEFAULT_BOSS_STATE);
+	}
+
 	if (balance.DEFAULT_WEAPON_DAMAGE) {
 		for (const deck of DECK_ORDER) {
 			itemProfile.biomeTierBase.weapon[deck] = {
@@ -723,7 +736,6 @@ function buildDeckMonsterDefs(deck: MonsterTierDeck, profile: MonsterBalanceProf
 			out.push({
 				id: toMonsterVariantId(entry.id, variant),
 				name: toMonsterVariantName(entry.name, variant),
-				biome: entry.biome,
 				img: entry.img,
 				health: Math.max(1, baseHealth + mods.healthDelta),
 				attack: Math.max(1, baseAttack + mods.attackDelta),
@@ -737,7 +749,11 @@ function buildDeckMonsterDefs(deck: MonsterTierDeck, profile: MonsterBalanceProf
 	return out;
 }
 
-function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: MonsterBalanceProfile) {
+function buildDeckDefinitions(
+	itemProfile: ItemBalanceProfile,
+	monsterProfile: MonsterBalanceProfile,
+	bossProfile: BossBalanceProfile
+) {
 	const deckData: Record<
 		DeckType,
 		{
@@ -836,11 +852,11 @@ function buildDeckDefinitions(itemProfile: ItemBalanceProfile, monsterProfile: M
 	const finalBoss = {
 		id: EVIL_PRINCESS_MONSTER.id,
 		name: EVIL_PRINCESS_MONSTER.name,
-		health: EVIL_PRINCESS_MONSTER.health,
-		attack: EVIL_PRINCESS_MONSTER.attack,
-		attackChance: EVIL_PRINCESS_MONSTER.attackChance,
-		defense: EVIL_PRINCESS_MONSTER.defense,
-		defenseChance: EVIL_PRINCESS_MONSTER.defenseChance,
+		health: bossProfile.health,
+		attack: bossProfile.attack,
+		attackChance: bossProfile.attackChance,
+		defense: bossProfile.defense,
+		defenseChance: bossProfile.defenseChance,
 		img: EVIL_PRINCESS_MONSTER.img,
 	};
 
@@ -869,9 +885,10 @@ async function main() {
 	const resolved = await resolveConfig(parsedArgs);
 	const itemProfile = getDefaultItemProfile();
 	const monsterProfile = getDefaultMonsterProfile();
-	applyBalanceOverrides(itemProfile, monsterProfile, resolved.balance);
+	const bossProfile = getDefaultBossProfile();
+	applyBalanceOverrides(itemProfile, monsterProfile, bossProfile, resolved.balance);
 
-	const output = buildDeckDefinitions(itemProfile, monsterProfile);
+	const output = buildDeckDefinitions(itemProfile, monsterProfile, bossProfile);
 	await fs.writeFile(resolved.outPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
 	console.log(`Generated deck definitions: ${resolved.outPath}`);
 }
