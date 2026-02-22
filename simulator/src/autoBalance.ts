@@ -914,12 +914,18 @@ async function evaluatePopulation(
 	const results: Candidate[] = new Array(population.length);
 	let nextIndex = 0;
 	const workerCount = Math.min(args.candidateParallelism, population.length);
+	let activeWorkers = 0;
 
-	const workers = Array.from({ length: Math.min(workerCount, population.length) }, async () => {
+	const workers = Array.from({ length: Math.min(workerCount, population.length) }, async (_, workerSlot) => {
 		while (true) {
 			const index = nextIndex;
 			nextIndex += 1;
 			if (index >= population.length) break;
+
+			activeWorkers += 1;
+			console.error(
+				`[autobalance] g${generation + 1} dispatch c${index + 1}/${population.length} slot=${workerSlot + 1}/${workerCount} active=${activeWorkers}`
+			);
 			try {
 				const candidate = await evaluateCandidateWithRetry(
 					population[index],
@@ -939,6 +945,11 @@ async function evaluatePopulation(
 				results[index] = fallback;
 				console.error(
 					`[autobalance] g${generation + 1} c${index + 1}/${population.length} failed; substituted fallback. error=${error instanceof Error ? error.message : String(error)}`
+				);
+			} finally {
+				activeWorkers = Math.max(0, activeWorkers - 1);
+				console.error(
+					`[autobalance] g${generation + 1} complete c${index + 1}/${population.length} slot=${workerSlot + 1}/${workerCount} active=${activeWorkers}`
 				);
 			}
 		}
