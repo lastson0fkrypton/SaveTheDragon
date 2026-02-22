@@ -193,11 +193,11 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Simulator supports deterministic seeds and configurable run parameters (games, max turns, grid size).
   - Simulator writes machine-readable and human-readable artifacts (JSON summary, report, game log).
   - A GA auto-balancer can evaluate many candidate configs and persist best outputs.
-  - Config-first balancing is supported for both game stats and biome deck composition.
+  - Config-first balancing is supported for generator defaults and deck definitions.
   - Parallel candidate evaluation is supported safely without cross-candidate state bleed.
   - Summary metrics include success-rate and turn profile (`min/avg/max`) for balancing targets.
 - **Status:** DONE
-- **Notes:** Implemented API-driven simulator (`server/simulation/deckBalanceSimulator.ts`) that boots the real server with in-memory DB and plays through endpoints. Added reusable app bootstrap (`server/serverApp.ts`) for in-process simulation startup. Added config-driven balance/deck loading (`server/config/gameBalanceConfig.ts`, `server/config/biomeDeckConfig.ts` + JSON files). Added deck runtime service (`server/services/biomeDeckService.ts`) and integrated encounter/loot deck flow into gameplay services. Added GA auto-balancer (`server/simulation/autoBalance.ts`) with candidate mutation/crossover, worker-isolated parallel evaluation (`server/simulation/candidateSimulationWorker.ts`), and artifact generation under `server/simulation-output/*`. Fixed discovered simulation exploits and updated battle/item flow (no run-away, battle item usage endpoint). Updated aggregate terminology to success metrics (`successfulGames`, `successRate`) and extended GA fitness to target success plus turn profile (`targetMinTurns`, `targetAvgTurns`, `targetMaxTurns`) with tunable penalty weights.
+- **Notes:** Implemented API-driven simulator in `simulator/src/deckBalanceSimulator.ts` and GA auto-balancer in `simulator/src/autoBalance.ts`, both exercising real server endpoints via `server/serverApp.ts`. Added standalone `deck-generator/` with deterministic `deck-definitions.json` output consumed by server runtime. Added candidate-worker parallel evaluation, isolated per-run deck-definition handling, and artifact output under `simulator/simulation-output/*`. Extended GA objective with success-rate and turn-profile targets (`targetMinTurns`, `targetAvgTurns`, `targetMaxTurns`) and tunable penalty weights.
 
 
 ## BACKLOG-015

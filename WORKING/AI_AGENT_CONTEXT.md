@@ -8,6 +8,8 @@ This file is a persistent handoff so any future Copilot session can quickly resu
 - **Type:** Multiplayer turn-based, grid-based web game
 - **Server:** Node.js + Express + SQLite
 - **Client:** React + TypeScript + Vite + MobX
+- **Deck Generator:** TypeScript standalone tool under `deck-generator/`
+- **Simulation/GA:** TypeScript standalone tool under `simulator/`
 - **State Model:** Server-authoritative game state, client polls `/api/games/:gameId/state` periodically
 
 ## Current Architecture (High-Level)
@@ -15,7 +17,7 @@ This file is a persistent handoff so any future Copilot session can quickly resu
 - **Services:** game/business rules in `server/services/` (`gameService`, `battleService`, `playerService`, `adminService`)
 - **Repositories:** SQLite access centralized in `server/repositories/` (`gameRepository`, `dbClient`)
 - **Persistence bootstrap:** DB schema init in `server/db.ts`
-- **Game data/constants:** items, monsters, characters, biome rates in `server/constants/`
+- **Game data/constants:** server runtime constants in `server/constants/`; generated deck data comes from `server/config/deck-definitions.json`
 - **Client pages:** home, game, admin under `client/src/pages/`
 - **Client game UI:** board + overlays + modals under `client/src/components/`
 - **Backlog source of truth:** `WORKING/Backlog.md`
@@ -26,6 +28,9 @@ This file is a persistent handoff so any future Copilot session can quickly resu
 - Win-state UI is implemented client-side with a completion modal and game-complete overlays.
 - Boss run-away behavior sends player to nearest town.
 - Dynamic balancing exists for monsters/items by biome tier + variant model.
+- Deck generation and balancing use generator defaults (`DEFAULT_*`) with GA tuning support.
+- Final boss tuning is supported through `DEFAULT_BOSS_STATE`.
+- Deck-generator monster catalog entries no longer require biome fields.
 - Admin live-ops tools exist for active games: kick player, give item, delete game, prevent expiry toggle.
 - Inactivity cleanup runs every 60s and skips games marked `preventExpiry`.
 - Quest system backlog remains unimplemented beyond placeholders.
@@ -48,6 +53,13 @@ Current forward-looking items remain centered around quests, mobile UX, animatio
 - Balance and bug fixes:
 	- Random weapons are never weaker than fist baseline (`>=2` attack, `>=0.5` chance).
 	- Stacked consumables now consume one item per use (not all matching copies).
+
+## Simulation/GA Notes
+- Main GA entrypoint: `simulator/src/autoBalance.ts`
+- Main simulation entrypoint: `simulator/src/deckBalanceSimulator.ts`
+- Candidate parallelism is controlled by `--candidateParallelism`.
+- Current GA logs include active worker dispatch/completion counters for visibility.
+- Simulation and GA runs use isolated deck-definition files to avoid mutating `server/config` during evaluation.
 
 ## Working Conventions for Future AI Sessions
 1. Read `WORKING/Backlog.md` first.

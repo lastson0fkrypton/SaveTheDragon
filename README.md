@@ -78,7 +78,7 @@ This separation keeps the API layer thin, game logic reusable/testable, and SQL 
    - Early game: plains/forest tuned for starter survivability.
    - Mid game: desert tuned as a meaningful progression step.
    - Late game: cave/volcano tuned as high-threat zones.
-   - Item/monster stats remain tied to existing IDs, names, images, and biome assignments.
+   - Item/monster stats remain tied to existing IDs, names, and images.
    - Chance bar UI now supports dynamic percentages (not limited to fixed 50/70/90 buckets).
 - **BACKLOG-007:** Shared raid-boss win condition implemented with persistent boss HP and global game-complete state.
 - **BACKLOG-013:** Movement now uses click-to-select destination and `End Turn` confirmation with visual destination highlight and path arrow.
@@ -88,20 +88,20 @@ This separation keeps the API layer thin, game logic reusable/testable, and SQL 
 - Deck generation is now a standalone project in `deck-generator/`.
 - Simulation/auto-balance is now a standalone project in `simulator/`.
 - The server only consumes `server/config/deck-definitions.json` at runtime.
+- GA tunes concrete `DEFAULT_*` generator defaults (including `DEFAULT_BOSS_STATE`) and writes best/baseline artifacts.
+- Simulation/GA runs use isolated deck-definition files during evaluation to avoid mutating shared server config.
 
 Generate deck definitions:
 ```sh
-cd deck-generator
-npm install
-npm run generate -- --out=../server/config/deck-definitions.json
+npm --prefix deck-generator install
+npm --prefix deck-generator run generate -- --out=../server/config/deck-definitions.json
 ```
 
 Run simulation / auto-balance:
 ```sh
-cd simulator
-npm install
-npm run simulate -- --games=20 --maxTurns=120
-npm run autobalance -- --generations=2 --population=8 --games=20 --maxTurns=120 --candidateParallelism=3 --targetSuccessRate=1.0 --targetMinTurns=30 --targetAvgTurns=50 --targetMaxTurns=100
+npm --prefix simulator install
+npm --prefix simulator run simulate -- --games=20 --maxTurns=120
+npm --prefix simulator run autobalance -- --generations=2 --population=8 --games=20 --maxTurns=120 --candidateParallelism=3 --targetSuccessRate=1.0 --targetMinTurns=30 --targetAvgTurns=50 --targetMaxTurns=100
 ```
 
 GA target/fitness knobs:
