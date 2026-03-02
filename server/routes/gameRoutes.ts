@@ -1,10 +1,12 @@
 import express from 'express';
 import {
+	abandonPlayerQuest,
 	createNewGame,
 	joinExistingGame,
 	loadSerializedGame,
 	movePlayerToTarget,
 	reconnectPlayer,
+	resolveTownQuestOffer,
 	rollDiceForPlayer,
 } from '../services/gameService.js';
 import lastPoll from '../lastPoll.js';
@@ -96,6 +98,31 @@ router.post('/games/:gameId/reconnect', async (req, res) => {
 		const { playerName } = req.body;
 		const result = await reconnectPlayer(gameId, playerName);
 		return res.json(result);
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.post('/games/:gameId/quests/respond', async (req, res) => {
+	try {
+		const { gameId } = req.params;
+		const { playerId, action } = req.body;
+		if (action !== 'accept' && action !== 'reject') {
+			return res.status(400).json({ error: "Action must be 'accept' or 'reject'." });
+		}
+		const gameState = await resolveTownQuestOffer(gameId, playerId, action);
+		return res.json({ success: true, gameState });
+	} catch (error) {
+		return handleError(res, error);
+	}
+});
+
+router.post('/games/:gameId/quests/abandon', async (req, res) => {
+	try {
+		const { gameId } = req.params;
+		const { playerId, questInstanceId } = req.body;
+		const gameState = await abandonPlayerQuest(gameId, playerId, questInstanceId);
+		return res.json({ success: true, gameState });
 	} catch (error) {
 		return handleError(res, error);
 	}

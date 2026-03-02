@@ -79,6 +79,52 @@ export interface GameCompletionState {
 	completedAtTs?: number;
 }
 
+export type QuestDifficulty = 'easy' | 'medium' | 'hard';
+
+export interface QuestChecklistItem {
+	label: string;
+	checked: boolean;
+}
+
+export interface QuestOffer {
+	id: string;
+	title: string;
+	description: string;
+	difficulty: QuestDifficulty;
+	rewardHearts: number;
+	offeredAtTs: number;
+	objectiveChecklist?: QuestChecklistItem[];
+}
+
+export interface QuestInstance {
+	id: string;
+	instanceId: string;
+	title: string;
+	description: string;
+	difficulty: QuestDifficulty;
+	rewardHearts: number;
+	acceptedAtTs: number;
+	completedAtTs?: number;
+	progressLabel: string;
+	progress: Record<string, unknown>;
+	objectiveChecklist?: QuestChecklistItem[];
+}
+
+export interface PlayerQuestState {
+	active: QuestInstance[];
+	completed: QuestInstance[];
+	pendingTownQuestPrompt: boolean;
+	pendingQuestOffer: QuestOffer | null;
+}
+
+export interface QuestSystemState {
+	deck: {
+		drawPile: string[];
+		discardPile: string[];
+	};
+	players: Record<string, PlayerQuestState>;
+}
+
 export interface MonsterMeta {
 	id: string;
 	name: string;
@@ -111,6 +157,7 @@ export interface GameState {
 	recentActions?: RecentAction[];
 	raidBoss?: RaidBossState;
 	gameCompletion?: GameCompletionState;
+	questSystem?: QuestSystemState;
 }
 
 export interface AdminGame {

@@ -79,24 +79,43 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
 - **Title:** Implement town-driven quest system with map prompts and objectives
 - **Why:** The game needs explicit objective loops beyond roaming combat and loot.
 - **Acceptance Criteria:**
-  - Random towns can host available quests, visually indicated on map/UI.
-  - Walking over a quest town prompts player to accept/start a quest.
-  - Quest tracking and completion status persist in game state and are handled server side.
-  - Initial quest types implemented:
-    - Kill N(1-5) monster(s) from biome X.
-    - Kill N(1-5) weak/regular/strong monsters.
-    - Kill N(1-5) of X monster type (scorpion/snake/spider, etc).
-    - Rescue a villager (movement quest, target X, Y, and id for image to render) (appears on map after accepting quest, quest complete when player reaches cell)
-    - Deliver parcel to town (movement quest, target X, Y - a town and id for image of mailbox to render)
-  - Player quests, and quest status should be serialised as part of game state.
-  - Quest log UI displays active/completed quests and progress.
-  - Only a max of 5 quests per person at a time, quests can only be accepted if there is space for one. 
+  - There is a deck of quest cards.
+  - Walking over a town gives the player a quest card and prompts player to accept/start a quest.
+  - Quests that are rejected are put into the quest discard pile.
+  - Players can only hold a total of 5 quest cards.
+  - Players who already have 5 quest cards cannot draw another one, even when arriving at a town.
+  - Players can abandon a quest in the UI, discarding the quest to the quest discard pile.
+  - Any progress made towards the quest is lost with discard.
+  - Players landing on a town are prompted to accept the quest upon starting their next turn not when they arrive to the town cell.
   - Players can click "X" on a quest to abandon it. Popup for "are you sure you wish to abandon quest" required.
-  - Completed quests result in an additional_heart being gifted to the player.
-  - All towns should have a quest at all times. Once a quest is accepted by a player, it is replaced by a new one.
-  - Players landing on a town are prompted to accept the quest upon starting their next turn (when on a town square)
-- **Status:** TODO
-- **Notes:** Define quest state model first (assignment, progress counters, objective targets, completion rewards).
+  - Only a max of 5 quests per person at a time, quests can only be accepted if there is space for one. 
+  - Quest tracking and completion status persist in game state and are handled server side.
+  - Player quests, and quest status should be serialised as part of game state.
+  - Quest log UI displays active/completed quests and progress.  
+  - Completed quests result in X additional_heart(s) being gifted to the player where X is 1 for easy quests, 2 for medium quests and 3 for hard quests
+  - Initial quest cards implemented:
+      Easy (+1 heart)
+        Forest Patrol — Kill 2 monsters in forest.
+        Scout the Wilds — Enter 3 different biomes.
+        Town Courier — Visit 2 different towns.
+        Clean Sweep — Defeat 2 weak monsters.
+        Potion Discipline — Use 1 consumable and win your next battle.
+        No Rest for the Brave — Win 2 battles without returning to town.
+      Medium (+2 hearts)
+        Desert Exterminator — Kill 3 monsters in desert.
+        Hunter’s Streak — Win 3 battles in a row without dying.
+        Balanced Slayer — Defeat 1 weak, 1 regular, and 1 strong monster.
+        Frontier Route — Visit forest, desert, and cave in one quest life.
+        Treasure Fighter — Win 2 battles while carrying at least 1 unequipped item.
+        No Safe Haven — Defeat 3 monsters without stepping on a town tile.
+      Hard (+3 hearts)
+        Cave Purge — Kill 3 monsters in cave without dying.
+        Volcano Trial — Win 2 battles in volcano without dying.
+        Elite Breaker — Defeat 3 strong monsters without dying.
+        World Circuit — Win at least 1 battle in forest, desert, cave, and volcano.
+        Iron Will — Complete 4 total battle wins without using consumables.
+- **Status:** DONE
+- **Notes:** Implemented server-authoritative, deck-based quest system with draw/discard piles in `gameState.questSystem`, including per-player quest state (`active`, `completed`, `pendingTownQuestPrompt`, `pendingQuestOffer`) serialized in game state responses. Added full initial quest card set (6 easy, 6 medium, 6 hard) with objective-specific progress tracking and completion checks in `server/services/questService.ts`, including reset conditions (death, town step, consumable constraints), discard-on-reject/abandon behavior, max 5 active quests, and reward grants as additional heart items (`+1/+2/+3` by difficulty). Town arrival now flags a deferred quest prompt; offer is generated at the start of that player’s next turn (not immediately on arrival). Added server endpoints for accepting/rejecting pending offers and abandoning active quests (`/api/games/:gameId/quests/respond`, `/api/games/:gameId/quests/abandon`), with roll blocked until pending town offer is resolved by the active player. Wired quest progression hooks into movement, item use, and battle resolution flows. Updated client quest UI (`QuestPanel`) to show pending quest prompt actions, active/completed quest logs with progress, and `X`-based abandon flow with confirmation dialog. Validated with `npm run test` and `npm run build` in `server/`, plus `npm run test -- --run` and `npm run build` in `client/`.
 
 ## BACKLOG-007
 - **ID:** BACKLOG-007
@@ -201,7 +220,7 @@ Execution pattern: pick the next `TODO` item, complete it, validate it, then upd
   - Parallel candidate evaluation is supported safely without cross-candidate state bleed.
   - Summary metrics include success-rate and turn profile (`min/avg/max`) for balancing targets.
 - **Status:** DONE
-- **Notes:** Implemented API-driven simulator in `simulator/src/deckBalanceSimulator.ts` and GA auto-balancer in `simulator/src/autoBalance.ts`, both exercising real server endpoints via `server/serverApp.ts`. Added standalone `deck-generator/` with deterministic `deck-definitions.json` output consumed by server runtime. Added candidate-worker parallel evaluation, isolated per-run deck-definition handling, and artifact output under `simulator/simulation-output/*`. Extended GA objective with success-rate and turn-profile targets (`targetMinTurns`, `targetAvgTurns`, `targetMaxTurns`) and tunable penalty weights.
+- **Notes:** Implemented API-driven simulator in `simulator/src/deckBalanceSimulator.ts` and GA auto-balancer in `simulator/src/autoBalance.ts`, both exercising real server endpoints via `server/serverApp.ts`. Added standalone `deck-generator/` with deterministic `deck-definitions.json` output consumed by server runtime. Added candidate-worker parallel evaluation, isolated per-run deck-definition handling, and artifact output under `simulator/simulation-output/*`. Extended GA objective with success-rate and turn-profile targets (`targetMinTurns`, `targetAvgTurns`, `targetMaxTurns`) and tunable penalty weights. Deck rework is complete and now standardized around canonical tiers (`easy`, `medium`, `hard`) with runtime decks (`easy_encounter`/`easy_loot`, `medium_encounter`/`medium_loot`, `hard_encounter`/`hard_loot`). Generator/simulator responsibilities are explicitly split (`deck-generator/` deterministic artifacts, `simulator/` API simulation + GA). Current balance inputs are driven by `DEFAULT_*` config families (healing, boss state, weapon/armor/item/monster consumables, tier baselines, variant modifiers), with GA guardrails enforcing tier ordering, signed variant behavior, and minimum deltas. Monster catalogs in `deck-generator` no longer require biome fields, and boss stats are driven/tuned through `DEFAULT_BOSS_STATE`.
 
 
 ## BACKLOG-015

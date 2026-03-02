@@ -3,18 +3,32 @@ import path from 'node:path';
 import type { DeckType } from './biomeTypes.js';
 import type { ItemDef, MonsterDef } from '../types.js';
 
-export type DeckKind = 'encounter' | 'loot';
+export type DeckKind = 'encounter' | 'loot' | 'quests';
 export type DeckId =
 	| 'easy_encounter'
 	| 'easy_loot'
+	| 'easy_quests'
 	| 'medium_encounter'
 	| 'medium_loot'
+	| 'medium_quests'
 	| 'hard_encounter'
-	| 'hard_loot';
+	| 'hard_loot'
+	| 'hard_quests';
 
 export type EncounterDeckCardDef = { kind: 'monster'; id: string };
 
 export type LootDeckCardDef = { kind: 'item'; id: string };
+
+export type QuestDeckCardDef = {
+	kind: 'quest';
+	id: string;
+	name: string;
+	description: string;
+	difficulty: QuestDifficultyTier;
+	rewardHearts: number;
+	objectives: QuestObjective[];
+	modifiers?: QuestModifiers;
+};
 
 export type DeckConsumableCounts = {
 	teleport: number;
@@ -28,8 +42,48 @@ export type DeckConsumableCounts = {
 
 export type DeckDefinition = {
 	deck: DeckId;
-	cards: Array<EncounterDeckCardDef | LootDeckCardDef>;
+	cards: Array<EncounterDeckCardDef | LootDeckCardDef | QuestDeckCardDef>;
 	consumables: DeckConsumableCounts;
+};
+
+export type QuestDifficultyTier = 'easy' | 'medium' | 'hard';
+type PlayBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
+type QuestMonsterVariant = 'weak' | 'regular' | 'strong';
+
+export type QuestObjective =
+	| {
+		kind: 'visit';
+		biome?: PlayBiome;
+		count: number;
+	}
+	| {
+		kind: 'visit_town';
+		count: number;
+	}
+	| {
+		kind: 'battle';
+		kills: number;
+		biome?: PlayBiome | null;
+		variant?: QuestMonsterVariant | null;
+	};
+
+export type QuestModifiers = {
+	withoutDying?: boolean;
+	withoutUsingConsumables?: boolean;
+	resetOnDeath?: boolean;
+	requiresUnequippedItem?: boolean;
+	withoutEnteringTown?: boolean;
+	requiresConsumableThenWin?: boolean;
+};
+
+export type QuestDefinition = {
+	id: string;
+	title: string;
+	description: string;
+	difficulty: QuestDifficultyTier;
+	rewardHearts: number;
+	objectives: QuestObjective[];
+	modifiers?: QuestModifiers;
 };
 
 export type DeckDefinitionsConfig = {
@@ -51,10 +105,13 @@ export type DeckDefinitionsConfig = {
 const REQUIRED_DECK_IDS: DeckId[] = [
 	'easy_encounter',
 	'easy_loot',
+	'easy_quests',
 	'medium_encounter',
 	'medium_loot',
+	'medium_quests',
 	'hard_encounter',
 	'hard_loot',
+	'hard_quests',
 ];
 
 let activeDeckDefinitionsConfig: DeckDefinitionsConfig | null = null;
@@ -260,7 +317,7 @@ function validateCard(
 	deckId: DeckId,
 	deckKind: DeckKind,
 	index: number
-): EncounterDeckCardDef | LootDeckCardDef {
+): EncounterDeckCardDef | LootDeckCardDef | QuestDeckCardDef {
 	if (!isPlainObject(rawCard)) {
 		throw new Error(`Invalid card at ${deckId}[${index}]: expected object`);
 	}
@@ -284,6 +341,10 @@ function validateCard(
 		throw new Error(`Invalid card at ${deckId}[${index}]: loot deck cards must be kind 'item'`);
 	}
 
+	if (deckKind === 'quests' && kind !== 'quest') {
+		throw new Error(`Invalid card at ${deckId}[${index}]: quest deck cards must be kind 'quest'`);
+	}
+
 	if (deckKind === 'loot') {
 		const cardType = rawCard.type;
 		if (cardType !== 'weapon' && cardType !== 'armor') {
@@ -291,8 +352,8 @@ function validateCard(
 		}
 	}
 
-	if (kind === 'monster' || kind === 'item' || kind === 'chest') {
-		return { ...rawCard, kind, id } as EncounterDeckCardDef | LootDeckCardDef;
+	if (kind === 'monster' || kind === 'item' || kind === 'chest' || kind === 'quest') {
+		return { ...rawCard, kind, id } as EncounterDeckCardDef | LootDeckCardDef | QuestDeckCardDef;
 	}
 
 	throw new Error(`Invalid card at ${deckId}[${index}]: unsupported kind '${String(kind)}'`);
@@ -332,13 +393,133 @@ function validateDeck(rawDeck: unknown, deckId: DeckId): DeckDefinition {
 		throw new Error(`Invalid deck '${deckId}': cards must be an array`);
 	}
 
-	const deckKind: DeckKind = deckId.endsWith('_encounter') ? 'encounter' : 'loot';
-	const cards = rawDeck.cards.map((card, index) => validateCard(card, deckId, deckKind, index));
+	const deckKind: DeckKind = deckId.endsWith('_encounter') ? 'encounter' : deckId.endsWith('_loot') ? 'loot' : 'quests';
+	const cards = rawDeck.cards.map((card, index) => {
+		const validated = validateCard(card, deckId, deckKind, index);
+		if (deckKind !== 'quests') {
+			return validated;
+		}
+
+		const questRaw = validated as Record<string, unknown>;
+		if (!isPlainObject(questRaw)) {
+			throw new Error(`Invalid card at ${deckId}[${index}]: quest card must be an object`);
+		}
+		if (typeof questRaw.name !== 'string' || questRaw.name.length === 0) {
+			throw new Error(`Invalid card at ${deckId}[${index}]: quest card missing name`);
+		}
+		if (typeof questRaw.description !== 'string' || questRaw.description.length === 0) {
+			throw new Error(`Invalid card at ${deckId}[${index}]: quest card missing description`);
+		}
+		const objectiveSource = questRaw.objectives;
+		if (!Array.isArray(objectiveSource) || objectiveSource.length === 0) {
+			throw new Error(`Invalid card at ${deckId}[${index}]: quest card objectives must be a non-empty array`);
+		}
+
+		return {
+			kind: 'quest',
+			id: String(questRaw.id),
+			name: questRaw.name,
+			description: questRaw.description,
+			difficulty: toQuestDifficulty(questRaw.difficulty),
+			rewardHearts: toFiniteInt(questRaw.rewardHearts, `quest card '${String(questRaw.id)}' rewardHearts`, 0),
+			objectives: objectiveSource.map((objective, objectiveIndex) =>
+				validateQuestObjective(objective, String(questRaw.id), objectiveIndex)
+			),
+			modifiers: validateQuestModifiers(questRaw.modifiers),
+		} as QuestDeckCardDef;
+	});
 	const consumables = validateConsumables(rawDeck.consumables, deckId);
 	return {
 		deck: deckId,
 		cards,
 		consumables,
+	};
+}
+
+function toQuestDifficulty(raw: unknown): QuestDifficultyTier {
+	if (raw === 'easy' || raw === 'medium' || raw === 'hard') {
+		return raw;
+	}
+	throw new Error(`Invalid quest definition difficulty: '${String(raw)}'`);
+}
+
+function toQuestBiome(raw: unknown, label: string): PlayBiome {
+	if (raw === 'plains' || raw === 'forest' || raw === 'desert' || raw === 'cave' || raw === 'volcano') {
+		return raw;
+	}
+	throw new Error(`Invalid ${label}: expected valid biome`);
+}
+
+function toQuestMonsterVariant(raw: unknown, label: string): QuestMonsterVariant {
+	if (raw === 'weak' || raw === 'regular' || raw === 'strong') {
+		return raw;
+	}
+	throw new Error(`Invalid ${label}: expected variant weak|regular|strong`);
+}
+
+function toFiniteInt(raw: unknown, label: string, min = 0): number {
+	if (typeof raw !== 'number' || !Number.isFinite(raw)) {
+		throw new Error(`Invalid ${label}: expected number`);
+	}
+	return Math.max(min, Math.floor(raw));
+}
+
+function validateQuestObjective(rawObjective: unknown, questId: string, objectiveIndex: number): QuestObjective {
+	if (!isPlainObject(rawObjective)) {
+		throw new Error(`Invalid quest '${questId}' objective[${objectiveIndex}]: must be an object`);
+	}
+
+	const objectiveKind = rawObjective.kind;
+	if (objectiveKind === 'visit') {
+		return {
+			kind: 'visit',
+			biome:
+				rawObjective.biome === undefined || rawObjective.biome === null
+					? undefined
+					: toQuestBiome(rawObjective.biome, `quest '${questId}' objective[${objectiveIndex}] biome`),
+			count: toFiniteInt(rawObjective.count, `quest '${questId}' objective[${objectiveIndex}] count`, 1),
+		};
+	}
+
+	if (objectiveKind === 'visit_town') {
+		return {
+			kind: 'visit_town',
+			count: toFiniteInt(rawObjective.count, `quest '${questId}' objective[${objectiveIndex}] town count`, 1),
+		};
+	}
+
+	if (objectiveKind === 'battle') {
+		return {
+			kind: 'battle',
+			kills: toFiniteInt(rawObjective.kills, `quest '${questId}' objective[${objectiveIndex}] kills`, 1),
+			biome:
+				rawObjective.biome === undefined || rawObjective.biome === null
+					? null
+					: toQuestBiome(rawObjective.biome, `quest '${questId}' objective[${objectiveIndex}] biome`),
+			variant:
+				rawObjective.variant === undefined || rawObjective.variant === null
+					? null
+					: toQuestMonsterVariant(rawObjective.variant, `quest '${questId}' objective[${objectiveIndex}] variant`),
+		};
+	}
+
+	throw new Error(
+		`Invalid quest '${questId}' objective[${objectiveIndex}]: unsupported kind '${String(objectiveKind)}'`
+	);
+}
+
+function validateQuestModifiers(rawModifiers: unknown): QuestModifiers | undefined {
+	if (!isPlainObject(rawModifiers)) {
+		return undefined;
+	}
+
+	return {
+		withoutDying: Boolean(rawModifiers.withoutDying),
+		withoutUsingConsumables: Boolean(rawModifiers.withoutUsingConsumables),
+		resetOnDeath: Boolean(rawModifiers.resetOnDeath),
+		requiresUnequippedItem: Boolean(rawModifiers.requiresUnequippedItem),
+		withoutEnteringTown: Boolean(rawModifiers.withoutEnteringTown),
+		requiresConsumableThenWin: Boolean(rawModifiers.requiresConsumableThenWin),
 	};
 }
 
@@ -367,6 +548,21 @@ function normalizeConfig(input: unknown): DeckDefinitionsConfig {
 	for (const deckId of REQUIRED_DECK_IDS) {
 		const rawDeck = input.decks[deckId];
 		if (rawDeck === undefined) {
+			if (deckId.endsWith('_quests')) {
+				decks[deckId] = {
+					deck: deckId,
+					cards: [],
+					consumables: {
+						teleport: 0,
+						smallHealthPotion: 0,
+						mediumHealthPotion: 0,
+						largeHealthPotion: 0,
+						fullHealthPotion: 0,
+						extraHeart: 0,
+					},
+				};
+				continue;
+			}
 			throw new Error(`Invalid deck definitions config: missing deck '${deckId}'`);
 		}
 		decks[deckId] = validateDeck(rawDeck, deckId);
@@ -609,4 +805,31 @@ export function getAllMonsterDefinitions(): MonsterDef[] {
 
 export function getLootDeckTypesForItemId(itemId: string): DeckType[] {
 	return activeLootDeckTypesByItemId[itemId] ?? [];
+}
+
+export function getQuestDefinitions(): QuestDefinition[] {
+	if (!activeDeckDefinitionsConfig) {
+		return [];
+	}
+
+	const questDeckIds: DeckId[] = ['easy_quests', 'medium_quests', 'hard_quests'];
+	const quests: QuestDefinition[] = [];
+	for (const deckId of questDeckIds) {
+		const deck = activeDeckDefinitionsConfig.decks[deckId];
+		if (!deck) continue;
+		for (const card of deck.cards) {
+			if (card.kind !== 'quest') continue;
+			const questCard = card as QuestDeckCardDef;
+			quests.push({
+				id: questCard.id,
+				title: questCard.name,
+				description: questCard.description,
+				difficulty: questCard.difficulty,
+				rewardHearts: questCard.rewardHearts,
+				objectives: questCard.objectives,
+				modifiers: questCard.modifiers,
+			});
+		}
+	}
+	return quests;
 }

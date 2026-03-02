@@ -11,10 +11,12 @@ import {
 	DEFAULT_MONSTER_CONSUMABLES,
 	DEFAULT_MONSTER_VARIANT_MODIFIERS,
 	DEFAULT_PLAYER_STATE,
+	DEFAULT_QUEST_DECK_MODIFIERS,
 	DEFAULT_WEAPON_DAMAGE,
 	DEFAULT_ITEM_TIER_BASE,
 } from './catalog/deck.js';
 import { DESERT_ITEM_CATALOG, FIST_ITEM, FOREST_ITEM_CATALOG, VOLCANO_ITEM_CATALOG } from './catalog/items.js';
+import { QUEST_NAME_PARTS } from './catalog/quests.js';
 import {
 	DESERT_MONSTER_CATALOG,
 	EVIL_PRINCESS_MONSTER,
@@ -34,11 +36,18 @@ import type {
 	MonsterTierDeck,
 	MonsterVariant,
 } from './models/monsterTypes.js';
+import type {
+	PlayBiome,
+	QuestArchetype,
+	QuestDifficultyTier,
+	QuestModifiers,
+	QuestObjective,
+	QuestTierModifier,
+} from './models/questTypes.js';
 
 type DeckType = ItemTierDeck;
-type CardKind = 'monster' | 'item' | 'heart' | 'chest';
-type DeckKind = 'encounter' | 'loot';
-type PlayBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
+type CardKind = 'monster' | 'item' | 'heart' | 'chest' | 'quest';
+type DeckKind = 'encounter' | 'loot' | 'quests';
 
 type WeaponBalanceOverrides = Partial<
 	Record<DeckType, { minAttack?: number; maxAttack?: number; minChance?: number; maxChance?: number }>
@@ -105,6 +114,7 @@ type BalanceJsonConfig = {
 	DEFAULT_MONSTER_TIER_BASE?: MonsterTierOverrides;
 	DEFAULT_MONSTER_CONSUMABLES?: Partial<Record<DeckType, Partial<MonsterConsumableBalanceRange>>>;
 	DEFAULT_MONSTER_VARIANT_MODIFIERS?: MonsterVarianceOverrides;
+	QUEST_DECK_MODIFIERS?: Partial<Record<QuestDifficultyTier, Partial<QuestTierModifier>>>;
 };
 
 type GeneratorConfig = {
@@ -140,6 +150,19 @@ type MonsterBalanceProfile = {
 
 type BossBalanceProfile = typeof DEFAULT_BOSS_STATE;
 
+type GeneratedQuestDefinition = {
+	id: string;
+	title: string;
+	description: string;
+	difficulty: QuestDifficultyTier;
+	archetype: QuestArchetype;
+	rewardHearts: number;
+	objectives: QuestObjective[];
+	modifiers?: QuestModifiers;
+};
+
+type QuestProfile = Record<QuestDifficultyTier, QuestTierModifier>;
+
 type DeckConsumableCounts = {
 	teleport: number;
 	smallHealthPotion: number;
@@ -165,6 +188,11 @@ type DeckCard = {
 	attackChance?: number | null;
 	defense?: number | null;
 	defenseChance?: number | null;
+	difficulty?: QuestDifficultyTier;
+	description?: string;
+	rewardHearts?: number;
+	objectives?: QuestObjective[];
+	modifiers?: QuestModifiers;
 };
 
 type GeneratedDeck = {
@@ -421,10 +449,15 @@ function getDefaultBossProfile(): BossBalanceProfile {
 	return structuredClone(DEFAULT_BOSS_STATE);
 }
 
+function getDefaultQuestProfile(): QuestProfile {
+	return structuredClone(DEFAULT_QUEST_DECK_MODIFIERS);
+}
+
 function applyBalanceOverrides(
 	itemProfile: ItemBalanceProfile,
 	monsterProfile: MonsterBalanceProfile,
 	bossProfile: BossBalanceProfile,
+	questProfile: QuestProfile,
 	balance: BalanceJsonConfig
 ): void {
 	if (balance.DEFAULT_BOSS_STATE) {
@@ -589,6 +622,269 @@ function applyBalanceOverrides(
 			};
 		}
 	}
+
+	if (balance.QUEST_DECK_MODIFIERS) {
+		for (const tier of DECK_ORDER) {
+			const next = balance.QUEST_DECK_MODIFIERS[tier];
+			if (!next) continue;
+			questProfile[tier] = {
+				...questProfile[tier],
+				numberOfQuests:
+					typeof next.numberOfQuests === 'number'
+						? Math.max(0, Math.floor(next.numberOfQuests))
+						: questProfile[tier].numberOfQuests,
+				numberOfObjectives:
+					typeof next.numberOfObjectives === 'number'
+						? Math.max(1, Math.floor(next.numberOfObjectives))
+						: questProfile[tier].numberOfObjectives,
+				rewardHearts:
+					typeof next.rewardHearts === 'number'
+						? Math.max(0, Math.floor(next.rewardHearts))
+						: questProfile[tier].rewardHearts,
+				questTypes: {
+					...questProfile[tier].questTypes,
+					...(next.questTypes ?? {}),
+				},
+			};
+		}
+	}
+}
+
+function objectiveDescription(objective: QuestObjective): string {
+	if (objective.kind === 'visit') {
+		if (objective.biome) {
+			if (objective.count > 1) return `Visit the ${objective.biome} biome ${objective.count} times`;
+			return `Visit the ${objective.biome} biome`;
+		}
+		return `Visit ${objective.count} different biomes`;
+	}
+	if (objective.kind === 'visit_town') {
+		return `Visit ${objective.count} different towns`;
+	}
+	const variantPart = objective.variant ? ` ${objective.variant}` : '';
+	const biomePart = objective.biome ? ` from the ${objective.biome}` : '';
+	return `Kill ${objective.kills}${variantPart} monsters${biomePart}`;
+}
+
+function modifiersDescription(modifiers?: QuestModifiers): string | null {
+	if (!modifiers) return null;
+	const parts: string[] = [];
+	if (modifiers.withoutDying) parts.push('without dying');
+	if (modifiers.withoutUsingConsumables) parts.push('without using consumables');
+	if (modifiers.withoutEnteringTown) parts.push('without entering town');
+	if (modifiers.requiresUnequippedItem) parts.push('while carrying unequipped gear');
+	if (modifiers.requiresConsumableThenWin) parts.push('after using a consumable');
+	if (parts.length === 0) return null;
+	return parts.join(', ');
+}
+
+function toQuestDescription(objectives: QuestObjective[], modifiers?: QuestModifiers): string {
+	const objectiveParts = objectives.map(objectiveDescription);
+	const modifierPart = modifiersDescription(modifiers);
+	const body = objectiveParts.join(' then ');
+	return `${body}${modifierPart ? `, ${modifierPart}` : ''}.`;
+}
+
+function toQuestTitle(archetype: QuestArchetype, ordinal: number): string {
+	const nameParts = QUEST_NAME_PARTS[archetype];
+	const prefix = nameParts.prefixes[ordinal % nameParts.prefixes.length];
+	const suffix = nameParts.suffixes[(ordinal * 7) % nameParts.suffixes.length];
+	return `${prefix} ${suffix}`;
+}
+
+function computeQuestArchetypeTargets(count: number, modifier: QuestTierModifier): Record<QuestArchetype, number> {
+	const weights = {
+		traveller: Math.max(0, Math.floor(modifier.questTypes.traveller ?? 0)),
+		battler: Math.max(0, Math.floor(modifier.questTypes.battler ?? 0)),
+	};
+	const totalWeight = weights.traveller + weights.battler;
+	if (count <= 0) {
+		return { traveller: 0, battler: 0 };
+	}
+	if (totalWeight <= 0) {
+		const base = Math.floor(count / 2);
+		const remainder = count - base * 2;
+		return {
+			traveller: base + (remainder > 0 ? 1 : 0),
+			battler: base,
+		};
+	}
+
+	const exact = {
+		traveller: (count * weights.traveller) / totalWeight,
+		battler: (count * weights.battler) / totalWeight,
+	};
+
+	const targets: Record<QuestArchetype, number> = {
+		traveller: Math.floor(exact.traveller),
+		battler: Math.floor(exact.battler),
+	};
+
+	let remaining = count - (targets.traveller + targets.battler);
+	const byFraction: Array<{ archetype: QuestArchetype; fraction: number }> = [
+		{ archetype: 'traveller' as QuestArchetype, fraction: exact.traveller - Math.floor(exact.traveller) },
+		{ archetype: 'battler' as QuestArchetype, fraction: exact.battler - Math.floor(exact.battler) },
+	].sort((left, right) => right.fraction - left.fraction);
+
+	let index = 0;
+	while (remaining > 0) {
+		targets[byFraction[index % byFraction.length].archetype] += 1;
+		remaining -= 1;
+		index += 1;
+	}
+
+	return targets;
+}
+
+function buildQuestArchetypeSequence(count: number, modifier: QuestTierModifier): QuestArchetype[] {
+	if (count <= 0) return [];
+	const targets = computeQuestArchetypeTargets(count, modifier);
+	const sequence: QuestArchetype[] = [];
+	for (const archetype of ['traveller', 'battler'] as const) {
+		for (let index = 0; index < targets[archetype]; index += 1) {
+			sequence.push(archetype);
+		}
+	}
+	return sequence;
+}
+
+function buildTravellerObjectivePool(difficulty: QuestDifficultyTier): QuestObjective[] {
+	if (difficulty === 'easy') {
+		return [
+			{ kind: 'visit', biome: 'forest', count: 1 },
+			{ kind: 'visit', biome: 'desert', count: 1 },
+			{ kind: 'visit_town', count: 1 },
+			{ kind: 'visit', count: 2 },
+		];
+	}
+	if (difficulty === 'medium') {
+		return [
+			{ kind: 'visit', biome: 'forest', count: 1 },
+			{ kind: 'visit', biome: 'desert', count: 1 },
+			{ kind: 'visit', biome: 'cave', count: 1 },
+			{ kind: 'visit_town', count: 2 },
+			{ kind: 'visit', count: 3 },
+		];
+	}
+	return [
+		{ kind: 'visit', biome: 'forest', count: 1 },
+		{ kind: 'visit', biome: 'desert', count: 1 },
+		{ kind: 'visit', biome: 'cave', count: 1 },
+		{ kind: 'visit', biome: 'volcano', count: 1 },
+		{ kind: 'visit_town', count: 2 },
+		{ kind: 'visit', count: 4 },
+	];
+}
+
+function buildBattlerObjectivePool(difficulty: QuestDifficultyTier): QuestObjective[] {
+	if (difficulty === 'easy') {
+		return [
+			{ kind: 'battle', kills: 2, biome: 'forest', variant: 'weak' },
+			{ kind: 'battle', kills: 2, biome: 'forest' },
+			{ kind: 'battle', kills: 2, variant: 'regular' },
+			{ kind: 'battle', kills: 2 },
+		];
+	}
+	if (difficulty === 'medium') {
+		return [
+			{ kind: 'battle', kills: 3, biome: 'desert' },
+			{ kind: 'battle', kills: 2, biome: 'cave' },
+			{ kind: 'battle', kills: 2, variant: 'strong' },
+			{ kind: 'battle', kills: 3 },
+		];
+	}
+	return [
+		{ kind: 'battle', kills: 3, biome: 'volcano', variant: 'strong' },
+		{ kind: 'battle', kills: 3, biome: 'cave', variant: 'strong' },
+		{ kind: 'battle', kills: 4, biome: 'volcano' },
+		{ kind: 'battle', kills: 4 },
+	];
+}
+
+function buildQuestObjectives(
+	difficulty: QuestDifficultyTier,
+	archetype: QuestArchetype,
+	numberOfObjectives: number,
+	questOrdinal: number
+): QuestObjective[] {
+	const pool = archetype === 'traveller' ? buildTravellerObjectivePool(difficulty) : buildBattlerObjectivePool(difficulty);
+	const count = Math.max(1, Math.floor(numberOfObjectives));
+	const objectives: QuestObjective[] = [];
+	for (let index = 0; index < count; index += 1) {
+		const pick = pool[(questOrdinal + index) % pool.length];
+		objectives.push(structuredClone(pick));
+	}
+	return objectives;
+}
+
+function buildQuestModifiers(
+	difficulty: QuestDifficultyTier,
+	archetype: QuestArchetype,
+	questOrdinal: number
+): QuestModifiers | undefined {
+	if (archetype === 'traveller') {
+		if (difficulty !== 'easy' && questOrdinal % 2 === 0) {
+			return { resetOnDeath: true };
+		}
+		return undefined;
+	}
+
+	const candidates: QuestModifiers[] =
+		difficulty === 'easy'
+			? [{ withoutUsingConsumables: true }, { withoutEnteringTown: true }, {}]
+			: difficulty === 'medium'
+				? [{ withoutDying: true }, { requiresUnequippedItem: true }, { withoutUsingConsumables: true }, {}]
+				: [
+					{ withoutDying: true, withoutUsingConsumables: true },
+					{ withoutEnteringTown: true, withoutDying: true },
+					{ requiresConsumableThenWin: true, withoutDying: true },
+					{},
+				];
+
+	const selected = candidates[questOrdinal % candidates.length];
+	return Object.keys(selected).length > 0 ? selected : undefined;
+}
+
+function buildQuestDefinitions(questProfile: QuestProfile): GeneratedQuestDefinition[] {
+	const quests: GeneratedQuestDefinition[] = [];
+	let questCounter = 1;
+	const titleCounts = new Map<string, number>();
+	const archetypeCounter: Record<QuestArchetype, number> = {
+		traveller: 0,
+		battler: 0,
+	};
+
+	for (const difficulty of DECK_ORDER) {
+		const modifier = questProfile[difficulty];
+		const count = Math.max(0, Math.floor(modifier.numberOfQuests));
+		const numberOfObjectives = Math.max(1, Math.floor(modifier.numberOfObjectives));
+		const rewardHearts = Math.max(0, Math.floor(modifier.rewardHearts));
+		const archetypes = buildQuestArchetypeSequence(count, modifier);
+
+		for (let questIndex = 0; questIndex < archetypes.length; questIndex += 1) {
+			const archetype = archetypes[questIndex];
+			const objectives = buildQuestObjectives(difficulty, archetype, numberOfObjectives, questIndex);
+			const modifiers = buildQuestModifiers(difficulty, archetype, questIndex);
+			archetypeCounter[archetype] += 1;
+			const baseTitle = toQuestTitle(archetype, archetypeCounter[archetype] - 1);
+			const titleCount = (titleCounts.get(baseTitle) ?? 0) + 1;
+			titleCounts.set(baseTitle, titleCount);
+			const title = titleCount > 1 ? `${baseTitle} ${titleCount}` : baseTitle;
+			quests.push({
+				id: `quest_${questCounter}`,
+				title,
+				description: toQuestDescription(objectives, modifiers),
+				difficulty,
+				archetype,
+				rewardHearts,
+				objectives,
+				modifiers,
+			});
+			questCounter += 1;
+		}
+	}
+
+	return quests;
 }
 
 function toItemCard(item: ItemDef, variant?: ItemVariant): DeckCard {
@@ -620,6 +916,19 @@ function toMonsterCard(monster: MonsterDef, variant: MonsterVariant): DeckCard {
 		attackChance: monster.attackChance,
 		defense: monster.defense,
 		defenseChance: monster.defenseChance,
+	};
+}
+
+function toQuestCard(quest: GeneratedQuestDefinition): DeckCard {
+	return {
+		kind: 'quest',
+		id: quest.id,
+		name: quest.title,
+		difficulty: quest.difficulty,
+		description: quest.description,
+		rewardHearts: quest.rewardHearts,
+		objectives: quest.objectives,
+		modifiers: quest.modifiers,
 	};
 }
 
@@ -752,7 +1061,8 @@ function buildDeckMonsterDefs(deck: MonsterTierDeck, profile: MonsterBalanceProf
 function buildDeckDefinitions(
 	itemProfile: ItemBalanceProfile,
 	monsterProfile: MonsterBalanceProfile,
-	bossProfile: BossBalanceProfile
+	bossProfile: BossBalanceProfile,
+	questProfile: QuestProfile
 ) {
 	const deckData: Record<
 		DeckType,
@@ -794,7 +1104,27 @@ function buildDeckDefinitions(
 		},
 	};
 
+	const questDefinitions = buildQuestDefinitions(questProfile);
 	const decks: Record<string, GeneratedDeck> = {};
+	for (const deck of DECK_ORDER) {
+		const deckNameQuests = `${deck}_quests`;
+		const questCards = questDefinitions
+			.filter(quest => quest.difficulty === deck)
+			.map(toQuestCard);
+		decks[deckNameQuests] = {
+			deck: deckNameQuests,
+			cards: questCards,
+			consumables: {
+				teleport: 0,
+				smallHealthPotion: 0,
+				mediumHealthPotion: 0,
+				largeHealthPotion: 0,
+				fullHealthPotion: 0,
+				extraHeart: 0,
+			},
+		};
+	}
+
 	for (const deck of DECK_ORDER) {
 		const template = GENERATION_TEMPLATE[deck];
 		const deckNameEncounter = `${deck}_encounter`;
@@ -886,9 +1216,10 @@ async function main() {
 	const itemProfile = getDefaultItemProfile();
 	const monsterProfile = getDefaultMonsterProfile();
 	const bossProfile = getDefaultBossProfile();
-	applyBalanceOverrides(itemProfile, monsterProfile, bossProfile, resolved.balance);
+	const questProfile = getDefaultQuestProfile();
+	applyBalanceOverrides(itemProfile, monsterProfile, bossProfile, questProfile, resolved.balance);
 
-	const output = buildDeckDefinitions(itemProfile, monsterProfile, bossProfile);
+	const output = buildDeckDefinitions(itemProfile, monsterProfile, bossProfile, questProfile);
 	await fs.writeFile(resolved.outPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8');
 	console.log(`Generated deck definitions: ${resolved.outPath}`);
 }

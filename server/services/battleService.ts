@@ -16,6 +16,12 @@ import {
 import { addRecentAction } from '../utils/gameUtils.js';
 import { random } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
+import {
+	hasUnequippedItem,
+	onBattleLost,
+	onBattleWon,
+	onConsumableUsed,
+} from './questService.js';
 
 function isDeckBiome(biome: string): biome is PlayBiome {
 	return biome === 'plains' || biome === 'forest' || biome === 'desert' || biome === 'cave' || biome === 'volcano';
@@ -218,6 +224,12 @@ async function attackBattle(gameId, playerId) {
 			};
 			addRecentAction(gameState, 'game-complete', playerRow.name, 'defeated the Evil Princess');
 			log.push('The Evil Princess has fallen! The realm is saved.');
+			onBattleWon(gameState, playerId, playerRow.name || 'Player', playerState, {
+				biome: battle.biome || 'castle',
+				monster: battle.monster,
+				hadUnequippedItem: hasUnequippedItem(playerState),
+				playerSurvived: battle.playerHealth > 0,
+			});
 		}
 	} else {
 		resolveMonsterCounterAttack(battle, playerState, log, playerRow.name || 'Player');
@@ -289,6 +301,7 @@ async function useBattleItem(gameId, playerId, itemId) {
 		playerState.damage = 0;
 		battle.battleActive = false;
 		gameState.currentBattle = null;
+		onConsumableUsed(gameState, playerId);
 		const usedItemIndex = playerState.inventory.items.indexOf(itemId);
 		playerState.inventory.items.splice(usedItemIndex, 1);
 		addRecentAction(gameState, 'use-item', playerRow.name || 'Player', item.name || item.id);
@@ -305,6 +318,8 @@ async function useBattleItem(gameId, playerId, itemId) {
 	if (!consumed) {
 		throw serviceError(400, 'This item cannot be used in battle');
 	}
+
+	onConsumableUsed(gameState, playerId);
 
 	const usedItemIndex = playerState.inventory.items.indexOf(itemId);
 	playerState.inventory.items.splice(usedItemIndex, 1);
@@ -364,6 +379,7 @@ async function collectBattleLoot(gameId, playerId) {
 	}
 
 	const battleBiome = battle.biome || 'plains';
+	const hadUnequippedItem = hasUnequippedItem(playerState);
 	let reward: LootCard | null = null;
 	if (isDeckBiome(battleBiome)) {
 		const deckState = ensureBiomeDeckState(gameState);
@@ -379,6 +395,12 @@ async function collectBattleLoot(gameId, playerId) {
 		gameState.recentlyFoundItem = null;
 	}
 	addRecentAction(gameState, 'battle-end', playerRow.name, `defeated ${battle.monster?.name || 'a monster'}`);
+	onBattleWon(gameState, playerId, playerRow.name || 'Player', playerState, {
+		biome: battleBiome,
+		monster: battle.monster,
+		hadUnequippedItem,
+		playerSurvived: battle.playerHealth > 0,
+	});
 
 	const playerRows = await getPlayersByGameId(gameId);
 	gameState.currentTurn = (gameState.currentTurn + 1) % playerRows.length;
@@ -404,6 +426,7 @@ async function returnPlayerToTown(gameId, playerId) {
 	if (!battle || battle.playerId !== playerId || battle.playerHealth > 0 || battle.battleActive !== false) {
 		throw serviceError(400, 'Cannot return to town unless you have lost the battle.');
 	}
+	onBattleLost(gameState, playerId);
 	if (isRaidBossBattle(battle) && gameState.raidBoss) {
 		gameState.raidBoss.currentHealth = Math.max(0, battle.monsterHealth);
 	}

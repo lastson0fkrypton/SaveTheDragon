@@ -288,6 +288,34 @@ class GameService {
 		}
 		return [];
 	}
+
+	async respondToQuestOffer(action: 'accept' | 'reject') {
+		if (!this.store.gameId || !this.store.playerId) return;
+		const response = await fetch(`/api/games/${this.store.gameId}/quests/respond`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ playerId: this.store.playerId, action }),
+		});
+		if (!response.ok) {
+			console.error('Failed to respond to quest offer');
+			return;
+		}
+		await this.refreshCurrentGameState();
+	}
+
+	async abandonQuest(questInstanceId: string) {
+		if (!this.store.gameId || !this.store.playerId) return;
+		const response = await fetch(`/api/games/${this.store.gameId}/quests/abandon`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ playerId: this.store.playerId, questInstanceId }),
+		});
+		if (!response.ok) {
+			console.error('Failed to abandon quest');
+			return;
+		}
+		await this.refreshCurrentGameState();
+	}
 }
 
 export default GameService;

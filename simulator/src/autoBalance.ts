@@ -70,6 +70,18 @@ type Genome = {
 		normal: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
 		strong: { healthDelta: number; attackDelta: number; attackChanceDelta: number; defenseDelta: number; defenseChanceDelta: number };
 	};
+	QUEST_DECK_MODIFIERS: Record<
+		BalanceDeck,
+		{
+			numberOfQuests: number;
+			numberOfObjectives: number;
+			rewardHearts: number;
+			questTypes: {
+				traveller?: number;
+				battler?: number;
+			};
+		}
+	>;
 };
 
 type BalanceJsonConfig = Genome;
@@ -267,6 +279,11 @@ const BASE_GENOME: Genome = {
 		normal: { healthDelta: 0, attackDelta: 0, attackChanceDelta: 0, defenseDelta: 0, defenseChanceDelta: 0 },
 		strong: { healthDelta: 1, attackDelta: 1, attackChanceDelta: 0.08, defenseDelta: 1, defenseChanceDelta: 0.08 },
 	},
+	QUEST_DECK_MODIFIERS: {
+		easy: { numberOfQuests: 6, numberOfObjectives: 2, rewardHearts: 1, questTypes: { traveller: 2, battler: 4 } },
+		medium: { numberOfQuests: 6, numberOfObjectives: 2, rewardHearts: 2, questTypes: { traveller: 1, battler: 5 } },
+		hard: { numberOfQuests: 6, numberOfObjectives: 3, rewardHearts: 3, questTypes: { traveller: 0, battler: 6 } },
+	},
 };
 
 const GENOME_BOUNDS: GenomeBound[] = [
@@ -321,6 +338,11 @@ const GENOME_BOUNDS: GenomeBound[] = [
 		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.attackChanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
 		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.defenseDelta`, min: -20, max: 20, span: 1, integer: true },
 		{ path: `DEFAULT_MONSTER_VARIANT_MODIFIERS.${variant}.defenseChanceDelta`, min: -0.5, max: 0.5, span: 0.03 },
+	]),
+	...(['easy', 'medium', 'hard'] as const).flatMap(deck => [
+		{ path: `QUEST_DECK_MODIFIERS.${deck}.numberOfQuests`, min: 0, max: 20, span: 2, integer: true },
+		{ path: `QUEST_DECK_MODIFIERS.${deck}.numberOfObjectives`, min: 1, max: 5, span: 1, integer: true },
+		{ path: `QUEST_DECK_MODIFIERS.${deck}.rewardHearts`, min: 0, max: 10, span: 1, integer: true },
 	]),
 ];
 

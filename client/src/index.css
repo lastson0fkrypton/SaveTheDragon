@@ -344,6 +344,61 @@ button:disabled {
 .quest-panel ul li:nth-child(1) {
 	border-top: 1px solid #9999;
 }
+
+.quest-panel .quest-list {
+	max-height: 420px;
+	overflow-y: auto;
+}
+
+.quest-panel .quest-capacity {
+	margin-bottom: 8px;
+	font-weight: bold;
+}
+
+.quest-panel .quest-offer {
+	padding: 8px;
+	border: 1px solid #9999;
+	margin-bottom: 10px;
+}
+
+.quest-panel .quest-offer-actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.quest-panel .quest-listing {
+	margin: 0;
+	padding: 0;
+}
+
+.quest-panel .quest-entry {
+	padding: 8px 0;
+}
+
+.quest-panel .quest-entry-header {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.quest-panel .quest-difficulty {
+	text-transform: uppercase;
+	font-size: 12px;
+	opacity: 0.9;
+}
+
+.quest-panel .quest-abandon {
+	margin-left: auto;
+	padding: 0 8px;
+	line-height: 1.2;
+}
+
+.quest-panel .quest-progress,
+.quest-panel .quest-reward {
+	font-size: 13px;
+	opacity: 0.9;
+}
 .dice-panel {
 	pointer-events: auto;
 	position: absolute;

@@ -22,6 +22,17 @@ import {
 import { addRecentAction, generateBiomeGrid, serializeGame } from '../utils/gameUtils.js';
 import { randomChoice, randomId, randomInt } from '../utils/random.js';
 import { serviceError } from './serviceErrors.js';
+import {
+	abandonQuest,
+	acceptPendingQuestOffer,
+	ensurePlayerQuestState,
+	ensureQuestSystem,
+	hasPendingQuestOffer,
+	onBiomeEntered,
+	onTownVisited,
+	prepareTownQuestOfferForCurrentTurn,
+	rejectPendingQuestOffer,
+} from './questService.js';
 
 const REQUIRED_EXTRA_HEART_ITEM_ID = 'extra_heart';
 
@@ -104,15 +115,19 @@ async function loadSerializedGame(gameId) {
 	const raidBossBefore = gameState.raidBoss;
 	const completionBefore = gameState.gameCompletion;
 	const deckBefore = gameState.biomeDecks;
+	const questBefore = gameState.questSystem;
 	ensureRaidBossState(gameState);
 	ensureBiomeDeckState(gameState);
-	if (!raidBossBefore || !completionBefore || !deckBefore) {
+	const playerRows = await getPlayersByGameId(gameId);
+	ensureQuestSystem(gameState);
+	for (const playerRow of playerRows) {
+		ensurePlayerQuestState(gameState, playerRow.id);
+	}
+	const questPromptChanged = prepareTownQuestOfferForCurrentTurn(gameState, playerRows);
+	if (!raidBossBefore || !completionBefore || !deckBefore || !questBefore || questPromptChanged) {
 		await updateGameStateJson(gameId, JSON.stringify(gameState));
 	}
-	const [playerRows, validMoveRows] = await Promise.all([
-		getPlayersByGameId(gameId),
-		getValidMovesByGameId(gameId),
-	]);
+	const validMoveRows = await getValidMovesByGameId(gameId);
 	return buildGameState({ ...gameRow, gameStateJson: JSON.stringify(gameState) }, playerRows, validMoveRows);
 }
 
@@ -256,6 +271,7 @@ async function createNewGame(gridSizeX, gridSizeY) {
 		},
 		gameCompletion: { completed: false },
 	};
+	ensureQuestSystem(gameState);
 	await createGame(gameId, JSON.stringify(gameState));
 	return { gameId };
 }
@@ -295,6 +311,7 @@ async function joinExistingGame(gameId, playerName) {
 			: null;
 
 	const gameState = getGameState(gameRow);
+	ensureQuestSystem(gameState);
 	const spawn = pickPlayerSpawn(gameState, usedPositions);
 	const playerId = randomId();
 	const playerState = {
@@ -313,6 +330,8 @@ async function joinExistingGame(gameId, playerName) {
 	};
 
 	await createPlayer(playerId, gameId, playerName, JSON.stringify(playerState));
+	ensurePlayerQuestState(gameState, playerId);
+	await updateGameStateJson(gameId, JSON.stringify(gameState));
 	return { playerId };
 }
 
@@ -324,10 +343,18 @@ async function rollDiceForPlayer(gameId, playerId) {
 	ensureRaidBossState(gameState);
 	ensureGameNotCompleted(gameState);
 	const playerRows = await getPlayersByGameId(gameId);
+	ensureQuestSystem(gameState);
+	for (const playerRow of playerRows) {
+		ensurePlayerQuestState(gameState, playerRow.id);
+	}
+	prepareTownQuestOfferForCurrentTurn(gameState, playerRows);
 	const player = playerRows.find(p => p.id === playerId);
 	if (!player) throw serviceError(404, 'Player not found');
 	if (!playerRows[gameState.currentTurn] || playerRows[gameState.currentTurn].id !== playerId) {
 		throw serviceError(400, 'Not your turn');
+	}
+	if (hasPendingQuestOffer(gameState, playerId)) {
+		throw serviceError(400, 'Resolve your pending town quest offer before rolling.');
 	}
 	if (gameState.currentDiceRoll) throw serviceError(400, 'Dice already rolled for this turn');
 
@@ -480,9 +507,11 @@ async function movePlayerToTarget(gameId, playerId, targetX, targetY) {
 	playerState.positionY = targetY;
 
 	const biome = gameState.biomeGrid?.[targetY]?.[targetX] || 'plains';
+	onBiomeEntered(gameState, playerId, biome);
 	if (biome === 'town') {
 		playerState.damage = 0;
 		addRecentAction(gameState, 'visit-town', player.name || 'Player');
+		onTownVisited(gameState, playerId, targetX, targetY);
 	}
 
 	gameState.recentlyFoundItem = null;
@@ -501,6 +530,49 @@ async function movePlayerToTarget(gameId, playerId, targetX, targetY) {
 	return loadSerializedGame(gameId);
 }
 
+async function resolveTownQuestOffer(gameId, playerId, action) {
+	const [gameRow, playerRows] = await Promise.all([getGameById(gameId), getPlayersByGameId(gameId)]);
+	if (!gameRow) throw serviceError(404, 'Game not found');
+
+	const player = playerRows.find(row => row.id === playerId);
+	if (!player) throw serviceError(404, 'Player not found');
+
+	const gameState = getGameState(gameRow);
+	ensureRaidBossState(gameState);
+	ensureBiomeDeckState(gameState);
+	ensureQuestSystem(gameState);
+	for (const row of playerRows) {
+		ensurePlayerQuestState(gameState, row.id);
+	}
+	prepareTownQuestOfferForCurrentTurn(gameState, playerRows);
+
+	if (action === 'accept') {
+		acceptPendingQuestOffer(gameState, playerId, player.name || 'Player', playerRows);
+	} else {
+		rejectPendingQuestOffer(gameState, playerId, player.name || 'Player', playerRows);
+	}
+
+	await updateGameStateJson(gameId, JSON.stringify(gameState));
+	return loadSerializedGame(gameId);
+}
+
+async function abandonPlayerQuest(gameId, playerId, questInstanceId) {
+	const [gameRow, playerRows] = await Promise.all([getGameById(gameId), getPlayersByGameId(gameId)]);
+	if (!gameRow) throw serviceError(404, 'Game not found');
+	const player = playerRows.find(row => row.id === playerId);
+	if (!player) throw serviceError(404, 'Player not found');
+
+	const gameState = getGameState(gameRow);
+	ensureQuestSystem(gameState);
+	for (const row of playerRows) {
+		ensurePlayerQuestState(gameState, row.id);
+	}
+	abandonQuest(gameState, playerId, questInstanceId, player.name || 'Player');
+
+	await updateGameStateJson(gameId, JSON.stringify(gameState));
+	return loadSerializedGame(gameId);
+}
+
 async function reconnectPlayer(gameId, playerName) {
 	const gameRow = await getGameById(gameId);
 	if (!gameRow) throw serviceError(404, 'Game not found');
@@ -509,12 +581,16 @@ async function reconnectPlayer(gameId, playerName) {
 	const gameState = getGameState(gameRow);
 	ensureRaidBossState(gameState);
 	ensureBiomeDeckState(gameState);
-	await updateGameStateJson(gameId, JSON.stringify(gameState));
-
 	const [playerRows, validMoveRows] = await Promise.all([
 		getPlayersByGameId(gameId),
 		getValidMovesByGameId(gameId),
 	]);
+	ensureQuestSystem(gameState);
+	for (const row of playerRows) {
+		ensurePlayerQuestState(gameState, row.id);
+	}
+	prepareTownQuestOfferForCurrentTurn(gameState, playerRows);
+	await updateGameStateJson(gameId, JSON.stringify(gameState));
 
 	return {
 		playerId: playerRow.id,
@@ -529,4 +605,6 @@ export {
 	rollDiceForPlayer,
 	movePlayerToTarget,
 	reconnectPlayer,
+	resolveTownQuestOffer,
+	abandonPlayerQuest,
 };

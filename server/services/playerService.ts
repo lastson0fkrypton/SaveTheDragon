@@ -15,6 +15,7 @@ import {
 } from '../repositories/gameRepository.js';
 import { addRecentAction } from '../utils/gameUtils.js';
 import { serviceError } from './serviceErrors.js';
+import { onConsumableUsed } from './questService.js';
 
 function parseJson(text, fallback = {}) {
 	if (!text) return fallback;
@@ -203,6 +204,7 @@ async function useItem(gameId, playerId, itemId) {
 	const usedItemIndex = playerState.inventory.items.indexOf(itemId);
 	if (usedItemIndex < 0) throw serviceError(400, 'Item not in inventory');
 	playerState.inventory.items.splice(usedItemIndex, 1);
+	onConsumableUsed(gameState, playerId);
 	addRecentAction(gameState, 'use-item', playerRow.name, item.name);
 
 	await updateGameStateJson(gameId, JSON.stringify(gameState));
