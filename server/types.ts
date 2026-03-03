@@ -90,8 +90,6 @@ export interface RecentlyFoundItem {
 	ts: number;
 }
 
-export type QuestDifficulty = 'easy' | 'medium' | 'hard';
-
 export interface QuestChecklistItem {
 	label: string;
 	checked: boolean;
@@ -101,7 +99,6 @@ export interface QuestOffer {
 	id: string;
 	title: string;
 	description: string;
-	difficulty: QuestDifficulty;
 	rewardHearts: number;
 	offeredAtTs: number;
 	objectiveChecklist?: QuestChecklistItem[];
@@ -112,7 +109,6 @@ export interface QuestInstance {
 	instanceId: string;
 	title: string;
 	description: string;
-	difficulty: QuestDifficulty;
 	rewardHearts: number;
 	acceptedAtTs: number;
 	completedAtTs?: number;

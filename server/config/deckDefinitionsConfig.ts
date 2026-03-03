@@ -7,13 +7,11 @@ export type DeckKind = 'encounter' | 'loot' | 'quests';
 export type DeckId =
 	| 'easy_encounter'
 	| 'easy_loot'
-	| 'easy_quests'
 	| 'medium_encounter'
 	| 'medium_loot'
-	| 'medium_quests'
 	| 'hard_encounter'
 	| 'hard_loot'
-	| 'hard_quests';
+	| 'quests';
 
 export type EncounterDeckCardDef = { kind: 'monster'; id: string };
 
@@ -24,7 +22,6 @@ export type QuestDeckCardDef = {
 	id: string;
 	name: string;
 	description: string;
-	difficulty: QuestDifficultyTier;
 	rewardHearts: number;
 	objectives: QuestObjective[];
 	modifiers?: QuestModifiers;
@@ -46,8 +43,7 @@ export type DeckDefinition = {
 	consumables: DeckConsumableCounts;
 };
 
-export type QuestDifficultyTier = 'easy' | 'medium' | 'hard';
-type PlayBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
+type PlayBiome = 'any' | 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
 type QuestMonsterVariant = 'weak' | 'regular' | 'strong';
 
 export type QuestObjective =
@@ -80,7 +76,6 @@ export type QuestDefinition = {
 	id: string;
 	title: string;
 	description: string;
-	difficulty: QuestDifficultyTier;
 	rewardHearts: number;
 	objectives: QuestObjective[];
 	modifiers?: QuestModifiers;
@@ -105,13 +100,11 @@ export type DeckDefinitionsConfig = {
 const REQUIRED_DECK_IDS: DeckId[] = [
 	'easy_encounter',
 	'easy_loot',
-	'easy_quests',
 	'medium_encounter',
 	'medium_loot',
-	'medium_quests',
 	'hard_encounter',
 	'hard_loot',
-	'hard_quests',
+	'quests',
 ];
 
 let activeDeckDefinitionsConfig: DeckDefinitionsConfig | null = null;
@@ -420,7 +413,6 @@ function validateDeck(rawDeck: unknown, deckId: DeckId): DeckDefinition {
 			id: String(questRaw.id),
 			name: questRaw.name,
 			description: questRaw.description,
-			difficulty: toQuestDifficulty(questRaw.difficulty),
 			rewardHearts: toFiniteInt(questRaw.rewardHearts, `quest card '${String(questRaw.id)}' rewardHearts`, 0),
 			objectives: objectiveSource.map((objective, objectiveIndex) =>
 				validateQuestObjective(objective, String(questRaw.id), objectiveIndex)
@@ -436,15 +428,8 @@ function validateDeck(rawDeck: unknown, deckId: DeckId): DeckDefinition {
 	};
 }
 
-function toQuestDifficulty(raw: unknown): QuestDifficultyTier {
-	if (raw === 'easy' || raw === 'medium' || raw === 'hard') {
-		return raw;
-	}
-	throw new Error(`Invalid quest definition difficulty: '${String(raw)}'`);
-}
-
 function toQuestBiome(raw: unknown, label: string): PlayBiome {
-	if (raw === 'plains' || raw === 'forest' || raw === 'desert' || raw === 'cave' || raw === 'volcano') {
+	if (raw === 'any' || raw === 'plains' || raw === 'forest' || raw === 'desert' || raw === 'cave' || raw === 'volcano') {
 		return raw;
 	}
 	throw new Error(`Invalid ${label}: expected valid biome`);
@@ -548,7 +533,7 @@ function normalizeConfig(input: unknown): DeckDefinitionsConfig {
 	for (const deckId of REQUIRED_DECK_IDS) {
 		const rawDeck = input.decks[deckId];
 		if (rawDeck === undefined) {
-			if (deckId.endsWith('_quests')) {
+			if (deckId === 'quests') {
 				decks[deckId] = {
 					deck: deckId,
 					cards: [],
@@ -712,6 +697,7 @@ function getDeckTypeFromDeckId(deckId: DeckId): DeckType {
 }
 
 function toDeckId(deckType: DeckType, kind: DeckKind): DeckId {
+	if (kind === 'quests') return 'quests';
 	return `${deckType}_${kind}` as DeckId;
 }
 
@@ -811,25 +797,20 @@ export function getQuestDefinitions(): QuestDefinition[] {
 	if (!activeDeckDefinitionsConfig) {
 		return [];
 	}
-
-	const questDeckIds: DeckId[] = ['easy_quests', 'medium_quests', 'hard_quests'];
 	const quests: QuestDefinition[] = [];
-	for (const deckId of questDeckIds) {
-		const deck = activeDeckDefinitionsConfig.decks[deckId];
-		if (!deck) continue;
-		for (const card of deck.cards) {
-			if (card.kind !== 'quest') continue;
-			const questCard = card as QuestDeckCardDef;
-			quests.push({
-				id: questCard.id,
-				title: questCard.name,
-				description: questCard.description,
-				difficulty: questCard.difficulty,
-				rewardHearts: questCard.rewardHearts,
-				objectives: questCard.objectives,
-				modifiers: questCard.modifiers,
-			});
-		}
+	const deck = activeDeckDefinitionsConfig.decks.quests;
+	if (!deck) return quests;
+	for (const card of deck.cards) {
+		if (card.kind !== 'quest') continue;
+		const questCard = card as QuestDeckCardDef;
+		quests.push({
+			id: questCard.id,
+			title: questCard.name,
+			description: questCard.description,
+			rewardHearts: questCard.rewardHearts,
+			objectives: questCard.objectives,
+			modifiers: questCard.modifiers,
+		});
 	}
 	return quests;
 }

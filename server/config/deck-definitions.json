@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-02T15:16:08.193Z",
+  "generatedAt": "2026-03-03T14:21:13.746Z",
   "initialPlayerState": {
     "playerHealth": 5,
     "playerWeapon": {
@@ -32,108 +32,96 @@
     "img": "evil_princess.png"
   },
   "decks": {
-    "easy_quests": {
-      "deck": "easy_quests",
+    "quests": {
+      "deck": "quests",
       "cards": [
         {
           "kind": "quest",
           "id": "quest_1",
-          "name": "Whispering Horizon",
-          "difficulty": "easy",
-          "description": "Visit the forest biome then Visit the desert biome.",
+          "name": "Forest Patrol",
+          "description": "Kill 2 monsters in forest.",
           "rewardHearts": 1,
           "objectives": [
             {
-              "kind": "visit",
+              "kind": "battle",
+              "kills": 2,
               "biome": "forest",
-              "count": 1
-            },
-            {
-              "kind": "visit",
-              "biome": "desert",
-              "count": 1
+              "variant": null
             }
           ]
         },
         {
           "kind": "quest",
           "id": "quest_2",
-          "name": "Golden Crossing",
-          "difficulty": "easy",
-          "description": "Visit the desert biome then Visit 1 different towns.",
+          "name": "Scout the Wilds",
+          "description": "Enter 3 different biomes.",
           "rewardHearts": 1,
           "objectives": [
             {
               "kind": "visit",
-              "biome": "desert",
-              "count": 1
-            },
-            {
-              "kind": "visit_town",
-              "count": 1
+              "biome": "any",
+              "count": 3
             }
           ]
         },
         {
           "kind": "quest",
           "id": "quest_3",
-          "name": "Iron Arena",
-          "difficulty": "easy",
-          "description": "Kill 2 regular monsters then Kill 2 monsters.",
+          "name": "Town Courier",
+          "description": "Visit 2 different towns.",
           "rewardHearts": 1,
           "objectives": [
             {
-              "kind": "battle",
-              "kills": 2,
-              "variant": "regular"
-            },
-            {
-              "kind": "battle",
-              "kills": 2
+              "kind": "visit_town",
+              "count": 2
             }
           ]
         },
         {
           "kind": "quest",
           "id": "quest_4",
-          "name": "Crimson Siege",
-          "difficulty": "easy",
-          "description": "Kill 2 monsters then Kill 2 weak monsters from the forest, without using consumables.",
+          "name": "Clean Sweep",
+          "description": "Defeat 2 weak monsters.",
           "rewardHearts": 1,
           "objectives": [
             {
               "kind": "battle",
-              "kills": 2
-            },
-            {
-              "kind": "battle",
               "kills": 2,
-              "biome": "forest",
-              "variant": "weak"
+              "variant": "weak",
+              "biome": null
             }
-          ],
-          "modifiers": {
-            "withoutUsingConsumables": true
-          }
+          ]
         },
         {
           "kind": "quest",
           "id": "quest_5",
-          "name": "Shadow Rampage",
-          "difficulty": "easy",
-          "description": "Kill 2 weak monsters from the forest then Kill 2 monsters from the forest, without entering town.",
+          "name": "Potion Discipline",
+          "description": "Use 1 consumable and win your next battle.",
+          "rewardHearts": 1,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 1,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "requiresConsumableThenWin": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_6",
+          "name": "No Rest for the Brave",
+          "description": "Win 2 battles without returning to town.",
           "rewardHearts": 1,
           "objectives": [
             {
               "kind": "battle",
               "kills": 2,
-              "biome": "forest",
-              "variant": "weak"
-            },
-            {
-              "kind": "battle",
-              "kills": 2,
-              "biome": "forest"
+              "biome": null,
+              "variant": null
             }
           ],
           "modifiers": {
@@ -142,43 +130,208 @@
         },
         {
           "kind": "quest",
-          "id": "quest_6",
-          "name": "Bloodforged Conquest",
-          "difficulty": "easy",
-          "description": "Kill 2 monsters from the forest then Kill 2 regular monsters.",
+          "id": "quest_7",
+          "name": "First Blood",
+          "description": "Defeat 1 regular monster.",
           "rewardHearts": 1,
           "objectives": [
             {
               "kind": "battle",
+              "kills": 1,
+              "variant": "regular",
+              "biome": null
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_8",
+          "name": "Monster Mix",
+          "description": "Defeat 1 weak and 1 regular monster.",
+          "rewardHearts": 1,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 1,
+              "variant": "weak",
+              "biome": null
+            },
+            {
+              "kind": "battle",
+              "kills": 1,
+              "variant": "regular",
+              "biome": null
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_9",
+          "name": "Desert Exterminator",
+          "description": "Kill 3 monsters in desert.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 3,
+              "biome": "desert",
+              "variant": null
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_10",
+          "name": "Dual Biome Hunter",
+          "description": "Defeat 2 monsters in forest and 2 in desert.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
               "kills": 2,
-              "biome": "forest"
+              "biome": "forest",
+              "variant": null
             },
             {
               "kind": "battle",
               "kills": 2,
-              "variant": "regular"
+              "biome": "desert",
+              "variant": null
             }
           ]
-        }
-      ],
-      "consumables": {
-        "teleport": 0,
-        "smallHealthPotion": 0,
-        "mediumHealthPotion": 0,
-        "largeHealthPotion": 0,
-        "fullHealthPotion": 0,
-        "extraHeart": 0
-      }
-    },
-    "medium_quests": {
-      "deck": "medium_quests",
-      "cards": [
+        },
         {
           "kind": "quest",
-          "id": "quest_7",
-          "name": "Forgotten Descent",
-          "difficulty": "medium",
-          "description": "Visit the forest biome then Visit the desert biome.",
+          "id": "quest_11",
+          "name": "Cave Survivor",
+          "description": "Win 2 battles in cave without using consumables.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": "cave",
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutUsingConsumables": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_12",
+          "name": "Careful Explorer",
+          "description": "Visit forest, plains, and desert without dying.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "visit",
+              "biome": "forest",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "plains",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "desert",
+              "count": 1
+            }
+          ],
+          "modifiers": {
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_13",
+          "name": "Prepared Warrior",
+          "description": "Use a consumable, then win 2 battles without dying.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "requiresConsumableThenWin": true,
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_14",
+          "name": "Stronghold Breaker",
+          "description": "Defeat 2 strong monsters.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": null,
+              "variant": "strong"
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_15",
+          "name": "Hunter’s Streak",
+          "description": "Win 3 battles in a row without dying.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 3,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_16",
+          "name": "Balanced Slayer",
+          "description": "Defeat 1 weak, 1 regular, and 1 strong monster.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 1,
+              "variant": "weak",
+              "biome": null
+            },
+            {
+              "kind": "battle",
+              "kills": 1,
+              "variant": "regular",
+              "biome": null
+            },
+            {
+              "kind": "battle",
+              "kills": 1,
+              "variant": "strong",
+              "biome": null
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_17",
+          "name": "Frontier Route",
+          "description": "Visit forest, desert, and cave in one quest life.",
           "rewardHearts": 2,
           "objectives": [
             {
@@ -189,6 +342,11 @@
             {
               "kind": "visit",
               "biome": "desert",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "cave",
               "count": 1
             }
           ],
@@ -198,300 +356,281 @@
         },
         {
           "kind": "quest",
-          "id": "quest_8",
-          "name": "Stormborn Dominion",
-          "difficulty": "medium",
-          "description": "Kill 2 monsters from the cave then Kill 2 strong monsters, while carrying unequipped gear.",
-          "rewardHearts": 2,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 2,
-              "biome": "cave"
-            },
-            {
-              "kind": "battle",
-              "kills": 2,
-              "variant": "strong"
-            }
-          ],
-          "modifiers": {
-            "requiresUnequippedItem": true
-          }
-        },
-        {
-          "kind": "quest",
-          "id": "quest_9",
-          "name": "Obsidian Skirmish",
-          "difficulty": "medium",
-          "description": "Kill 2 strong monsters then Kill 3 monsters, without using consumables.",
-          "rewardHearts": 2,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 2,
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 3
-            }
-          ],
-          "modifiers": {
-            "withoutUsingConsumables": true
-          }
-        },
-        {
-          "kind": "quest",
-          "id": "quest_10",
-          "name": "Vengeful Trial",
-          "difficulty": "medium",
-          "description": "Kill 3 monsters then Kill 3 monsters from the desert.",
-          "rewardHearts": 2,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 3
-            },
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "desert"
-            }
-          ]
-        },
-        {
-          "kind": "quest",
-          "id": "quest_11",
-          "name": "Savage Clash",
-          "difficulty": "medium",
-          "description": "Kill 3 monsters from the desert then Kill 2 monsters from the cave, without dying.",
-          "rewardHearts": 2,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "desert"
-            },
-            {
-              "kind": "battle",
-              "kills": 2,
-              "biome": "cave"
-            }
-          ],
-          "modifiers": {
-            "withoutDying": true
-          }
-        },
-        {
-          "kind": "quest",
-          "id": "quest_12",
-          "name": "Blazing Cataclysm",
-          "difficulty": "medium",
-          "description": "Kill 2 monsters from the cave then Kill 2 strong monsters, while carrying unequipped gear.",
-          "rewardHearts": 2,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 2,
-              "biome": "cave"
-            },
-            {
-              "kind": "battle",
-              "kills": 2,
-              "variant": "strong"
-            }
-          ],
-          "modifiers": {
-            "requiresUnequippedItem": true
-          }
-        }
-      ],
-      "consumables": {
-        "teleport": 0,
-        "smallHealthPotion": 0,
-        "mediumHealthPotion": 0,
-        "largeHealthPotion": 0,
-        "fullHealthPotion": 0,
-        "extraHeart": 0
-      }
-    },
-    "hard_quests": {
-      "deck": "hard_quests",
-      "cards": [
-        {
-          "kind": "quest",
-          "id": "quest_13",
-          "name": "Warbound Reckoning",
-          "difficulty": "hard",
-          "description": "Kill 3 strong monsters from the volcano then Kill 3 strong monsters from the cave then Kill 4 monsters from the volcano, without dying, without using consumables.",
-          "rewardHearts": 3,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "volcano",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "cave",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 4,
-              "biome": "volcano"
-            }
-          ],
-          "modifiers": {
-            "withoutDying": true,
-            "withoutUsingConsumables": true
-          }
-        },
-        {
-          "kind": "quest",
-          "id": "quest_14",
-          "name": "Ashen Retribution",
-          "difficulty": "hard",
-          "description": "Kill 3 strong monsters from the cave then Kill 4 monsters from the volcano then Kill 4 monsters, without dying, without entering town.",
-          "rewardHearts": 3,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "cave",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 4,
-              "biome": "volcano"
-            },
-            {
-              "kind": "battle",
-              "kills": 4
-            }
-          ],
-          "modifiers": {
-            "withoutEnteringTown": true,
-            "withoutDying": true
-          }
-        },
-        {
-          "kind": "quest",
-          "id": "quest_15",
-          "name": "Steelclad Battlefront",
-          "difficulty": "hard",
-          "description": "Kill 4 monsters from the volcano then Kill 4 monsters then Kill 3 strong monsters from the volcano, without dying, after using a consumable.",
-          "rewardHearts": 3,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 4,
-              "biome": "volcano"
-            },
-            {
-              "kind": "battle",
-              "kills": 4
-            },
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "volcano",
-              "variant": "strong"
-            }
-          ],
-          "modifiers": {
-            "requiresConsumableThenWin": true,
-            "withoutDying": true
-          }
-        },
-        {
-          "kind": "quest",
-          "id": "quest_16",
-          "name": "Thunderous Uprising",
-          "difficulty": "hard",
-          "description": "Kill 4 monsters then Kill 3 strong monsters from the volcano then Kill 3 strong monsters from the cave.",
-          "rewardHearts": 3,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 4
-            },
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "volcano",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "cave",
-              "variant": "strong"
-            }
-          ]
-        },
-        {
-          "kind": "quest",
-          "id": "quest_17",
-          "name": "Relentless Onslaught",
-          "difficulty": "hard",
-          "description": "Kill 3 strong monsters from the volcano then Kill 3 strong monsters from the cave then Kill 4 monsters from the volcano, without dying, without using consumables.",
-          "rewardHearts": 3,
-          "objectives": [
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "volcano",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 3,
-              "biome": "cave",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 4,
-              "biome": "volcano"
-            }
-          ],
-          "modifiers": {
-            "withoutDying": true,
-            "withoutUsingConsumables": true
-          }
-        },
-        {
-          "kind": "quest",
           "id": "quest_18",
-          "name": "Grim Ascension",
-          "difficulty": "hard",
-          "description": "Kill 3 strong monsters from the cave then Kill 4 monsters from the volcano then Kill 4 monsters, without dying, without entering town.",
+          "name": "Treasure Fighter",
+          "description": "Win 2 battles while carrying at least 1 unequipped item.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "requiresUnequippedItem": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_19",
+          "name": "No Safe Haven",
+          "description": "Defeat 3 monsters without stepping on a town tile.",
+          "rewardHearts": 2,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 3,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutEnteringTown": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_20",
+          "name": "Cave Purge",
+          "description": "Kill 3 monsters in cave without dying.",
           "rewardHearts": 3,
           "objectives": [
             {
               "kind": "battle",
               "kills": 3,
               "biome": "cave",
-              "variant": "strong"
-            },
-            {
-              "kind": "battle",
-              "kills": 4,
-              "biome": "volcano"
-            },
-            {
-              "kind": "battle",
-              "kills": 4
+              "variant": null
             }
           ],
           "modifiers": {
-            "withoutEnteringTown": true,
-            "withoutDying": true
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_21",
+          "name": "Volcano Trial",
+          "description": "Win 2 battles in volcano without dying.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": "volcano",
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_22",
+          "name": "Elite Breaker",
+          "description": "Defeat 3 strong monsters without dying.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 3,
+              "biome": null,
+              "variant": "strong"
+            }
+          ],
+          "modifiers": {
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_23",
+          "name": "World Circuit",
+          "description": "Win at least 1 battle in forest, desert, cave, and volcano.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 1,
+              "biome": "forest",
+              "variant": null
+            },
+            {
+              "kind": "battle",
+              "kills": 1,
+              "biome": "desert",
+              "variant": null
+            },
+            {
+              "kind": "battle",
+              "kills": 1,
+              "biome": "cave",
+              "variant": null
+            },
+            {
+              "kind": "battle",
+              "kills": 1,
+              "biome": "volcano",
+              "variant": null
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_24",
+          "name": "Iron Will",
+          "description": "Complete 4 total battle wins without using consumables.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 4,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutUsingConsumables": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_25",
+          "name": "Volcanic Rampage",
+          "description": "Defeat 4 monsters in volcano.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 4,
+              "biome": "volcano",
+              "variant": null
+            }
+          ]
+        },
+        {
+          "kind": "quest",
+          "id": "quest_26",
+          "name": "Untouchable",
+          "description": "Win 3 battles in a row without dying or using consumables.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 3,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutDying": true,
+            "withoutUsingConsumables": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_27",
+          "name": "Master of the Plains",
+          "description": "Win 2 battles in plains and 2 in forest without dying.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": "plains",
+              "variant": null
+            },
+            {
+              "kind": "battle",
+              "kills": 2,
+              "biome": "forest",
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_28",
+          "name": "Relentless",
+          "description": "Win 5 total battles without entering town.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 5,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "withoutEnteringTown": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_29",
+          "name": "Treasure Guardian",
+          "description": "Win 3 battles while carrying at least 1 unequipped item and without dying.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "battle",
+              "kills": 3,
+              "biome": null,
+              "variant": null
+            }
+          ],
+          "modifiers": {
+            "requiresUnequippedItem": true,
+            "withoutDying": true,
+            "resetOnDeath": true
+          }
+        },
+        {
+          "kind": "quest",
+          "id": "quest_30",
+          "name": "Grand Explorer",
+          "description": "Visit all biomes (plains, forest, desert, cave, volcano) in one life.",
+          "rewardHearts": 3,
+          "objectives": [
+            {
+              "kind": "visit",
+              "biome": "plains",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "forest",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "desert",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "cave",
+              "count": 1
+            },
+            {
+              "kind": "visit",
+              "biome": "volcano",
+              "count": 1
+            }
+          ],
+          "modifiers": {
+            "resetOnDeath": true
           }
         }
       ],

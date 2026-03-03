@@ -130,7 +130,7 @@ function addUnique(values: string[], value: string): void {
 
 function toObjectiveLabel(objective: QuestObjective): string {
 	if (objective.kind === 'visit') {
-		if (objective.biome) {
+		if (objective.biome && objective.biome !== 'any') {
 			const suffix = objective.count > 1 ? ` x${objective.count}` : '';
 			return `Visit the ${formatBiomeName(objective.biome)} biome${suffix}`;
 		}
@@ -422,10 +422,10 @@ function onBiomeEntered(gameState, playerId: string, biome: string): void {
 		for (let index = 0; index < quest.objectives.length; index += 1) {
 			const objective = quest.objectives[index];
 			if (objective.kind !== 'visit') continue;
-			if (objective.biome && objective.biome !== biome) continue;
+			if (objective.biome && objective.biome !== 'any' && objective.biome !== biome) continue;
 			const objectiveProgress = progressState.objectives[index] as { count?: number; visitedBiomes?: string[] };
 			if (!Array.isArray(objectiveProgress.visitedBiomes)) objectiveProgress.visitedBiomes = [];
-			if (objective.biome) {
+			if (objective.biome && objective.biome !== 'any') {
 				objectiveProgress.count = Number(objectiveProgress.count || 0) + 1;
 			} else {
 				addUnique(objectiveProgress.visitedBiomes, biome);
@@ -468,7 +468,7 @@ function onBattleWon(gameState, playerId: string, playerName: string, playerStat
 		for (let index = 0; index < quest.objectives.length; index += 1) {
 			const objective = quest.objectives[index];
 			if (objective.kind !== 'battle') continue;
-			if (objective.biome && objective.biome !== context.biome) continue;
+			if (objective.biome && objective.biome !== 'any' && objective.biome !== context.biome) continue;
 			if (objective.variant && objective.variant !== monsterVariant) continue;
 			const objectiveProgress = progressState.objectives[index] as { count?: number };
 			objectiveProgress.count = Number(objectiveProgress.count || 0) + 1;

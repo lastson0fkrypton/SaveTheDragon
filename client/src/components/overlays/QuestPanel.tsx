@@ -69,7 +69,6 @@ const QuestPanel: React.FC = observer(() => {
 			<li key={quest.instanceId} className="quest-entry">
 				<div className="quest-entry-header">
 					<strong>{quest.title}</strong>
-					<span className={`quest-difficulty quest-${quest.difficulty}`}>{quest.difficulty}</span>
 					{showAbandon && (
 						<button
 							className="quest-abandon"
@@ -107,7 +106,6 @@ const QuestPanel: React.FC = observer(() => {
 				<div className="quest-offer">
 					<div className="quest-entry-header">
 						<strong>{pendingOffer.title}</strong>
-						<span className={`quest-difficulty quest-${pendingOffer.difficulty}`}>{pendingOffer.difficulty}</span>
 					</div>
 					<div>{pendingOffer.description}</div>
 					{Array.isArray(pendingOffer.objectiveChecklist) && pendingOffer.objectiveChecklist.length > 0 && (

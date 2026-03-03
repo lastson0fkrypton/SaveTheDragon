@@ -13,7 +13,6 @@ import {
 	MonsterVariant,
 	MonsterVarientRangeModifier,
 } from '../models/monsterTypes.js';
-import type { QuestDifficultyTier, QuestTierModifier } from '../models/questTypes.js';
 
 export const DEFAULT_PLAYER_STATE = {
 	playerHealth: 5,
@@ -160,34 +159,4 @@ export const DEFAULT_MONSTER_VARIANT_MODIFIERS: Record<MonsterVariant, MonsterVa
 	weak: { healthDelta: -1, attackDelta: -1, attackChanceDelta: -0.08, defenseDelta: -1, defenseChanceDelta: -0.08 },
 	normal: { healthDelta: 0, attackDelta: 0, attackChanceDelta: 0, defenseDelta: 0, defenseChanceDelta: 0 },
 	strong: { healthDelta: 1, attackDelta: 1, attackChanceDelta: 0.08, defenseDelta: 1, defenseChanceDelta: 0.08 },
-};
-
-export const DEFAULT_QUEST_DECK_MODIFIERS: Record<QuestDifficultyTier, QuestTierModifier> = {
-	easy: {
-		numberOfQuests: 6,
-		numberOfObjectives: 1,
-		rewardHearts: 1,
-		questTypes: {
-			traveller: 2,
-			battler: 4,
-		},
-	},
-	medium: {
-		numberOfQuests: 6,
-		numberOfObjectives: 2,
-		rewardHearts: 2,
-		questTypes: {
-			traveller: 1,
-			battler: 5,
-		},
-	},
-	hard: {
-		numberOfQuests: 6,
-		numberOfObjectives: 3,
-		rewardHearts: 3,
-		questTypes: {
-			traveller: 0,
-			battler: 6,
-		},
-	},
 };
