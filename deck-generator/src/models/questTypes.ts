@@ -1,18 +1,11 @@
-export type PlayBiome = 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
+export type PlayBiome = 'any' | 'plains' | 'forest' | 'desert' | 'cave' | 'volcano';
 
-export type QuestDifficultyTier = 'easy' | 'medium' | 'hard';
-export type QuestArchetype = 'traveller' | 'battler';
-
-export type QuestTypeModifier = {
-	traveller?: number;
-	battler?: number;
-};
-
-export type QuestTierModifier = {
-	numberOfQuests: number;
-	numberOfObjectives: number;
+export type Quest = {
+	name: string;
+	description: string;
 	rewardHearts: number;
-	questTypes: QuestTypeModifier;
+	objectives: QuestObjective[];
+	modifiers: QuestModifiers;
 };
 
 export type QuestObjective =
