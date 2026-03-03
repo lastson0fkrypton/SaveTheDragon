@@ -12,6 +12,7 @@ Save the Dragon! is a turn-based, grid-based multiplayer board game implemented 
 - Admin panel for managing games.
 - Shared raid-boss win condition (`Evil Princess`) with server-authoritative completion state.
 - Dynamic balance model for monsters/items by biome tier and variants.
+- Single human-authored quest catalog deck (`quests`) with random draw + town prompt flow.
 
 ## Prerequisites
 - Node.js (v16 or newer recommended)
@@ -84,11 +85,18 @@ This separation keeps the API layer thin, game logic reusable/testable, and SQL 
 - **BACKLOG-013:** Movement now uses click-to-select destination and `End Turn` confirmation with visual destination highlight and path arrow.
 - **BACKLOG-014:** API-driven simulation and GA auto-balancing harness implemented with config-first deck/stat tuning and artifact output.
 
+## Quest System (Current)
+- Quests are now sourced from a single catalog in `deck-generator/src/catalog/quests.ts`.
+- Deck generation writes one quest deck (`decks.quests`) into `server/config/deck-definitions.json`.
+- Quest cards no longer carry generated difficulty metadata; players evaluate offers primarily by reward/objectives.
+- Server quest logic draws randomly from the shared quest draw pile when a pending town prompt is resolved at the start of turn.
+
 ## Simulation & Deck Generation
 - Deck generation is now a standalone project in `deck-generator/`.
 - Simulation/auto-balance is now a standalone project in `simulator/`.
 - The server only consumes `server/config/deck-definitions.json` at runtime.
 - GA tunes concrete `DEFAULT_*` generator defaults (including `DEFAULT_BOSS_STATE`) and writes best/baseline artifacts.
+- Quest auto-balancing knobs were removed; quests are not evolved/tuned by GA and remain catalog-authored.
 - Simulation/GA runs use isolated deck-definition files during evaluation to avoid mutating shared server config.
 
 Generate deck definitions:
@@ -102,6 +110,9 @@ Run simulation / auto-balance:
 npm --prefix simulator install
 npm --prefix simulator run simulate -- --games=20 --maxTurns=120
 npm --prefix simulator run autobalance -- --generations=2 --population=8 --games=20 --maxTurns=120 --candidateParallelism=3 --targetSuccessRate=1.0 --targetMinTurns=30 --targetAvgTurns=50 --targetMaxTurns=100
+
+# quest-focused persona (prioritizes towns/quest offers before rushing castle)
+npm --prefix simulator run simulate -- --games=10 --maxTurns=160 --persona=quest-hunter --questCompletionGoal=6 --minQuestRewardToAccept=1
 ```
 
 GA target/fitness knobs:

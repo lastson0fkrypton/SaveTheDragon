@@ -12,6 +12,9 @@ export type SimOptions = {
 	gridSizeX: number;
 	gridSizeY: number;
 	playerName: string;
+	persona?: 'default' | 'quest-hunter';
+	minQuestRewardToAccept?: number;
+	questCompletionGoal?: number;
 	deckDefinitionsConfigPath?: string;
 	balanceConfigPath?: string;
 };
@@ -29,6 +32,9 @@ export type SingleRunResult = {
 	turnsPlayed: number;
 	bossDefeated: boolean;
 	recentActionsCount: number;
+	questAccepted: number;
+	questRejected: number;
+	questCompleted: number;
 	events: SimEvent[];
 };
 
@@ -39,6 +45,12 @@ export type AggregateResult = {
 	minTurnsPlayed: number;
 	avgTurnsPlayed: number;
 	maxTurnsPlayed: number;
+	totalQuestAccepted: number;
+	totalQuestRejected: number;
+	totalQuestCompleted: number;
+	avgQuestAccepted: number;
+	avgQuestRejected: number;
+	avgQuestCompleted: number;
 };
 
 export type SimulationRunOutput = {
@@ -126,6 +138,9 @@ function parseArgs(): SimOptions {
 		gridSizeX: Math.max(10, Number(pairs.get('gridSizeX') || 20)),
 		gridSizeY: Math.max(10, Number(pairs.get('gridSizeY') || 20)),
 		playerName: pairs.get('playerName') || 'SimBot',
+		persona: (pairs.get('persona') as 'default' | 'quest-hunter') || 'default',
+		minQuestRewardToAccept: Math.max(0, Number(pairs.get('minQuestRewardToAccept') || 1)),
+		questCompletionGoal: Math.max(0, Number(pairs.get('questCompletionGoal') || 6)),
 		deckDefinitionsConfigPath:
 			pairs.get('deckDefinitionsConfigPath') ||
 			process.env.DECK_DEFINITIONS_CONFIG_PATH ||
@@ -137,6 +152,12 @@ function parseArgs(): SimOptions {
 function average(values: number[]): number {
 	if (values.length === 0) return 0;
 	return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function getQuestEventCounts(events: SimEvent[]): { accepted: number; rejected: number } {
+	const accepted = events.filter(event => event.type === 'quest-accept').length;
+	const rejected = events.filter(event => event.type === 'quest-reject').length;
+	return { accepted, rejected };
 }
 
 function pickCastleTarget(gameState): { x: number; y: number } {
@@ -165,6 +186,98 @@ function chooseMoveTowardTarget(validMoves: Array<{ x: number; y: number }>, tar
 		}
 	}
 	return selected;
+}
+
+function removeStationaryMoves(
+	validMoves: Array<{ x: number; y: number }>,
+	currentPosition?: { x: number; y: number }
+): Array<{ x: number; y: number }> {
+	if (!currentPosition || !Array.isArray(validMoves) || validMoves.length === 0) {
+		return validMoves;
+	}
+	const movingOptions = validMoves.filter(move => move.x !== currentPosition.x || move.y !== currentPosition.y);
+	return movingOptions.length > 0 ? movingOptions : validMoves;
+}
+
+function removeImmediateBacktrackMoves(
+	validMoves: Array<{ x: number; y: number }>,
+	previousPosition?: { x: number; y: number }
+): Array<{ x: number; y: number }> {
+	if (!previousPosition || !Array.isArray(validMoves) || validMoves.length === 0) {
+		return validMoves;
+	}
+	const nonBacktrackingMoves = validMoves.filter(
+		move => move.x !== previousPosition.x || move.y !== previousPosition.y
+	);
+	return nonBacktrackingMoves.length > 0 ? nonBacktrackingMoves : validMoves;
+}
+
+function listCellsByBiome(gameState, biome: string): Array<{ x: number; y: number }> {
+	const grid = gameState?.biomeGrid || [];
+	const out: Array<{ x: number; y: number }> = [];
+	for (let y = 0; y < grid.length; y += 1) {
+		for (let x = 0; x < (grid[y] || []).length; x += 1) {
+			if (grid[y][x] === biome) {
+				out.push({ x, y });
+			}
+		}
+	}
+	return out;
+}
+
+function chooseMoveTowardAnyTarget(
+	validMoves: Array<{ x: number; y: number }>,
+	targets: Array<{ x: number; y: number }>
+): { x: number; y: number } | null {
+	if (!Array.isArray(validMoves) || validMoves.length === 0) return null;
+	if (!Array.isArray(targets) || targets.length === 0) return null;
+
+	let selected = validMoves[0];
+	let bestDistance = Number.POSITIVE_INFINITY;
+	for (const move of validMoves) {
+		let nearestTargetDistance = Number.POSITIVE_INFINITY;
+		for (const target of targets) {
+			const distance = Math.abs(move.x - target.x) + Math.abs(move.y - target.y);
+			if (distance < nearestTargetDistance) {
+				nearestTargetDistance = distance;
+			}
+		}
+		if (nearestTargetDistance < bestDistance) {
+			bestDistance = nearestTargetDistance;
+			selected = move;
+		}
+	}
+	return selected;
+}
+
+async function maybeRespondToQuestOffer(
+	baseUrl: string,
+	gameId: string,
+	state,
+	playerId: string,
+	options: SimOptions,
+	events: SimEvent[],
+	turn: number
+): Promise<boolean> {
+	const myQuestState = state?.questSystem?.players?.[playerId];
+	const offer = myQuestState?.pendingQuestOffer;
+	if (!offer) return false;
+
+	const activeCount = Array.isArray(myQuestState?.active) ? myQuestState.active.length : 0;
+	const minReward = Math.max(0, Math.floor(options.minQuestRewardToAccept ?? 1));
+	const shouldAccept = activeCount < 5 && Number(offer.rewardHearts || 0) >= minReward;
+	const action = shouldAccept ? 'accept' : 'reject';
+
+	await apiRequest(baseUrl, 'POST', `/api/games/${gameId}/quests/respond`, {
+		playerId,
+		action,
+	});
+	events.push({
+		turn,
+		type: action === 'accept' ? 'quest-accept' : 'quest-reject',
+		detail: `${offer.title} (+${offer.rewardHearts})`,
+	});
+	return true;
 }
 
 function findBestEquip(inventoryIds: string[], itemMeta: Record<string, any>, statKey: 'attack' | 'defense', chanceKey: 'attackChance' | 'defenseChance') {
@@ -370,11 +483,18 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 	const playerId = joined.playerId;
 	let lastState = joined.gameState;
 	const castleTarget = pickCastleTarget(lastState);
+	const townTargets = listCellsByBiome(lastState, 'town');
+	const persona = options.persona || 'default';
+	let previousPosition: { x: number; y: number } | undefined;
 
 	for (let turn = 1; turn <= options.maxTurns; turn += 1) {
 		lastState = await apiRequest(baseUrl, 'GET', `/api/games/${gameId}/state`);
 		const me = (lastState.players || []).find(player => player.id === playerId);
 		if (!me) {
+			const questCounts = getQuestEventCounts(events);
+			const questCompleted = Array.isArray(lastState?.questSystem?.players?.[playerId]?.completed)
+				? lastState.questSystem.players[playerId].completed.length
+				: 0;
 			return {
 				gameId,
 				completed: false,
@@ -382,11 +502,18 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 				turnsPlayed: turn,
 				bossDefeated: Boolean(lastState.raidBoss?.defeated),
 				recentActionsCount: Array.isArray(lastState.recentActions) ? lastState.recentActions.length : 0,
+				questAccepted: questCounts.accepted,
+				questRejected: questCounts.rejected,
+				questCompleted,
 				events,
 			};
 		}
 
 		if (lastState.gameCompletion?.completed) {
+			const questCounts = getQuestEventCounts(events);
+			const questCompleted = Array.isArray(lastState?.questSystem?.players?.[playerId]?.completed)
+				? lastState.questSystem.players[playerId].completed.length
+				: 0;
 			return {
 				gameId,
 				completed: true,
@@ -394,6 +521,9 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 				turnsPlayed: turn,
 				bossDefeated: Boolean(lastState.raidBoss?.defeated),
 				recentActionsCount: Array.isArray(lastState.recentActions) ? lastState.recentActions.length : 0,
+				questAccepted: questCounts.accepted,
+				questRejected: questCounts.rejected,
+				questCompleted,
 				events,
 			};
 		}
@@ -403,11 +533,34 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 			continue;
 		}
 
+		const respondedToQuest = await maybeRespondToQuestOffer(baseUrl, gameId, lastState, playerId, options, events, turn);
+		if (respondedToQuest) {
+			lastState = await apiRequest(baseUrl, 'GET', `/api/games/${gameId}/state`);
+		}
+
 		await maybeUseHealingItem(baseUrl, gameId, me, lastState.itemMeta || {}, events, turn);
 		await maybeEquipBestItems(baseUrl, gameId, me, lastState.itemMeta || {}, events, turn);
 
 		const roll = await apiRequest(baseUrl, 'POST', `/api/games/${gameId}/roll`, { playerId });
-		const selectedMove = chooseMoveTowardTarget(roll.validMoves || [], castleTarget);
+
+		const myQuestState = lastState?.questSystem?.players?.[playerId];
+		const completedQuestCount = Array.isArray(myQuestState?.completed) ? myQuestState.completed.length : 0;
+		const activeQuestCount = Array.isArray(myQuestState?.active) ? myQuestState.active.length : 0;
+		const questGoal = Math.max(0, Math.floor(options.questCompletionGoal ?? 6));
+		const currentPosition = { x: me.positionX, y: me.positionY };
+		const availableMoves = removeImmediateBacktrackMoves(
+			removeStationaryMoves(roll.validMoves || [], currentPosition),
+			previousPosition
+		);
+		const currentBiome = lastState?.biomeGrid?.[me.positionY]?.[me.positionX] || 'unknown';
+		const isInTown = currentBiome === 'town';
+		const shouldSeekTown =
+			persona === 'quest-hunter' && completedQuestCount < questGoal && activeQuestCount === 0 && !isInTown;
+
+		const selectedMove =
+			shouldSeekTown && townTargets.length > 0
+				? chooseMoveTowardAnyTarget(availableMoves, townTargets)
+				: chooseMoveTowardTarget(availableMoves, castleTarget);
 		if (!selectedMove) {
 			events.push({ turn, type: 'no-valid-move', detail: 'stalled' });
 			continue;
@@ -418,11 +571,16 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 			targetX: selectedMove.x,
 			targetY: selectedMove.y,
 		});
+		previousPosition = currentPosition;
 		const landedBiome = moveResult?.gameState?.biomeGrid?.[selectedMove.y]?.[selectedMove.x] || 'unknown';
 		events.push({ turn, type: 'move', detail: `(${selectedMove.x},${selectedMove.y}) ${landedBiome}` });
 	}
 
 	lastState = await apiRequest(baseUrl, 'GET', `/api/games/${gameId}/state`);
+	const questCounts = getQuestEventCounts(events);
+	const questCompleted = Array.isArray(lastState?.questSystem?.players?.[playerId]?.completed)
+		? lastState.questSystem.players[playerId].completed.length
+		: 0;
 	return {
 		gameId,
 		completed: Boolean(lastState.gameCompletion?.completed),
@@ -430,6 +588,9 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 		turnsPlayed: options.maxTurns,
 		bossDefeated: Boolean(lastState.raidBoss?.defeated),
 		recentActionsCount: Array.isArray(lastState.recentActions) ? lastState.recentActions.length : 0,
+		questAccepted: questCounts.accepted,
+		questRejected: questCounts.rejected,
+		questCompleted,
 		events,
 	};
 }
@@ -437,6 +598,9 @@ async function simulateSingleGame(baseUrl: string, options: SimOptions, runIndex
 function summarize(results: SingleRunResult[]): AggregateResult {
 	const successfulGames = results.filter(result => result.bossDefeated).length;
 	const turns = results.map(result => result.turnsPlayed);
+	const totalQuestAccepted = results.reduce((sum, result) => sum + result.questAccepted, 0);
+	const totalQuestRejected = results.reduce((sum, result) => sum + result.questRejected, 0);
+	const totalQuestCompleted = results.reduce((sum, result) => sum + result.questCompleted, 0);
 	return {
 		totalGames: results.length,
 		successfulGames,
@@ -444,6 +608,12 @@ function summarize(results: SingleRunResult[]): AggregateResult {
 		minTurnsPlayed: turns.length > 0 ? Math.min(...turns) : 0,
 		avgTurnsPlayed: Number(average(results.map(result => result.turnsPlayed)).toFixed(2)),
 		maxTurnsPlayed: turns.length > 0 ? Math.max(...turns) : 0,
+		totalQuestAccepted,
+		totalQuestRejected,
+		totalQuestCompleted,
+		avgQuestAccepted: Number(average(results.map(result => result.questAccepted)).toFixed(2)),
+		avgQuestRejected: Number(average(results.map(result => result.questRejected)).toFixed(2)),
+		avgQuestCompleted: Number(average(results.map(result => result.questCompleted)).toFixed(2)),
 	};
 }
 
@@ -461,6 +631,12 @@ function writeReport(options: SimOptions, aggregate: AggregateResult, runs: Sing
 		`minTurnsPlayed=${aggregate.minTurnsPlayed}`,
 		`avgTurnsPlayed=${aggregate.avgTurnsPlayed}`,
 		`maxTurnsPlayed=${aggregate.maxTurnsPlayed}`,
+		`totalQuestAccepted=${aggregate.totalQuestAccepted}`,
+		`totalQuestRejected=${aggregate.totalQuestRejected}`,
+		`totalQuestCompleted=${aggregate.totalQuestCompleted}`,
+		`avgQuestAccepted=${aggregate.avgQuestAccepted}`,
+		`avgQuestRejected=${aggregate.avgQuestRejected}`,
+		`avgQuestCompleted=${aggregate.avgQuestCompleted}`,
 	].join('\n');
 	fs.writeFileSync(path.join(outputDir, 'deck-balance-report.txt'), `${reportText}\n`, 'utf8');
 
